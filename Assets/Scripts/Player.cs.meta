@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 9676c48e3638b17468bede6b6a481672
+timeCreated: 1539384941
+licenseType: Free
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - snowBall: {fileID: 1661686430247236, guid: 740d6d73a2c1d9140a1c7e3af8a39d42, type: 2}
+  - superSnowBall: {fileID: 1815434565595278, guid: 0b61ae2c5223745499869ff5b5d09b64,
+      type: 2}
+  - soundEffectSwing1: {fileID: 8300000, guid: a019ac0cca88f0f41887eb77628009f3, type: 3}
+  - soundEffectSwing2: {fileID: 8300000, guid: 7aa4d7eaedaae0b40b9ee223d828ec98, type: 3}
+  - soundEffectSwing3: {fileID: 8300000, guid: e712959691e83994b90bada876463910, type: 3}
+  - soundEffectSwing4: {fileID: 8300000, guid: 56497cc828c206d4c9ab8b46038870d9, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
