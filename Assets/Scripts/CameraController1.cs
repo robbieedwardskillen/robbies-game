@@ -7,6 +7,8 @@ using Cinemachine;
 public class CameraController1 : MonoBehaviour {
 	private GameObject player;
 	private Player playerScript;
+	private Launcher launcherScript;
+	private bool connected = false;
 	private PlayerControls controls;
 	private Vector2 rotate;
 	private bool aiming = false;
@@ -38,12 +40,10 @@ public class CameraController1 : MonoBehaviour {
 	// Use this for initialization
 	void Awake()
 	{
-		player = GameObject.Find("Player");
 		controls = new PlayerControls();
 		controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Rotate.canceled += ctx => rotate = Vector2.zero;
-		playerScript = player.GetComponent<Player>();
-		aiming = playerScript.aiming;
+
 		loadingScreen = GameObject.Find("Loading Screen");
 		m_cam = Camera.main;
 		offset = new Vector3(0f, 1.1f, 2.3f);
@@ -59,6 +59,8 @@ public class CameraController1 : MonoBehaviour {
 		shackRoom1 = GameObject.Find ("shack room 1");
 	}
 	void Start() {
+		launcherScript = GameObject.Find("Launcher").GetComponent<Launcher>();
+
 		volume.profile.TryGetSettings(out depthOfField);
 		if (controls != null){
 			controls.Gameplay.Enable();
@@ -76,25 +78,35 @@ public class CameraController1 : MonoBehaviour {
 		
 	}
 	public void Update() {
-		if (/* !aiming */ false){
-			//blur effects
-			depthOfField.active = true;
-			raycast = new Ray(transform.position, transform.forward * 100);
-			isHit = false;
-			if (Physics.Raycast(raycast, out hit, 100f)){
-				isHit = true;
-				hitDistance = Vector3.Distance(transform.position, hit.point);
-			}
-			else {
-				if (hitDistance < 100f) {
-					hitDistance++;
-				}
-			}
-			SetFocus();
-			
-		} else {
-			depthOfField.active = false;
+
+		if (launcherScript.connected && !connected){
+			player = GameObject.Find("Player(Clone)");
+			playerScript = player.GetComponent<Player>();
+			aiming = playerScript.aiming;
+			connected = true;
 		}
+		if (connected){
+			if (/* !aiming */ false){
+				//blur effects
+				depthOfField.active = true;
+				raycast = new Ray(transform.position, transform.forward * 100);
+				isHit = false;
+				if (Physics.Raycast(raycast, out hit, 100f)){
+					isHit = true;
+					hitDistance = Vector3.Distance(transform.position, hit.point);
+				}
+				else {
+					if (hitDistance < 100f) {
+						hitDistance++;
+					}
+				}
+				SetFocus();
+					
+			} else {
+					depthOfField.active = false;
+			}
+		}
+
 		
 	}
 	void SetFocus() {
@@ -102,39 +114,38 @@ public class CameraController1 : MonoBehaviour {
 	}
 	void FixedUpdate()
 	{
+		if (connected){
+				
+			bool outside = shackRoom1.activeSelf == false && 
+				storeRoom1.activeSelf == false &&
+				storeRoom2.activeSelf == false && 
+				aptRoom1.activeSelf == false &&
+				aptRoom2.activeSelf == false &&
+				aptRoom3.activeSelf == false &&
+				aptRoom4.activeSelf == false &&
+				aptRoom5.activeSelf == false;
+			if (gameTransition.transitioning){
+				loadingScreen.active = true;
+			} else {
+				loadingScreen.active = false;
+			}
 
-		bool outside = shackRoom1.activeSelf == false && 
-			storeRoom1.activeSelf == false &&
-			storeRoom2.activeSelf == false && 
-			aptRoom1.activeSelf == false &&
-			aptRoom2.activeSelf == false &&
-			aptRoom3.activeSelf == false &&
-			aptRoom4.activeSelf == false &&
-			aptRoom5.activeSelf == false;
-		if (gameTransition.transitioning){
-			loadingScreen.active = true;
-		} else {
-			loadingScreen.active = false;
+			if (outside && player != null) {
+				
+				if (!playerScript.underWater){ 
+					m_cam.fieldOfView = 60f;
+				} else {
+					m_cam.fieldOfView = 35f;
+				} 
+
+				m_cam.clearFlags = CameraClearFlags.Skybox;
+				m_cam.orthographic = false;
+				
+			} else {
+				m_cam.clearFlags = CameraClearFlags.Depth;
+			}
+
 		}
-
-		if (outside) {
-			
- 			if (!playerScript.underWater){ 
-				m_cam.fieldOfView = 60f;
- 			} else {
-				m_cam.fieldOfView = 35f;
-			} 
-
-			m_cam.clearFlags = CameraClearFlags.Skybox;
-			m_cam.orthographic = false;
-			
-		} else {
-			m_cam.clearFlags = CameraClearFlags.Depth;
-		}
-
-
-
-
-			
+	
 	}
 }
