@@ -20,5 +20,6 @@ public class FindPlayerPrefab2 : MonoBehaviour
             virtualLookCam.Follow = GameObject.Find("Player(Clone)").transform;
             virtualLookCam.LookAt = GameObject.Find("Player(Clone)").transform;
         }
+
     }
 }

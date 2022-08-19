@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.PostProcessing;
 using Cinemachine;
+
 public class CameraController1 : MonoBehaviour {
 	private GameObject player;
 	private Player playerScript;
@@ -37,6 +38,7 @@ public class CameraController1 : MonoBehaviour {
 	float hitDistance;
 	public PostProcessVolume volume;
 	private DepthOfField depthOfField;
+
 	// Use this for initialization
 	void Awake()
 	{

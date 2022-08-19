@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 using Cinemachine;
-public class Player : MonoBehaviour {
+using Photon.Pun;
+public class Player : MonoBehaviourPunCallbacks {
 
 	public bool super = false;
 	public bool alive = true;
@@ -109,6 +110,8 @@ public class Player : MonoBehaviour {
 	private Vector3 lastRotation;
 	private Vector3 previousPos;
 	private Vector3 velocity;
+	private Launcher launcherScript;
+	private bool connected = false;
 	bool moveLegs = false;
 	bool blockTurning = false;
 	bool knockDown = false;
@@ -202,9 +205,6 @@ public class Player : MonoBehaviour {
 		
 	}
 	void Awake () {
-
-		freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
-		virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
 
 		controls = new PlayerControls();
 		controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
@@ -320,13 +320,16 @@ public class Player : MonoBehaviour {
 		camRotateWithZeroY = GameObject.Find("CamRotateWithZeroY");
 		m_camRotation = GameObject.Find("Rotation");
 		gameTransition = m_cam.GetComponent<Transition>();
-		
-		freeLookCam.Priority = 1;
-		virtualLookCam.Priority = 0;
-		
+
+
+	
 	}
+	
 	void Start() {
+		launcherScript = GameObject.Find("Launcher").GetComponent<Launcher>();
+		DumpToConsole(photonView);
 		allColliders (gameObject.transform, false);
+		
 	}
 	IEnumerator waitForSecondBigHit1(){
 		yield return new WaitForSeconds(0.5f);
@@ -370,657 +373,673 @@ public class Player : MonoBehaviour {
  
 	void FixedUpdate()
 	{
-		velocity = (transform.position - previousPos) / Time.deltaTime;
-		previousPos = transform.position;
-
+		if (photonView.IsMine){
+			velocity = (transform.position - previousPos) / Time.deltaTime;
+			previousPos = transform.position;
+		}
 	}
  
 	void Update () {
-		playerAnimator.SetBool("jumping", isAerial);
-		rolling = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll");
-
-		if (alive) {
-			h = Input.GetAxis("Horizontal");
-			v = Input.GetAxis("Vertical");
-		}
-
-	
-			//TESTING
-/* 		if()
-		{
-			Debug.Break();
-		} */
-			//END TESTING
-		if (controls.Gameplay.Menu.triggered){
-			print("open game menu");
-		}
-		if (controls.Gameplay.Aim.triggered){
-			if(aiming == false){
-				aiming = true;
-			} else {
-				aiming = false;
-			}
-		} 
-		if (!aiming){
-			if (controls.Gameplay.Action4.triggered){ //left shoulder button
-				//add target
-				//if (previousTarget != null){
-					//currentTarget = previousTarget
-				//} else {
-					//currentTarget = 
-				//}
-				
-				//previousTarget = 
-			}
-			if (controls.Gameplay.Action5.triggered){ //right shoulder button
-				//not sure yet
-			}
-		}
 		
-		if (rifle.gameObject.activeSelf == true){
-			if (aiming == true){ //smooth the layer weight
-					lerpVal += Time.deltaTime * 8f;
-					playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
-				if (controls.Gameplay.Shoot.triggered){
-					if(playerAnimator.GetCurrentAnimatorStateInfo(6).normalizedTime > 0.9f){
-						firingRifle();
-					}
+		if (launcherScript.connected && !connected){
+			
+			//fix this
 
-				}
-			} else {
-				lerpVal = 0f;
-				playerAnimator.SetLayerWeight(6, 0);
-			}
+			freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
+			virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
+			freeLookCam.Priority = 1;
+			virtualLookCam.Priority = 0;
+			connected = true;
 		}
 
-		if ((handgun.gameObject.activeSelf == true)){
-			if (aiming == true){
-					lerpVal += Time.deltaTime * 8f;
-					playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
-				if (controls.Gameplay.Shoot.triggered){
-					if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){
-						muzzleFlashParticle.Play();
-						playerAnimator.Play("Firing Handgun", -1, 0f);
-						firingHandgun();
-					}
+		if (photonView.IsMine){
+
+			playerAnimator.SetBool("jumping", isAerial);
+			rolling = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll");
+
+			if (alive) {
+				h = Input.GetAxis("Horizontal");
+				v = Input.GetAxis("Vertical");
+			}
+
+		
+				//TESTING
+	/* 		if()
+			{
+				Debug.Break();
+			} */
+				//END TESTING
+			if (controls.Gameplay.Menu.triggered){
+				print("open game menu");
+			}
+			if (controls.Gameplay.Aim.triggered){
+				if(aiming == false){
+					aiming = true;
+				} else {
+					aiming = false;
+				}
+			} 
+			if (!aiming){
+				if (controls.Gameplay.Action4.triggered){ //left shoulder button
+					//add target
+					//if (previousTarget != null){
+						//currentTarget = previousTarget
+					//} else {
+						//currentTarget = 
+					//}
 					
+					//previousTarget = 
 				}
-			} else {
-				lerpVal = 0f;
-				playerAnimator.SetLayerWeight(7, 0);
+				if (controls.Gameplay.Action5.triggered){ //right shoulder button
+					//not sure yet
+				}
 			}
-		}
+			
+			if (rifle.gameObject.activeSelf == true){
+				if (aiming == true){ //smooth the layer weight
+						lerpVal += Time.deltaTime * 8f;
+						playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
+					if (controls.Gameplay.Shoot.triggered){
+						if(playerAnimator.GetCurrentAnimatorStateInfo(6).normalizedTime > 0.9f){
+							firingRifle();
+						}
 
-		bool equippedFireSword = (fireSword.gameObject.activeSelf == true);
-		bool equippedHandgun = (handgun.gameObject.activeSelf == true);
-		bool equippedRifle = (rifle.gameObject.activeSelf == true);
-		bool equippedBow = (bow.gameObject.activeSelf == true);
-		bool equippedBigSword = (bigSword.gameObject.activeSelf == true);
-		bool equippedNothing = ((fireSword.gameObject.activeSelf == false) &&
-		(bow.gameObject.activeSelf == false) &&
-		(handgun.gameObject.activeSelf == false) && 
-		(rifle.gameObject.activeSelf == false) && 
-		(bigSword.gameObject.activeSelf == false)); 
+					}
+				} else {
+					lerpVal = 0f;
+					playerAnimator.SetLayerWeight(6, 0);
+				}
+			}
+
+			if ((handgun.gameObject.activeSelf == true)){
+				if (aiming == true){
+						lerpVal += Time.deltaTime * 8f;
+						playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
+					if (controls.Gameplay.Shoot.triggered){
+						if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){
+							muzzleFlashParticle.Play();
+							playerAnimator.Play("Firing Handgun", -1, 0f);
+							firingHandgun();
+						}
+						
+					}
+				} else {
+					lerpVal = 0f;
+					playerAnimator.SetLayerWeight(7, 0);
+				}
+			}
+
+			bool equippedFireSword = (fireSword.gameObject.activeSelf == true);
+			bool equippedHandgun = (handgun.gameObject.activeSelf == true);
+			bool equippedRifle = (rifle.gameObject.activeSelf == true);
+			bool equippedBow = (bow.gameObject.activeSelf == true);
+			bool equippedBigSword = (bigSword.gameObject.activeSelf == true);
+			bool equippedNothing = ((fireSword.gameObject.activeSelf == false) &&
+			(bow.gameObject.activeSelf == false) &&
+			(handgun.gameObject.activeSelf == false) && 
+			(rifle.gameObject.activeSelf == false) && 
+			(bigSword.gameObject.activeSelf == false)); 
 
 
-		if (equippedBigSword)
-		attackRotate = Vector2.SmoothDamp(attackRotate, rotate, ref smoothInputVelocity, 1 / (attackSpeed * 15f));
-		else if (equippedBow || equippedHandgun || equippedRifle)
-		attackRotate = Vector2.SmoothDamp(attackRotate, rotate, ref smoothInputVelocity, 1 / (attackSpeed * 25f));
-		//add speeds for the rest
-		else
-		attackRotate = new Vector2(0f,0f);
-		playerAnimator.SetFloat("attackRotateX", attackRotate.x);
-		playerAnimator.SetFloat("attackRotateY", attackRotate.y);
+			if (equippedBigSword)
+			attackRotate = Vector2.SmoothDamp(attackRotate, rotate, ref smoothInputVelocity, 1 / (attackSpeed * 15f));
+			else if (equippedBow || equippedHandgun || equippedRifle)
+			attackRotate = Vector2.SmoothDamp(attackRotate, rotate, ref smoothInputVelocity, 1 / (attackSpeed * 25f));
+			//add speeds for the rest
+			else
+			attackRotate = new Vector2(0f,0f);
+			playerAnimator.SetFloat("attackRotateX", attackRotate.x);
+			playerAnimator.SetFloat("attackRotateY", attackRotate.y);
 
 
-		if(takingDamage && alive){
-			StartCoroutine(blinking());
-		}
-		underWater = (transform.position.y <= 40.3f) ? true : false;
-		if (transform.position.y < 15f){
-			playerHealth = 0;
-		}
-		isAerial = !IsGrounded ();
-		if (isAerial){
-			playerAnimator.SetLayerWeight(5, 1);
-		} else {
-			playerAnimator.SetLayerWeight(5, 0);
-		}
-		bool gettingUp = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("Getting Up");
-		bool punch1 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch1");
-		bool punch2 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch2");
-		bool punch3 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch3");
-		bool punch4 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch4");
-		bool kick = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("kick");
-		bool fireball = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("fireball");
-		bool knifeRight = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("knifeRight");
-		bool swordLeft = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordLeft");
-		bool swordRight = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordRight");
-		bool knifeUp = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("knifeUp");
-		bool knifeDown = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("knifeDown");
-		bool swordUp = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordUp");
-		bool swordDown = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordDown");
-		var rb = transform.GetComponent<Rigidbody>();
-		if (underWater){
-			if (jump == 1 && transform.position.y <= 40f) {
-					moveLegs = false;
-					gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(0, 4f, 0));
-				}		
+			if(takingDamage && alive){
+				StartCoroutine(blinking());
+			}
+			underWater = (transform.position.y <= 40.3f) ? true : false;
+			if (transform.position.y < 15f){
+				playerHealth = 0;
+			}
+			isAerial = !IsGrounded ();
 			if (isAerial){
-				rb.drag = 7.5f;
+				playerAnimator.SetLayerWeight(5, 1);
 			} else {
+				playerAnimator.SetLayerWeight(5, 0);
+			}
+			bool gettingUp = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("Getting Up");
+			bool punch1 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch1");
+			bool punch2 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch2");
+			bool punch3 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch3");
+			bool punch4 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch4");
+			bool kick = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("kick");
+			bool fireball = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("fireball");
+			bool knifeRight = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("knifeRight");
+			bool swordLeft = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordLeft");
+			bool swordRight = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordRight");
+			bool knifeUp = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("knifeUp");
+			bool knifeDown = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("knifeDown");
+			bool swordUp = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordUp");
+			bool swordDown = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordDown");
+			var rb = transform.GetComponent<Rigidbody>();
+			if (underWater){
+				if (jump == 1 && transform.position.y <= 40f) {
+						moveLegs = false;
+						gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(0, 4f, 0));
+					}		
+				if (isAerial){
+					rb.drag = 7.5f;
+				} else {
+					rb.drag = 2.5f;
+				}
+				rb.mass = 1f;
+			} else {
+				rb.mass = 1f;
 				rb.drag = 2.5f;
 			}
-			rb.mass = 1f;
-		} else {
-			rb.mass = 1f;
-			rb.drag = 2.5f;
-		}
 
-		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing1") ||
-		playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing2") ||
-		playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing3") ||
-		playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing4") ||
-		playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing5") ||
-		playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing6")){
-			mwt2.enabled = true;
-			bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
-			bigSwing = true;
-		} else {
-			if (!dynamicHitting){
-				bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = false;
-				mwt2.enabled = false;
-				bigSwing = false;
-			}
-		}
-
-		//----begin player movement and rotation
-
-		if (alive) {
-			//squatting animation
-			blocking = playerAnimator.GetBool("blocking");
-			if (playerHealth < 3) {
-				playerAnimator.SetBool("injured", true);
-			}
-			if (controls.Gameplay.Action2.triggered && !busy && !changingWeps) {
-				playerAnimator.SetTrigger("changeWep");
-				StartCoroutine(changeWeaponTime());
-			}
-			if (punch1 || punch2 || punch3 || punch4 || kick || fireball) {
-				punching = true;
+			if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing1") ||
+			playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing2") ||
+			playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing3") ||
+			playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing4") ||
+			playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing5") ||
+			playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing6")){
+				mwt2.enabled = true;
+				bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
+				bigSwing = true;
 			} else {
-				punching = false;
+				if (!dynamicHitting){
+					bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = false;
+					mwt2.enabled = false;
+					bigSwing = false;
+				}
 			}
-			if (knifeRight || knifeUp || knifeDown || swordLeft || swordRight || swordUp || swordDown) {
-				mwt.enabled = true;
-				swordBlade.transform.GetComponent<CapsuleCollider> ().enabled = true;
-				ignitionFlame.transform.gameObject.SetActive(true);
-				swordBlade.transform.gameObject.SetActive(true);
-				busy = true;
 
-			} else {
-				if (blocking){
+			//----begin player movement and rotation
+
+			if (alive) {
+				//squatting animation
+				blocking = playerAnimator.GetBool("blocking");
+				if (playerHealth < 3) {
+					playerAnimator.SetBool("injured", true);
+				}
+				if (controls.Gameplay.Action2.triggered && !busy && !changingWeps) {
+					playerAnimator.SetTrigger("changeWep");
+					StartCoroutine(changeWeaponTime());
+				}
+				if (punch1 || punch2 || punch3 || punch4 || kick || fireball) {
+					punching = true;
+				} else {
+					punching = false;
+				}
+				if (knifeRight || knifeUp || knifeDown || swordLeft || swordRight || swordUp || swordDown) {
+					mwt.enabled = true;
+					swordBlade.transform.GetComponent<CapsuleCollider> ().enabled = true;
 					ignitionFlame.transform.gameObject.SetActive(true);
 					swordBlade.transform.gameObject.SetActive(true);
+					busy = true;
+
 				} else {
-					swordBlade.transform.GetComponent<CapsuleCollider> ().enabled = false;
-					mwt.enabled = false;
-					ignitionFlame.transform.gameObject.SetActive(false);
-					swordBlade.transform.gameObject.SetActive(false);
+					if (blocking){
+						ignitionFlame.transform.gameObject.SetActive(true);
+						swordBlade.transform.gameObject.SetActive(true);
+					} else {
+						swordBlade.transform.GetComponent<CapsuleCollider> ().enabled = false;
+						mwt.enabled = false;
+						ignitionFlame.transform.gameObject.SetActive(false);
+						swordBlade.transform.gameObject.SetActive(false);
+					}
+
+					busy = false;
 				}
 
-				busy = false;
-			}
-
-			if (Mathf.Abs(v) > Mathf.Abs(h)){
-				playerAnimator.SetFloat("averageSpeed", Mathf.Abs(v));
-			} else {
-				playerAnimator.SetFloat("averageSpeed", Mathf.Abs(h));
-			}
-			
-			playerAnimator.SetFloat ("horizontalSpeed", h);
-			playerAnimator.SetFloat ("verticalSpeed", v);
-			
-			if (rolling && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.1f
-			&& playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 0.6f){
-				transform.GetComponent<Rigidbody>().AddForce(transform.forward * 23f); //add force to roll anim during actual roll time
-			}
-			if (!rolling && !changingWeps){
-				//start attacks
-				if (controls.Gameplay.Action4.triggered && !isAerial) {
-					playerAnimator.SetTrigger("roll");
-				} 
+				if (Mathf.Abs(v) > Mathf.Abs(h)){
+					playerAnimator.SetFloat("averageSpeed", Mathf.Abs(v));
+				} else {
+					playerAnimator.SetFloat("averageSpeed", Mathf.Abs(h));
+				}
 				
-				if (!isAerial) {
-					if (equippedBigSword && !blocking){
-						if (controls.Gameplay.Action1.triggered && !bigSwing){
-							StartCoroutine(waitForSound(soundEffectSwing1, "bigSwing4"));
-							secondHit = false;
-						}
-						if (controls.Gameplay.Action1.triggered && bigSwing && !secondHit){
-							StartCoroutine(waitForSecondBigHit1());
-							secondHit = true;
-						}
-					}
-					if (equippedBigSword && blocking) {
-						playerAnimator.speed = 1;
-						if (controls.Gameplay.Action1.triggered && !bigSwing) {
-							StartCoroutine(waitForSound(soundEffectSwing1, "bigSwing6"));
-							secondHit = false;
-						}
-						if (controls.Gameplay.Action1.triggered && bigSwing && !secondHit) {
-							StartCoroutine(waitForSecondBigHit2());
-							secondHit = true;
-						}
-					}
-					if (equippedFireSword && !blocking){
-						if (controls.Gameplay.Action1.triggered && !busy) {
-							if (moveLegs) {
-								playerAnimator.Play("swordRight", 0, .4f);
-								audio.PlayOneShot(soundEffectSwing1, 0.7f);
-							} else {
-								playerAnimator.Play("knifeRight", 0, .4f);
-								audio.PlayOneShot(soundEffectSwing1, 0.7f);
-							}
-							secondHit = false;
-						}
-						if (controls.Gameplay.Action1.triggered && busy && secondHit == false) {
-							StartCoroutine(waitForSecondSmallHit1());
-							secondHit = true;
-						}
-					}
-					if (equippedNothing && !blocking) {
-						if (controls.Gameplay.Action1.triggered && !punching) {
-							audio.PlayOneShot(soundEffectSwing1, 0.7f);
-							if (moveLegs) {
-								playerAnimator.Play("punch3", 0, .2f);
-							} else {
-								playerAnimator.Play("punch1", 0, .2f);
-							}
-							secondHit = false;
-						}
-						if (controls.Gameplay.Action1.triggered && punching && secondHit == false) {
-							StartCoroutine(waitForSecondPunch());
-							secondHit = true;
-						}
-					}
-					if (equippedNothing && blocking) {
-						playerAnimator.speed = 1;
-						if (controls.Gameplay.Action1.triggered && !punching) {
-							StartCoroutine(shootFireball());
-							playerAnimator.Play("fireball", 0, .5f);
-							secondHit = false;
-						}
-					}
+				playerAnimator.SetFloat ("horizontalSpeed", h);
+				playerAnimator.SetFloat ("verticalSpeed", v);
+				
+				if (rolling && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.1f
+				&& playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 0.6f){
+					transform.GetComponent<Rigidbody>().AddForce(transform.forward * 23f); //add force to roll anim during actual roll time
 				}
-				else {
-
-				if (equippedFireSword && !blocking){
-					if (controls.Gameplay.Action1.triggered && !busy){
-							playerAnimator.Play("swordUp", 0, .4f);
-							audio.PlayOneShot(soundEffectSwing4, 0.7f);
-							secondHit = false;
-						}
-						if (controls.Gameplay.Action1.triggered && busy && secondHit == false){
-							StartCoroutine(waitForSecondSmallHit2());
-							secondHit = true;
-						}
-					}
-					if (equippedNothing && !blocking) {
-						if (controls.Gameplay.Action1.triggered && !punching) {
-							audio.PlayOneShot(soundEffectSwing1, 0.7f);
-							playerAnimator.Play("kick", 0, .2f);
-							secondHit = false;
-						}
-
-					}
-				}
-				if (equippedBigSword){
-					if (controls.Gameplay.Action1.triggered && !bigSwing){
-						playerAnimator.Play("bigSwing5", 0, .2f);
-						audio.PlayOneShot(soundEffectSwing1, 0.7f);
-					}
-					if (shoot > 0.5f){
-						dynamicHitting = true;
-						mwt2.enabled = true;
-						bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
-						transitionTime += Time.deltaTime * 8; // so it doesn't teleport arms up
-						playerAnimator.SetLayerWeight(11, Mathf.Lerp(0f, 1f, transitionTime));
-					} else {
-						dynamicHitting = false;
-						if(!bigSwing){
-							bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = false;
-							mwt2.enabled = false;
-							bigSwing = false;
-						}
-						transitionTime = 0f;
-						playerAnimator.SetLayerWeight(11, 0f);
-					}
-				}
-				if (equippedHandgun){
-					playerAnimator.SetLayerWeight(1, 0f);
-					if (handgunAmmo <= 0 || playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
-						playerAnimator.SetLayerWeight(4, 1f);
-					} else {
-						playerAnimator.SetLayerWeight(4, 0f);
-					}
-					if (shoot > 0.5f && !aiming) {
-						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
-							if (handgunAmmo > 0){
-								playerAnimator.SetBool("ShootingHandgun", true);
-							} else {
-								playerAnimator.SetBool("ShootingHandgun", false);
-							}
-							StartCoroutine(shootingHandgun());
-						}
-					}  else {
-						playerAnimator.SetBool("ShootingHandgun", false);
-					}
+				if (!rolling && !changingWeps){
+					//start attacks
+					if (controls.Gameplay.Action4.triggered && !isAerial) {
+						playerAnimator.SetTrigger("roll");
+					} 
 					
-				}
-				if (equippedRifle){
-					playerAnimator.SetLayerWeight(1, 0f);
-					if (rifleAmmo <= 0 || playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
-						playerAnimator.SetLayerWeight(4, 1f);
-					} else {
-						playerAnimator.SetLayerWeight(4, 0f);
-					}
-					if (shoot > 0.5f && !aiming) {
-						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
-							if (rifleAmmo > 0) {
-								playerAnimator.SetBool("ShootingRifle", true);
-							} else {
-								playerAnimator.SetBool("ShootingRifle", false);
+					if (!isAerial) {
+						if (equippedBigSword && !blocking){
+							if (controls.Gameplay.Action1.triggered && !bigSwing){
+								StartCoroutine(waitForSound(soundEffectSwing1, "bigSwing4"));
+								secondHit = false;
 							}
-							StartCoroutine(shootingRifle());
+							if (controls.Gameplay.Action1.triggered && bigSwing && !secondHit){
+								StartCoroutine(waitForSecondBigHit1());
+								secondHit = true;
+							}
 						}
-					}  else {
-						playerAnimator.SetBool("ShootingRifle", false);
+						if (equippedBigSword && blocking) {
+							playerAnimator.speed = 1;
+							if (controls.Gameplay.Action1.triggered && !bigSwing) {
+								StartCoroutine(waitForSound(soundEffectSwing1, "bigSwing6"));
+								secondHit = false;
+							}
+							if (controls.Gameplay.Action1.triggered && bigSwing && !secondHit) {
+								StartCoroutine(waitForSecondBigHit2());
+								secondHit = true;
+							}
+						}
+						if (equippedFireSword && !blocking){
+							if (controls.Gameplay.Action1.triggered && !busy) {
+								if (moveLegs) {
+									playerAnimator.Play("swordRight", 0, .4f);
+									audio.PlayOneShot(soundEffectSwing1, 0.7f);
+								} else {
+									playerAnimator.Play("knifeRight", 0, .4f);
+									audio.PlayOneShot(soundEffectSwing1, 0.7f);
+								}
+								secondHit = false;
+							}
+							if (controls.Gameplay.Action1.triggered && busy && secondHit == false) {
+								StartCoroutine(waitForSecondSmallHit1());
+								secondHit = true;
+							}
+						}
+						if (equippedNothing && !blocking) {
+							if (controls.Gameplay.Action1.triggered && !punching) {
+								audio.PlayOneShot(soundEffectSwing1, 0.7f);
+								if (moveLegs) {
+									playerAnimator.Play("punch3", 0, .2f);
+								} else {
+									playerAnimator.Play("punch1", 0, .2f);
+								}
+								secondHit = false;
+							}
+							if (controls.Gameplay.Action1.triggered && punching && secondHit == false) {
+								StartCoroutine(waitForSecondPunch());
+								secondHit = true;
+							}
+						}
+						if (equippedNothing && blocking) {
+							playerAnimator.speed = 1;
+							if (controls.Gameplay.Action1.triggered && !punching) {
+								StartCoroutine(shootFireball());
+								playerAnimator.Play("fireball", 0, .5f);
+								secondHit = false;
+							}
+						}
 					}
-				} 
-				if (equippedBow && !blocking) {
-					if (shoot > 0.5f && !aiming) {
-						//bow has infinite ammo
-						playerAnimator.SetBool("ShootingBow", true);
-						transitionTime += Time.deltaTime * 8; // so it doesn't teleport arms up
-						playerAnimator.SetLayerWeight(1, Mathf.Lerp(0f, 1f, transitionTime));
-						float bowShootTime = playerAnimator.GetCurrentAnimatorStateInfo(1).normalizedTime % 1;
-						if (bowShootTime >= 0.2f && bowShootTime <= 0.4f){
-							if (shootingArrow == false) {
-								StartCoroutine (shootArrow ());
+					else {
+
+					if (equippedFireSword && !blocking){
+						if (controls.Gameplay.Action1.triggered && !busy){
+								playerAnimator.Play("swordUp", 0, .4f);
+								audio.PlayOneShot(soundEffectSwing4, 0.7f);
+								secondHit = false;
+							}
+							if (controls.Gameplay.Action1.triggered && busy && secondHit == false){
+								StartCoroutine(waitForSecondSmallHit2());
+								secondHit = true;
+							}
+						}
+						if (equippedNothing && !blocking) {
+							if (controls.Gameplay.Action1.triggered && !punching) {
+								audio.PlayOneShot(soundEffectSwing1, 0.7f);
+								playerAnimator.Play("kick", 0, .2f);
+								secondHit = false;
+							}
+
+						}
+					}
+					if (equippedBigSword){
+						if (controls.Gameplay.Action1.triggered && !bigSwing){
+							playerAnimator.Play("bigSwing5", 0, .2f);
+							audio.PlayOneShot(soundEffectSwing1, 0.7f);
+						}
+						if (shoot > 0.5f){
+							dynamicHitting = true;
+							mwt2.enabled = true;
+							bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
+							transitionTime += Time.deltaTime * 8; // so it doesn't teleport arms up
+							playerAnimator.SetLayerWeight(11, Mathf.Lerp(0f, 1f, transitionTime));
+						} else {
+							dynamicHitting = false;
+							if(!bigSwing){
+								bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = false;
+								mwt2.enabled = false;
+								bigSwing = false;
+							}
+							transitionTime = 0f;
+							playerAnimator.SetLayerWeight(11, 0f);
+						}
+					}
+					if (equippedHandgun){
+						playerAnimator.SetLayerWeight(1, 0f);
+						if (handgunAmmo <= 0 || playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
+							playerAnimator.SetLayerWeight(4, 1f);
+						} else {
+							playerAnimator.SetLayerWeight(4, 0f);
+						}
+						if (shoot > 0.5f && !aiming) {
+							if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
+								if (handgunAmmo > 0){
+									playerAnimator.SetBool("ShootingHandgun", true);
+								} else {
+									playerAnimator.SetBool("ShootingHandgun", false);
+								}
+								StartCoroutine(shootingHandgun());
+							}
+						}  else {
+							playerAnimator.SetBool("ShootingHandgun", false);
+						}
+						
+					}
+					if (equippedRifle){
+						playerAnimator.SetLayerWeight(1, 0f);
+						if (rifleAmmo <= 0 || playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
+							playerAnimator.SetLayerWeight(4, 1f);
+						} else {
+							playerAnimator.SetLayerWeight(4, 0f);
+						}
+						if (shoot > 0.5f && !aiming) {
+							if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
+								if (rifleAmmo > 0) {
+									playerAnimator.SetBool("ShootingRifle", true);
+								} else {
+									playerAnimator.SetBool("ShootingRifle", false);
+								}
+								StartCoroutine(shootingRifle());
+							}
+						}  else {
+							playerAnimator.SetBool("ShootingRifle", false);
+						}
+					} 
+					if (equippedBow && !blocking) {
+						if (shoot > 0.5f && !aiming) {
+							//bow has infinite ammo
+							playerAnimator.SetBool("ShootingBow", true);
+							transitionTime += Time.deltaTime * 8; // so it doesn't teleport arms up
+							playerAnimator.SetLayerWeight(1, Mathf.Lerp(0f, 1f, transitionTime));
+							float bowShootTime = playerAnimator.GetCurrentAnimatorStateInfo(1).normalizedTime % 1;
+							if (bowShootTime >= 0.2f && bowShootTime <= 0.4f){
+								if (shootingArrow == false) {
+									StartCoroutine (shootArrow ());
+								}
+							} 
+						} else {
+							playerAnimator.SetBool("ShootingBow", false);
+							transitionTime = 0f;
+							playerAnimator.SetLayerWeight(1, 0f);
+						}
+						
+						//if holding fire button
+					}
+					else if (!equippedBow) {
+						playerAnimator.SetBool("ShootingBow", false);
+						playerAnimator.SetLayerWeight(1,0f);
+					}
+
+					//end attacks
+					if (controls.Gameplay.Action5.triggered) {
+						if (grenades > 0) {
+							playerAnimator.SetTrigger ("throw");
+							StartCoroutine (rollThenBlowUp ());
+						} 
+					} 
+
+					if (controls.Gameplay.Jump.triggered && !isAerial && !playerAnimator.GetBool("blocking") && !underWater) {
+						//moveLegs = false;
+						//audio.PlayOneShot (playerJump, 1.2f);
+						gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(0, 200f, 0));
+					}		
+
+
+					if (action3 == 1) {
+						playerAnimator.SetBool("blocking", true);
+						lastRotation = transform.rotation.eulerAngles;
+						StartCoroutine("checkForMovement", lastRotation);
+						if (lastRotation.y != currentRotation.y){
+							if (!blockTurning){
+								StartCoroutine(strafeABit());
 							}
 						} 
 					} else {
-						playerAnimator.SetBool("ShootingBow", false);
-						transitionTime = 0f;
-						playerAnimator.SetLayerWeight(1, 0f);
-					}
-					
-					//if holding fire button
-				}
-				else if (!equippedBow) {
-					playerAnimator.SetBool("ShootingBow", false);
-					playerAnimator.SetLayerWeight(1,0f);
+						playerAnimator.SetBool("blocking", false);
+					}	
+		
 				}
 
-				//end attacks
-				if (controls.Gameplay.Action5.triggered) {
-					if (grenades > 0) {
-						playerAnimator.SetTrigger ("throw");
-						StartCoroutine (rollThenBlowUp ());
-					} 
-				} 
-
-				if (controls.Gameplay.Jump.triggered && !isAerial && !playerAnimator.GetBool("blocking") && !underWater) {
-					//moveLegs = false;
-					//audio.PlayOneShot (playerJump, 1.2f);
-					gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(0, 200f, 0));
-				}		
-
-
-				if (action3 == 1) {
-					playerAnimator.SetBool("blocking", true);
-					lastRotation = transform.rotation.eulerAngles;
-					StartCoroutine("checkForMovement", lastRotation);
-					if (lastRotation.y != currentRotation.y){
-						if (!blockTurning){
-							StartCoroutine(strafeABit());
-						}
-					} 
+				if (h < 0.01 && h > -0.01 && v < 0.01 && v > -0.01) {
+					moveLegs = false;
+					playerAnimator.SetBool("moving", false);
 				} else {
-					playerAnimator.SetBool("blocking", false);
-				}	
-	
-			}
-
-			if (h < 0.01 && h > -0.01 && v < 0.01 && v > -0.01) {
-				moveLegs = false;
-				playerAnimator.SetBool("moving", false);
-			} else {
-				if (!gameTransition.transitioning && !playerAnimator.GetBool("blocking") && !bigSwing && !knockDown &&
-				!playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("Getting Up")){
-					moveLegs = true;
-					playerAnimator.SetBool("moving", true);
-				} else {
-					if ((bigSwing && rolling) || (bigSwing && isAerial)){
+					if (!gameTransition.transitioning && !playerAnimator.GetBool("blocking") && !bigSwing && !knockDown &&
+					!playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("Getting Up")){
 						moveLegs = true;
 						playerAnimator.SetBool("moving", true);
 					} else {
-						moveLegs = false;
-						playerAnimator.SetBool("moving", false);
+						if ((bigSwing && rolling) || (bigSwing && isAerial)){
+							moveLegs = true;
+							playerAnimator.SetBool("moving", true);
+						} else {
+							moveLegs = false;
+							playerAnimator.SetBool("moving", false);
+						}
+						
 					}
-					
 				}
-			}
-			//----begin player death
-			if (playerHealth <= 0) {
-				playerAnimator.enabled = false;
-				allColliders (gameObject.transform, false);//don't ignore collisions
-				fire.gameObject.SetActive (false);
-				gameObject.GetComponent<CapsuleCollider> ().isTrigger = true;
-				gameObject.GetComponent<Rigidbody> ().isKinematic = true;
-				allColliders (gameObject.transform, true);
-				alive = false;
-			}
-			//----end player death
+				//----begin player death
+				if (playerHealth <= 0) {
+					playerAnimator.enabled = false;
+					allColliders (gameObject.transform, false);//don't ignore collisions
+					fire.gameObject.SetActive (false);
+					gameObject.GetComponent<CapsuleCollider> ().isTrigger = true;
+					gameObject.GetComponent<Rigidbody> ().isKinematic = true;
+					allColliders (gameObject.transform, true);
+					alive = false;
+				}
+				//----end player death
 
+
+			
+
+
+				if(virtualLookCam.Priority > 0){
+					m_camRotation.transform.position = virtualLookCam.transform.position;
+					m_camRotation.transform.rotation = virtualLookCam.transform.rotation;
+				}
+				
+				if (aiming){
+					if(bow.gameObject.activeSelf){
+						crossHair.gameObject.SetActive(false);
+					} else {
+						crossHair.gameObject.SetActive(true);
+					}
+					playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180)));//radians to degrees
+					transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
+					RaycastHit hit;
+					if(Physics.Raycast(m_camRotation.transform.position, m_camRotation.transform.forward, out hit, 200.0f)){
+						Debug.DrawRay(m_camRotation.transform.position, m_camRotation.transform.forward * 100.0f, Color.blue);
+						followTarget.LookAt(hit.point);//fix later
+					} else {
+						followTarget.transform.rotation = Quaternion.Euler(m_camRotation.transform.eulerAngles.x,
+						m_camRotation.transform.eulerAngles.y, m_camRotation.transform.eulerAngles.z);
+					}
+				} else {
+					crossHair.gameObject.SetActive(false);
+				}
+
+				camRotateWithZeroY.transform.position = new Vector3(m_cam.transform.position.x, transform.position.y, m_cam.transform.position.z);
+				camRotateWithZeroY.transform.LookAt(transform.position);
+
+				forward = camRotateWithZeroY.transform.forward;
+				right = camRotateWithZeroY.transform.right;
 
 		
+				forward.y = 0f;
+				Quaternion rotation;
+				
+				Vector3 moveDirection = (h * right + v * forward);
+				//moveDirection is not a direction it is a position just copied the name from a dum
 
-
-			if(virtualLookCam.Priority > 0){
-				m_camRotation.transform.position = virtualLookCam.transform.position;
-				m_camRotation.transform.rotation = virtualLookCam.transform.rotation;
-			}
-			
-			if (aiming){
-				if(bow.gameObject.activeSelf){
-					crossHair.gameObject.SetActive(false);
+				if (knockDown == true){
+					playerAnimator.SetBool("falling", true);
 				} else {
-					crossHair.gameObject.SetActive(true);
+					playerAnimator.SetBool("falling", false);
 				}
-				playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180)));//radians to degrees
-				transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
-				RaycastHit hit;
-				if(Physics.Raycast(m_camRotation.transform.position, m_camRotation.transform.forward, out hit, 200.0f)){
-					Debug.DrawRay(m_camRotation.transform.position, m_camRotation.transform.forward * 100.0f, Color.blue);
-					followTarget.LookAt(hit.point);//fix later
+
+				if (h > 0.80f || v > 0.80f || h < -0.80f || v < -0.80f){
+					moveSpeed = 2f;
 				} else {
-					followTarget.transform.rotation = Quaternion.Euler(m_camRotation.transform.eulerAngles.x,
-					m_camRotation.transform.eulerAngles.y, m_camRotation.transform.eulerAngles.z);
+					moveSpeed = 1f;
 				}
-			} else {
-				crossHair.gameObject.SetActive(false);
-			}
-
-			camRotateWithZeroY.transform.position = new Vector3(m_cam.transform.position.x, transform.position.y, m_cam.transform.position.z);
-			camRotateWithZeroY.transform.LookAt(transform.position);
-
-			forward = camRotateWithZeroY.transform.forward;
-			right = camRotateWithZeroY.transform.right;
-
-	
-			forward.y = 0f;
-			Quaternion rotation;
-			
-			Vector3 moveDirection = (h * right + v * forward);
-			//moveDirection is not a direction it is a position just copied the name from a dum
-
-			if (knockDown == true){
-				playerAnimator.SetBool("falling", true);
-			} else {
-				playerAnimator.SetBool("falling", false);
-			}
-
-			if (h > 0.80f || v > 0.80f || h < -0.80f || v < -0.80f){
-				moveSpeed = 2f;
-			} else {
-				moveSpeed = 1f;
-			}
-			if (moveDirection != Vector3.zero) {
-				rotation = Quaternion.LookRotation(Vector3.up);
-			} else {
-				rotation = Quaternion.Euler (forward);
-			}
-			movement = Vector3.ClampMagnitude(new Vector3(moveDirection.x * Time.deltaTime * moveSpeed, moveDirection.y,
-				moveDirection.z * Time.deltaTime * moveSpeed) * 100, 1f);
- 			if (moveDirection != Vector3.zero && !knockDown && !gettingUp && !fireball && !aiming) { //!aiming
-				rotation = Quaternion.LookRotation (moveDirection);
-				lastMoveDirection = moveDirection; 
-			}  
-			
-			if (!aiming && (playerAnimator.GetBool("ShootingHandgun") || playerAnimator.GetBool("ShootingRifle") ||
-			playerAnimator.GetBool("ShootingBow") || dynamicHitting) || playerAnimator.GetLayerWeight(4) >= 1 && !playerAnimator.GetBool("blocking")){
-				if (playerAnimator.GetLayerWeight(4) < 1f){//reloading
-					firing = true;
+				if (moveDirection != Vector3.zero) {
+					rotation = Quaternion.LookRotation(Vector3.up);
 				} else {
+					rotation = Quaternion.Euler (forward);
+				}
+				movement = Vector3.ClampMagnitude(new Vector3(moveDirection.x * Time.deltaTime * moveSpeed, moveDirection.y,
+					moveDirection.z * Time.deltaTime * moveSpeed) * 100, 1f);
+				if (moveDirection != Vector3.zero && !knockDown && !gettingUp && !fireball && !aiming) { //!aiming
+					rotation = Quaternion.LookRotation (moveDirection);
+					lastMoveDirection = moveDirection; 
+				}  
+				
+				if (!aiming && (playerAnimator.GetBool("ShootingHandgun") || playerAnimator.GetBool("ShootingRifle") ||
+				playerAnimator.GetBool("ShootingBow") || dynamicHitting) || playerAnimator.GetLayerWeight(4) >= 1 && !playerAnimator.GetBool("blocking")){
+					if (playerAnimator.GetLayerWeight(4) < 1f){//reloading
+						firing = true;
+					} else {
+						firing = false;
+					}
+					freeLookCam.m_YAxis.m_MaxSpeed = 0; //can't rotate vertically
+					freeLookCam.m_XAxis.m_MaxSpeed = 0; //can't rotate horizontally
+					playerAnimator.SetFloat("rotateY", rotate.y); //freelook aim up/down
+					playerAnimator.SetFloat("rotateX", rotate.x); //freelook aim left/right (bow)
+
+					//strafing and turning free look
+
+					var forwardA = m_cam.transform.rotation * Vector3.forward;
+					var forwardB = transform.rotation * Vector3.forward;
+
+					// get a numeric angle for each vector, on the X-Z plane (relative to world forward)
+					var angleA = Mathf.Atan2(forwardA.x, forwardA.z) * Mathf.Rad2Deg;
+					var angleB = Mathf.Atan2(forwardB.x, forwardB.z) * Mathf.Rad2Deg;
+
+					// get the signed difference in these angles
+					var relativeAngle = -Mathf.DeltaAngle(angleA, angleB);
+					Vector3 relativeRotationVec = new Vector3(0f, relativeAngle, 0f);
+					Quaternion relativeRotation = Quaternion.Euler(relativeRotationVec);
+					Vector3 relativeRotationForward = relativeRotation * Vector3.forward;
+					Vector3 relativeRotationRight = relativeRotation * Vector3.right;
+					Vector3 relativeMoveDirection = (relativeRotationRight * h + relativeRotationForward * v);
+
+					float howVertical = relativeMoveDirection.z;
+					float howHorizontal = relativeMoveDirection.x;
+					//*******need to work on this stuff********
+					//reverse horizontal
+					playerAnimator.SetFloat("horizontalStrafing", howHorizontal);
+					playerAnimator.SetFloat("verticalStrafing", howVertical);
+					if (howVertical < 0f && Mathf.Abs(howHorizontal) < 0.1f){ //moving backwards without strafing
+						playerAnimator.SetLayerWeight(9, 0f);
+						playerAnimator.SetLayerWeight(3, 1f);
+						playerAnimator.SetFloat("turn", 1f);
+					} else if (howVertical >= 0f){ //moving forwards
+						playerAnimator.SetLayerWeight(9, howVertical - Mathf.Abs(howHorizontal) * 2 );//how vertical joystick is - a set horizontal value
+						playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal) * 2);
+					} else if (howVertical < 0f && Mathf.Abs(howHorizontal) > 0.1f){ //moving backwards with strafing
+						playerAnimator.SetLayerWeight(9, 0f);
+						playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal) * 2); 
+					}
+					
+					if((!moveLegs && Mathf.Abs(howHorizontal) == 0f && Mathf.Abs(rotate.x) > 0.01f)){ //not moving and rotating
+						playerAnimator.SetFloat("turn", 1f);
+					} else {
+						if (howVertical < 0f){
+							playerAnimator.SetLayerWeight(3, Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+							playerAnimator.SetFloat("turn", Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+						} else {
+							if (howVertical >= 0f && !blockTurning){
+								playerAnimator.SetLayerWeight(3, 0f);
+								playerAnimator.SetFloat("turn", 0f);
+							}
+						}
+					}
+				}
+				else if (!aiming) {
 					firing = false;
-				}
-				freeLookCam.m_YAxis.m_MaxSpeed = 0; //can't rotate vertically
-				freeLookCam.m_XAxis.m_MaxSpeed = 0; //can't rotate horizontally
-				playerAnimator.SetFloat("rotateY", rotate.y); //freelook aim up/down
-				playerAnimator.SetFloat("rotateX", rotate.x); //freelook aim left/right (bow)
-
-				//strafing and turning free look
-
-				var forwardA = m_cam.transform.rotation * Vector3.forward;
-				var forwardB = transform.rotation * Vector3.forward;
-
-				// get a numeric angle for each vector, on the X-Z plane (relative to world forward)
-				var angleA = Mathf.Atan2(forwardA.x, forwardA.z) * Mathf.Rad2Deg;
-				var angleB = Mathf.Atan2(forwardB.x, forwardB.z) * Mathf.Rad2Deg;
-
-				// get the signed difference in these angles
-				var relativeAngle = -Mathf.DeltaAngle(angleA, angleB);
-				Vector3 relativeRotationVec = new Vector3(0f, relativeAngle, 0f);
-				Quaternion relativeRotation = Quaternion.Euler(relativeRotationVec);
-				Vector3 relativeRotationForward = relativeRotation * Vector3.forward;
-				Vector3 relativeRotationRight = relativeRotation * Vector3.right;
-				Vector3 relativeMoveDirection = (relativeRotationRight * h + relativeRotationForward * v);
-
-				float howVertical = relativeMoveDirection.z;
-				float howHorizontal = relativeMoveDirection.x;
-				//*******need to work on this stuff********
-				//reverse horizontal
-				playerAnimator.SetFloat("horizontalStrafing", howHorizontal);
-				playerAnimator.SetFloat("verticalStrafing", howVertical);
-				if (howVertical < 0f && Mathf.Abs(howHorizontal) < 0.1f){ //moving backwards without strafing
+					freeLookCam.m_YAxis.m_MaxSpeed = 2; //can rotate vertically again
+					freeLookCam.m_XAxis.m_MaxSpeed = 200;
 					playerAnimator.SetLayerWeight(9, 0f);
-					playerAnimator.SetLayerWeight(3, 1f);
-					playerAnimator.SetFloat("turn", 1f);
-				} else if (howVertical >= 0f){ //moving forwards
-					playerAnimator.SetLayerWeight(9, howVertical - Mathf.Abs(howHorizontal) * 2 );//how vertical joystick is - a set horizontal value
-					playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal) * 2);
-				} else if (howVertical < 0f && Mathf.Abs(howHorizontal) > 0.1f){ //moving backwards with strafing
-					playerAnimator.SetLayerWeight(9, 0f);
-					playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal) * 2); 
+					playerAnimator.SetLayerWeight(2, 0f);
+					if (!blockTurning)
+					playerAnimator.SetLayerWeight(3, 0f);
 				}
-				
-				if((!moveLegs && Mathf.Abs(howHorizontal) == 0f && Mathf.Abs(rotate.x) > 0.01f)){ //not moving and rotating
-					playerAnimator.SetFloat("turn", 1f);
-				} else {
-					if (howVertical < 0f){
-						playerAnimator.SetLayerWeight(3, Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
-						playerAnimator.SetFloat("turn", Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+				if (aiming){
+					freeLookCam.Priority = 0;
+					virtualLookCam.Priority = 1;
+					StartCoroutine(transitionToCam2());
+					//strafing and turning virtual cam
+					float howVertical = Input.GetAxis("Vertical");
+					float howHorizontal = Input.GetAxis("Horizontal");
+					playerAnimator.SetFloat("verticalStrafing", howVertical);
+					playerAnimator.SetFloat("horizontalStrafing", howHorizontal);
+					playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal));
+					playerAnimator.SetFloat("turn", rotate.x);
+					if (howVertical < 0f){ //not moving forward (is at idle animation when not moving)
+						playerAnimator.SetFloat("turn", 1f);
+					}
+					
+					if((!moveLegs && Mathf.Abs(howHorizontal) == 0f && Mathf.Abs(rotate.x) > 0.01f)){ //not moving and rotating
+						playerAnimator.SetFloat("turn", 1f);
 					} else {
-						if (howVertical >= 0f && !blockTurning){
-							playerAnimator.SetLayerWeight(3, 0f);
-							playerAnimator.SetFloat("turn", 0f);
+						if (howVertical < 0f){
+							playerAnimator.SetLayerWeight(3, Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+							playerAnimator.SetFloat("turn", Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+						} else {
+							if (howVertical >= 0f && !blockTurning){
+								playerAnimator.SetLayerWeight(3, 0f);
+								playerAnimator.SetFloat("turn", 0f);
+							}
+		
 						}
 					}
-				}
-			}
-			else if (!aiming) {
-				firing = false;
-				freeLookCam.m_YAxis.m_MaxSpeed = 2; //can rotate vertically again
-				freeLookCam.m_XAxis.m_MaxSpeed = 200;
-				playerAnimator.SetLayerWeight(9, 0f);
-				playerAnimator.SetLayerWeight(2, 0f);
-				if (!blockTurning)
-				playerAnimator.SetLayerWeight(3, 0f);
-			}
-			if (aiming){
-				freeLookCam.Priority = 0;
-				virtualLookCam.Priority = 1;
-				StartCoroutine(transitionToCam2());
-				//strafing and turning virtual cam
-				float howVertical = Input.GetAxis("Vertical");
-				float howHorizontal = Input.GetAxis("Horizontal");
-				playerAnimator.SetFloat("verticalStrafing", howVertical);
-				playerAnimator.SetFloat("horizontalStrafing", howHorizontal);
-				playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal));
-				playerAnimator.SetFloat("turn", rotate.x);
-				if (howVertical < 0f){ //not moving forward (is at idle animation when not moving)
-					playerAnimator.SetFloat("turn", 1f);
-				}
-				
-				if((!moveLegs && Mathf.Abs(howHorizontal) == 0f && Mathf.Abs(rotate.x) > 0.01f)){ //not moving and rotating
-					playerAnimator.SetFloat("turn", 1f);
 				} else {
-					if (howVertical < 0f){
-						playerAnimator.SetLayerWeight(3, Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
-						playerAnimator.SetFloat("turn", Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
-					} else {
-						if (howVertical >= 0f && !blockTurning){
-							playerAnimator.SetLayerWeight(3, 0f);
-							playerAnimator.SetFloat("turn", 0f);
+					StartCoroutine(transitionToCam1());
+					virtualLookCam.Priority = 0;
+					freeLookCam.Priority = 1;
+				}
+				if (lastMoveDirection != Vector3.zero) {
+					rotation = Quaternion.LookRotation (lastMoveDirection);
+				} else {
+					rotation = Quaternion.identity;
+				}
+				if (!gameTransition.transitioning && alive){
+					if (rolling) {
+						if (playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 0.5f) {
+							transform.position += movement * (moveSpeed * 1f) * Time.deltaTime;
+						} else {
+							transform.position += movement * (moveSpeed * 0.4f) * Time.deltaTime;
 						}
-	
-					}
-				}
-			} else {
-				StartCoroutine(transitionToCam1());
-				virtualLookCam.Priority = 0;
-				freeLookCam.Priority = 1;
-			}
-			if (lastMoveDirection != Vector3.zero) {
-				rotation = Quaternion.LookRotation (lastMoveDirection);
-			} else {
-				rotation = Quaternion.identity;
-			}
-			if (!gameTransition.transitioning && alive){
-				if (rolling) {
-					if (playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 0.5f) {
-						transform.position += movement * (moveSpeed * 1f) * Time.deltaTime;
 					} else {
-						transform.position += movement * (moveSpeed * 0.4f) * Time.deltaTime;
-					}
-				} else {
-					if (!playerAnimator.GetBool("blocking") && !bigSwing && !knockDown && !gettingUp && !fireball) {
-						transform.position += movement * moveSpeed * Time.deltaTime;
-					}
-					if (bigSwing && isAerial) {
-						transform.position += movement * moveSpeed * Time.deltaTime;
-					}
+						if (!playerAnimator.GetBool("blocking") && !bigSwing && !knockDown && !gettingUp && !fireball) {
+							transform.position += movement * moveSpeed * Time.deltaTime;
+						}
+						if (bigSwing && isAerial) {
+							transform.position += movement * moveSpeed * Time.deltaTime;
+						}
 
+					}
 				}
-			}
 
-			if (!aiming && !firing){
-				transform.rotation = rotation;
-			} 
-			
+				if (!aiming && !firing){
+					transform.rotation = rotation;
+				} 
+				
+			}
 		}
 	}
 

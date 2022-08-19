@@ -6,6 +6,7 @@ using Photon.Pun;
 public class Launcher : MonoBehaviourPunCallbacks
 {
     public PhotonView playerPrefab;
+    public PhotonView playerFreeCam;
     public bool connected = false;
     //private Transition gameTransition; set to false when loading room
 
@@ -29,7 +30,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("Joined a room successfully!");
-        PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(0f, 41f, 0f), Quaternion.identity);
+        PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
         //base.OnJoinedRoom();
         connected = true;
     }

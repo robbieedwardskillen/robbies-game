@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
-public class FindPlayerPrefab : MonoBehaviour
+using Photon.Pun;
+public class FindPlayerPrefab : MonoBehaviourPunCallbacks
 {	
     private CinemachineFreeLook freeLookCam;
     private Launcher launcherScript;
     // Start is called before the first frame update
     void Start()
     {
+
         launcherScript = GameObject.Find("Launcher").GetComponent<Launcher>();
         freeLookCam = gameObject.GetComponent<CinemachineFreeLook>();
     }
@@ -17,9 +19,19 @@ public class FindPlayerPrefab : MonoBehaviour
     void Update()
     {
         if (launcherScript.connected){
-            freeLookCam.m_Follow = GameObject.Find("Player(Clone)").transform;
-            freeLookCam.m_LookAt = GameObject.Find("Player(Clone)").transform;
-        }
             
+            //print(photonView.)
+            GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+            foreach (GameObject player in players)
+            {
+                if (PhotonView.Get(player).IsMine)
+                {
+                    freeLookCam.GetComponent<CinemachineFreeLook>().m_Follow = player.transform;
+                    freeLookCam.GetComponent<CinemachineFreeLook>().m_LookAt = player.transform;
+                    break;
+                }
+            }
+
+        }
     }
 }
