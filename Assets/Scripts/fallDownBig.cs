@@ -26,10 +26,11 @@ public class fallDownBig : MonoBehaviour
         Vector3 lastPosition = transform.position;
         yield return new WaitForFixedUpdate();
         speed = (lastPosition - transform.position).magnitude / Time.deltaTime;
-        print(speed);
+        //print(speed);
     }
 
     void OnTriggerEnter(Collider col){
+        print("test");
         if (col.gameObject.tag == "damage" || col.gameObject.tag == "Medium Damage" ||
         col.gameObject.tag == "groundBullet" || col.gameObject.tag == "Explosion"){
             health -= 1;

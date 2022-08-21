@@ -57,11 +57,12 @@ public class Player : MonoBehaviourPunCallbacks {
 	private Transform[] equippedWeps = new Transform[2];
 	private Transform chosenWep1;
 	private Transform chosenWep2;
-	public GameObject grenade;
-	public GameObject arrow;
-	public GameObject impactEffectGround;
-	public GameObject impactEffectPlayer;
-	public GameObject impactEffectWall;
+	public PhotonView grenade;
+	public PhotonView arrow;
+	public PhotonView impactEffectGround;
+	public PhotonView impactEffectPlayer;
+	public PhotonView impactEffectWall;
+	public PhotonView impactEffectHole;
 	private bool blocking = false;
 	private bool firing = false;
 	private bool shootingArrow = false;
@@ -111,6 +112,7 @@ public class Player : MonoBehaviourPunCallbacks {
 	private Vector3 previousPos;
 	private Vector3 velocity;
 	private Launcher launcherScript;
+
 	private bool connected = false;
 	bool moveLegs = false;
 	bool blockTurning = false;
@@ -296,7 +298,7 @@ public class Player : MonoBehaviourPunCallbacks {
 		//selection screen get chosen weps and put them into chosenWep1 & chosenWep2
 		chosenWep1 = bow;
 		chosenWep1.gameObject.SetActive(true);
-		chosenWep2 = bigSword;
+		chosenWep2 = handgun;
 		equippedWeps[0] = chosenWep1;
 		equippedWeps[1] = chosenWep2;
 		playerAnimator.SetBool(chosenWep1.name, true);
@@ -327,7 +329,6 @@ public class Player : MonoBehaviourPunCallbacks {
 	
 	void Start() {
 		launcherScript = GameObject.Find("Launcher").GetComponent<Launcher>();
-		DumpToConsole(photonView);
 		allColliders (gameObject.transform, false);
 		
 	}
@@ -1075,9 +1076,9 @@ public class Player : MonoBehaviourPunCallbacks {
 		grenades -= 1;
 		yield return new WaitForSeconds(0.25f);
 		GameObject newGrenade;
-		newGrenade = Instantiate (grenade, grenadeArea.position, grenadeArea.rotation) as GameObject;
+		newGrenade = PhotonNetwork.Instantiate (grenade.name, grenadeArea.position, grenadeArea.rotation) as GameObject;
 		newGrenade.GetComponent<Rigidbody> ().AddForce (grenadeArea.forward * 200);
-		newGrenade.GetComponent<Rigidbody> ().AddForce (transform.up * 25);
+		newGrenade.GetComponent<Rigidbody> ().AddForce (transform.up * 35);
 		yield return new WaitForSeconds(2);
 		newGrenade.transform.GetChild (0).gameObject.SetActive(true);
 		newGrenade.gameObject.tag = "Explosion";
@@ -1087,7 +1088,8 @@ public class Player : MonoBehaviourPunCallbacks {
 		newGrenade.gameObject.GetComponent<Renderer> ().enabled = false;
 		yield return new WaitForSeconds (2);
 		grenades = 1;
-		Destroy (newGrenade);
+		if (photonView.IsMine)
+		PhotonNetwork.Destroy (newGrenade);
 	}
 	IEnumerator shootFireball() {
 		yield return new WaitForSeconds(0.2f);
@@ -1265,11 +1267,12 @@ public class Player : MonoBehaviourPunCallbacks {
 					}
 					if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
 						impactEffectPlayer.tag = "bullet";
-						Instantiate(impactEffectPlayer, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
-						Instantiate(impactEffectWall, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectWall.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else {
-						Instantiate(impactEffectGround, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 					}
 				}
 			} else {
@@ -1279,11 +1282,12 @@ public class Player : MonoBehaviourPunCallbacks {
 					}
 					if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
 						impactEffectPlayer.tag = "bullet";
-						Instantiate(impactEffectPlayer, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
-						Instantiate(impactEffectWall, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectWall.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else {
-						Instantiate(impactEffectGround, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 					}
 				}
 			}
@@ -1306,11 +1310,12 @@ public class Player : MonoBehaviourPunCallbacks {
 					}
 					if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
 						impactEffectPlayer.tag = "bullet";
-						Instantiate(impactEffectPlayer, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
-						Instantiate(impactEffectWall, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectWall.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else {
-						Instantiate(impactEffectGround, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 					}
 				}
 			} 
@@ -1334,11 +1339,12 @@ public class Player : MonoBehaviourPunCallbacks {
 					}
 					if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
 						impactEffectPlayer.tag = "bullet";
-						Instantiate(impactEffectPlayer, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
-						Instantiate(impactEffectWall, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectWall.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else {
-						Instantiate(impactEffectGround, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 					}
 				}
 				
@@ -1350,7 +1356,6 @@ public class Player : MonoBehaviourPunCallbacks {
 		}
 		
 	}
-
 	IEnumerator shootingRifle() {
 		yield return new WaitForSeconds (0.15f);
 		Vector3 eulerRot = new Vector3(rifle.eulerAngles.x, rifle.eulerAngles.y, rifle.eulerAngles.z);
@@ -1366,22 +1371,24 @@ public class Player : MonoBehaviourPunCallbacks {
 					if (Physics.Raycast(shootZone.position, -shootZone.up, out hit, range)){
 						if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
 							impactEffectPlayer.tag = "bullet";
-							Instantiate(impactEffectPlayer, hit.point, Quaternion.LookRotation(hit.normal));
+							PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
 						} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
-							Instantiate(impactEffectWall, hit.point, Quaternion.LookRotation(hit.normal));
+							PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
+							PhotonNetwork.Instantiate(impactEffectWall.name, hit.point, Quaternion.LookRotation(hit.normal));
 						} else {
-							Instantiate(impactEffectGround, hit.point, Quaternion.LookRotation(hit.normal));
+							PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 						}
 					}
 				} else {
 					if (Physics.Raycast(rifle.position, -rifle.up, out hit, range)){
 						if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
 							impactEffectPlayer.tag = "bullet";
-							Instantiate(impactEffectPlayer, hit.point, Quaternion.LookRotation(hit.normal));
+							PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
 						} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
-							Instantiate(impactEffectWall, hit.point, Quaternion.LookRotation(hit.normal));
+							PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
+							PhotonNetwork.Instantiate(impactEffectWall.name, hit.point, Quaternion.LookRotation(hit.normal));
 						} else {
-							Instantiate(impactEffectGround, hit.point, Quaternion.LookRotation(hit.normal));
+							PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 						}
 					}
 				}
@@ -1396,14 +1403,15 @@ public class Player : MonoBehaviourPunCallbacks {
 		shootingArrow = true;
 		GameObject newArrow = null;
 		Vector3 eulerRot = new Vector3(shootZone.eulerAngles.x, shootZone.eulerAngles.y, shootZone.eulerAngles.z);
-		newArrow = Instantiate (arrow, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
+		newArrow = PhotonNetwork.Instantiate (arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
 		newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 50);
 		newArrow.gameObject.tag = "arrow";
 		yield return new WaitForSeconds(0.25f);
 		shootingArrow = false;
 		if (newArrow != null){
 			yield return new WaitForSeconds (5);
-			Destroy (newArrow);
+			if (photonView.IsMine)
+			PhotonNetwork.Destroy (newArrow);
 		}
 
 	}
