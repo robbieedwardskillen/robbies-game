@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
-public class FindPlayerPrefab2 : MonoBehaviour
+using Photon.Pun;
+public class FindPlayerPrefab2 : MonoBehaviourPunCallbacks
 {
 	private CinemachineVirtualCamera virtualLookCam;
     private Launcher launcherScript;
@@ -16,10 +17,23 @@ public class FindPlayerPrefab2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if (launcherScript.connected){
-            virtualLookCam.Follow = GameObject.Find("Player(Clone)").transform;
-            virtualLookCam.LookAt = GameObject.Find("Player(Clone)").transform;
+            
+            //print(photonView.)
+            GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+            foreach (GameObject player in players)
+            {
+                if (PhotonView.Get(player).IsMine)
+                {
+                    virtualLookCam.GetComponent<CinemachineVirtualCamera>().m_Follow = player.transform;
+                    virtualLookCam.GetComponent<CinemachineVirtualCamera>().m_LookAt = player.transform;
+                    break;
+                }
+            }
+
         }
+
 
     }
 }

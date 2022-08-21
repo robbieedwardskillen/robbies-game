@@ -16,8 +16,10 @@ MonoBehaviour:
     LoadedProjectGUID:
       valueInternal: 
     RecentlyOpenedProjectPath:
-      valueInternal: Assets
+      valueInternal: Assets\Animations
     RecentlyOpenedProjectGUIDsList:
+    - valueInternal: 25489fa85138a1740af3a7f1bcbcf703
+    - valueInternal: 258aed146e08e844d8a4ccf50c041bdf
     - valueInternal: 6b115b2b57ba931459f17aedfcc1edb3
     - valueInternal: a8c15fb1d57e30c4999a95e37e57d6d2
     - valueInternal: ff05b1605d653274bb2a83aaef8e98fd

@@ -6,14 +6,16 @@ using Photon.Pun;
 public class Launcher : MonoBehaviourPunCallbacks
 {
     public PhotonView playerPrefab;
-    public PhotonView playerFreeCam;
-    public bool connected = false;
-    //private Transition gameTransition; set to false when loading room
+    
 
-/*     void Awake() {
-        gameTransition = m_cam.GetComponent<Transition>();
-    } */
-    // Start is called before the first frame update
+    public bool connected = false;
+    
+    private Transition gameTransition;
+
+    void Awake() {
+        gameTransition = GameObject.Find("Main Camera").GetComponent<Transition>();
+    }
+
     void Start()
     {
         //try to connect

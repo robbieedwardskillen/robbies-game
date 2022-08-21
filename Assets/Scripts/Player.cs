@@ -316,10 +316,10 @@ public class Player : MonoBehaviourPunCallbacks {
 		//---- end player setup
 		m_cam = GameObject.Find("Main Camera").GetComponent<Camera>(); 
 		forward = m_cam.transform.forward;
-		cinemachineBrain = m_cam.GetComponent<CinemachineBrain>();
+		cinemachineBrain = GameObject.Find("Main Camera").GetComponent<CinemachineBrain>();
 		camRotateWithZeroY = GameObject.Find("CamRotateWithZeroY");
 		m_camRotation = GameObject.Find("Rotation");
-		gameTransition = m_cam.GetComponent<Transition>();
+		gameTransition = GameObject.Find("Main Camera").GetComponent<Transition>();
 
 
 	
@@ -332,21 +332,21 @@ public class Player : MonoBehaviourPunCallbacks {
 		
 	}
 	IEnumerator waitForSecondBigHit1(){
-		yield return new WaitForSeconds(0.5f);
+ 		yield return new WaitForSeconds(0.25f);
 		playerAnimator.Play("bigSwing3", 0, .2f);
 		yield return new WaitForSeconds(0.1f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing3"))
-		audio.PlayOneShot(soundEffectSwing1, 0.7f);
+		audio.PlayOneShot(soundEffectSwing1, 0.7f); 
 	}
 	IEnumerator waitForSecondBigHit2(){
-		yield return new WaitForSeconds(0.5f);
+		yield return new WaitForSeconds(0.25f);
 		playerAnimator.Play("bigSwing1", 0, .2f);
 		yield return new WaitForSeconds(0.1f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing1"))
 		audio.PlayOneShot(soundEffectSwing1, 0.7f);
 	}
 	IEnumerator waitForSecondSmallHit1() {
-		yield return new WaitForSeconds(0.15f);
+		yield return new WaitForSeconds(0.05f);
 		if (moveLegs) {
 			playerAnimator.Play("swordLeft", 0, .4f);
 			audio.PlayOneShot(soundEffectSwing2, 0.7f);
@@ -356,12 +356,12 @@ public class Player : MonoBehaviourPunCallbacks {
 		}
 	}
 	IEnumerator waitForSecondSmallHit2() {
-		yield return new WaitForSeconds(0.15f);
+		yield return new WaitForSeconds(0.05f);
 		playerAnimator.Play("swordDown", 0, .4f);
 		audio.PlayOneShot(soundEffectSwing3, 0.7f);
 	}
 	IEnumerator waitForSecondPunch() {
-		yield return new WaitForSeconds(0.12f);
+		yield return new WaitForSeconds(0.05f);
 		if (moveLegs) {
 			playerAnimator.Play("punch4", 0, .2f);
 		} else {
@@ -382,9 +382,6 @@ public class Player : MonoBehaviourPunCallbacks {
 	void Update () {
 		
 		if (launcherScript.connected && !connected){
-			
-			//fix this
-
 			freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
 			virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
 			freeLookCam.Priority = 1;
@@ -616,10 +613,10 @@ public class Player : MonoBehaviourPunCallbacks {
 								StartCoroutine(waitForSound(soundEffectSwing1, "bigSwing4"));
 								secondHit = false;
 							}
-							if (controls.Gameplay.Action1.triggered && bigSwing && !secondHit){
+							if (controls.Gameplay.Action1.triggered && bigSwing && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.5f && !secondHit){
 								StartCoroutine(waitForSecondBigHit1());
 								secondHit = true;
-							}
+							} 
 						}
 						if (equippedBigSword && blocking) {
 							playerAnimator.speed = 1;

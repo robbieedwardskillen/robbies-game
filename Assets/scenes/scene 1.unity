@@ -15297,6 +15297,7 @@ GameObject:
   - component: {fileID: 383722326}
   - component: {fileID: 383722325}
   - component: {fileID: 383722324}
+  - component: {fileID: 383722328}
   m_Layer: 0
   m_Name: CinemachineCam2
   m_TagString: Untagged
@@ -15399,6 +15400,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 27
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &383722328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 383722323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe1d5c8018d55fe4e8db1a358a75ee16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &388282170
 GameObject:
   m_ObjectHideFlags: 0
@@ -37208,8 +37221,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 8195236123159729233, guid: 3fc8e123fa09cf64787626ad11483435,
     type: 3}
-  playerFreeCam: {fileID: 4520156662091609365, guid: 0024bbfe8fb16f442997dcba4742493a,
-    type: 3}
   connected: 0
 --- !u!4 &1048956496
 Transform:
@@ -37237,6 +37248,7 @@ GameObject:
   - component: {fileID: 1050068060}
   - component: {fileID: 1050068059}
   - component: {fileID: 1050068058}
+  - component: {fileID: 1050068062}
   m_Layer: 0
   m_Name: CinemachineCam1
   m_TagString: Untagged
@@ -37407,6 +37419,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 26
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1050068062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1050068057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3e081964a956e04cb3e39b2489374ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1054087872
 PrefabInstance:
   m_ObjectHideFlags: 0
