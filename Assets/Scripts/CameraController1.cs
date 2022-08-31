@@ -7,7 +7,7 @@ using Cinemachine;
 
 public class CameraController1 : MonoBehaviour {
 	private GameObject player;
-	private Player playerScript;
+	private PlayerScript playerScript;
 	private Launcher launcherScript;
 	private bool connected = false;
 	private PlayerControls controls;
@@ -47,6 +47,7 @@ public class CameraController1 : MonoBehaviour {
 		controls.Gameplay.Rotate.canceled += ctx => rotate = Vector2.zero;
 
 		loadingScreen = GameObject.Find("Loading Screen");
+		loadingScreen.active = false;// testing
 		m_cam = Camera.main;
 		offset = new Vector3(0f, 1.1f, 2.3f);
 		gameTransition = m_cam.GetComponent<Transition>();
@@ -59,6 +60,7 @@ public class CameraController1 : MonoBehaviour {
 		storeRoom1 = GameObject.Find ("store room 1");
 		storeRoom2 = GameObject.Find ("store room 2");
 		shackRoom1 = GameObject.Find ("shack room 1");
+
 	}
 	void Start() {
 		launcherScript = GameObject.Find("Launcher").GetComponent<Launcher>();
@@ -83,7 +85,7 @@ public class CameraController1 : MonoBehaviour {
 
 		if (launcherScript.connected && !connected){
 			player = GameObject.Find("Player(Clone)");
-			playerScript = player.GetComponent<Player>();
+			playerScript = player.GetComponent<PlayerScript>();
 			aiming = playerScript.aiming;
 			connected = true;
 		}

@@ -61668,8 +61668,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8841779811147146405}
-  - component: {fileID: 8841779811146987849}
   - component: {fileID: 8841779811146987846}
+  - component: {fileID: 8841779811146987849}
   - component: {fileID: 8841779811146987847}
   - component: {fileID: 8841779811146987844}
   - component: {fileID: 8841779811146987848}
@@ -61704,25 +61704,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &8841779811146987849
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8841779811146987845}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: dd4802cc7972ecb4699ed0b29916793f, type: 3}
-  m_Controller: {fileID: 9100000, guid: 6d5430075c5fa9d4d82fe149be5e5217, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &8841779811146987846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61759,6 +61740,25 @@ MonoBehaviour:
   soundEffectSwing2: {fileID: 8300000, guid: 7aa4d7eaedaae0b40b9ee223d828ec98, type: 3}
   soundEffectSwing3: {fileID: 8300000, guid: e712959691e83994b90bada876463910, type: 3}
   soundEffectSwing4: {fileID: 8300000, guid: 56497cc828c206d4c9ab8b46038870d9, type: 3}
+--- !u!95 &8841779811146987849
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8841779811146987845}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: dd4802cc7972ecb4699ed0b29916793f, type: 3}
+  m_Controller: {fileID: 9100000, guid: 6d5430075c5fa9d4d82fe149be5e5217, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!54 &8841779811146987847
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -61904,6 +61904,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
+  - {fileID: 8841779811146987846}
   - {fileID: 7503160723288845475}
   - {fileID: -3905537170322577812}
   sceneViewId: 0
@@ -61958,173 +61959,173 @@ MonoBehaviour:
   ShowParameterInspector: 1
   m_SynchronizeParameters:
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: speed
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: horizontalSpeed
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: verticalSpeed
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: verticalStrafing
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: horizontalStrafing
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: averageSpeed
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: rotateY
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: rotateX
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: attackRotateX
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: attackRotateY
   - Type: 1
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: turn
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: jumping
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: moving
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: knifeRight
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: knifeDown
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: swordRight
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: swordDown
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: knifeUp
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: swordLeft
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: swordUp
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: shoot
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: throw
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: roll
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: ShootingHandgun
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: ShootingRifle
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: ShootingBow
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: blocking
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: injured
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: falling
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: getUp
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: bigSwing1
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: bigSwing2
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: bigSwing3
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: bigSwing4
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: bigSwing5
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: bigSwing6
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: changeWep
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: punch1
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: punch2
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: kick
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: fireball
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Rifle
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Bow
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Handgun
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: BigSword
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: FireSword
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Spear
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Unarmed
   m_SynchronizeLayers:
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 0
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 1
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 2
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 3
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 4
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 5
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 6
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 7
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 8
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 9
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 10
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 11
 --- !u!1 &8864758365582287875
 GameObject:

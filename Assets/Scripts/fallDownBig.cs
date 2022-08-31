@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class fallDownBig : MonoBehaviour
+using Photon.Pun;
+public class fallDownBig : MonoBehaviourPunCallbacks
 {
     private Rigidbody rb;
-    float health = 10;
+    float health = 5;
     private float radius = 1.25F;
     private float power = 20.0F;
     private float speed;
@@ -30,7 +30,6 @@ public class fallDownBig : MonoBehaviour
     }
 
     void OnTriggerEnter(Collider col){
-        print("test");
         if (col.gameObject.tag == "damage" || col.gameObject.tag == "Medium Damage" ||
         col.gameObject.tag == "groundBullet" || col.gameObject.tag == "Explosion"){
             health -= 1;
@@ -62,7 +61,7 @@ public class fallDownBig : MonoBehaviour
 
 	}
     void OnCollisionEnter(Collision col){
-        if (col.gameObject.tag == "Player" && gameObject.tag == "Explosion"){
+/*         if (col.gameObject.tag == "Player" && gameObject.tag == "Explosion"){
             if (col.transform.position.x > gameObject.transform.position.x){
                 col.gameObject.GetComponent<Rigidbody> ().AddForce(new Vector3(50f, 65f, 0));
             } else if (col.transform.position.x < gameObject.transform.position.x) {
@@ -74,6 +73,30 @@ public class fallDownBig : MonoBehaviour
                 col.gameObject.GetComponent<Rigidbody> ().AddForce(new Vector3(0, 65f, -50f));
             }
         }
+ */
 
+        if (col.gameObject.tag == "damage" || col.gameObject.tag == "Medium Damage" ||
+        col.gameObject.tag == "groundBullet" || col.gameObject.tag == "Explosion"){
+            health -= 1;
+        }
+        if (health <= 0){
+/*             if (gameObject.tag != "deadTree"){
+                if (speed >= 3.5){
+                    gameObject.tag = "Explosion";
+                } */
+                gameObject.GetComponent<Rigidbody> ().isKinematic = false;
+                if (col.transform.position.x > gameObject.transform.position.x){
+                    gameObject.GetComponent<Rigidbody> ().AddForce(new Vector3(1000f, 0, 0));
+                } else if (col.transform.position.x < gameObject.transform.position.x) {
+                    gameObject.GetComponent<Rigidbody> ().AddForce(new Vector3(-1000f, 0, 0));
+                }
+                if (col.transform.position.z > gameObject.transform.position.z){
+                    gameObject.GetComponent<Rigidbody> ().AddForce(new Vector3(0, 0, 1000f));
+                } else if (col.transform.position.z < gameObject.transform.position.z){
+                    gameObject.GetComponent<Rigidbody> ().AddForce(new Vector3(0, 0, -1000f));
+                }
+                StartCoroutine(RollThenStop());
+            //}
+        }
     }
 }

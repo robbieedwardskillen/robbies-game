@@ -6,11 +6,44 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/title_screen.unity
-    guid: 966341ad88c8e2f4d9bd04e82042f2ba
-  - enabled: 1
-    path: Assets/scenes/scene 1.unity
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
     guid: acb3c31b87de39649971c214986229c5
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: cdac175c77d1d3c42b33dd46ec16a171
+  - enabled: 0
+    path: 
+    guid: 0b50183a228c80342a9787bee00940ab
+  - enabled: 0
+    path: 
+    guid: ae2119bbdb1dde44eb17e5a87364d1f7
+  - enabled: 1
+    path: Assets/scenes/Launcher.unity
+    guid: f54d615d1e1247a45ac7f7967f6288fa
+  - enabled: 1
+    path: Assets/scenes/Room for 1.unity
+    guid: 4a8ba7f0a6e36834b9eb4ca2351bffd1
+  - enabled: 1
+    path: Assets/scenes/Room for 2.unity
+    guid: d3ca277725e4c1847a5166960993a87a
+  - enabled: 1
+    path: Assets/scenes/Room for 3.unity
+    guid: cd78937ac977c364e84254691451c915
+  - enabled: 1
+    path: Assets/scenes/Room for 4.unity
+    guid: d07cba02e85e03c459a73f675afb81c7
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: eff9a2558dbcd3e4cbeeb0847842b7f4,
       type: 2}

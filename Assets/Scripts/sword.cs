@@ -7,10 +7,10 @@ public class sword : MonoBehaviour {
 	private AudioSource audio;
 	public AudioClip swordClash;
 	GameObject thePlayer;
-	Player playerScript;
+	PlayerScript playerScript;
 	void Start() {
 		thePlayer = gameObject.transform.root.gameObject;
-		playerScript = thePlayer.GetComponent<Player>();
+		playerScript = thePlayer.GetComponent<PlayerScript>();
 		audio = gameObject.GetComponent<AudioSource> ();
 		audio.volume = 0.2f;
 		if (gameObject.transform.GetChild (0).gameObject.GetComponent<ParticleSystem>() != null){

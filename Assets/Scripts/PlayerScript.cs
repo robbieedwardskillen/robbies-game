@@ -5,7 +5,9 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 using Cinemachine;
 using Photon.Pun;
-public class Player : MonoBehaviourPunCallbacks {
+using Photon.Realtime;
+ 
+public class PlayerScript : MonoBehaviourPunCallbacks, IPunObservable {
 
 	public bool super = false;
 	public bool alive = true;
@@ -112,12 +114,35 @@ public class Player : MonoBehaviourPunCallbacks {
 	private Vector3 previousPos;
 	private Vector3 velocity;
 	private Launcher launcherScript;
-
+	
 	private bool connected = false;
 	bool moveLegs = false;
 	bool blockTurning = false;
 	bool knockDown = false;
 	bool changingWeps = false;
+
+	[Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
+	public static GameObject LocalPlayerInstance;
+
+    #region IPunObservable implementation
+
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+		if (stream.IsWriting)
+		{
+			// We own this player: send the others our data
+			//stream.SendNext(playerHealth);
+		}
+		else
+		{
+			// Network player, receive data
+			//this.playerHealth = (bool)stream.ReceiveNext();
+		}
+    }
+
+
+    #endregion
 	//----feet
 	private void getBase(Transform parent) {
 		foreach (Transform child in parent) { 
@@ -207,7 +232,14 @@ public class Player : MonoBehaviourPunCallbacks {
 		
 	}
 	void Awake () {
-
+		// #Important
+		// used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
+		if (photonView.IsMine){
+			PlayerScript.LocalPlayerInstance = this.gameObject;
+		}
+		// #Critical
+		// we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
+		DontDestroyOnLoad(this.gameObject);
 		controls = new PlayerControls();
 		controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Move.performed += ctx => move = Vector2.zero;
@@ -296,7 +328,7 @@ public class Player : MonoBehaviourPunCallbacks {
 		
 		
 		//selection screen get chosen weps and put them into chosenWep1 & chosenWep2
-		chosenWep1 = bow;
+		chosenWep1 = bigSword;
 		chosenWep1.gameObject.SetActive(true);
 		chosenWep2 = handgun;
 		equippedWeps[0] = chosenWep1;
@@ -381,7 +413,10 @@ public class Player : MonoBehaviourPunCallbacks {
 	}
  
 	void Update () {
-		
+		if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+		{
+			return;
+		}
 		if (launcherScript.connected && !connected){
 			freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
 			virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
@@ -541,10 +576,13 @@ public class Player : MonoBehaviourPunCallbacks {
 			playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing5") ||
 			playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing6")){
 				mwt2.enabled = true;
+				bigSword.transform.gameObject.GetComponent<Collider>().isTrigger = true;
 				bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
 				bigSwing = true;
 			} else {
 				if (!dynamicHitting){
+					
+					bigSword.transform.gameObject.GetComponent<Collider>().isTrigger = false;
 					bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = false;
 					mwt2.enabled = false;
 					bigSwing = false;
@@ -1041,8 +1079,17 @@ public class Player : MonoBehaviourPunCallbacks {
 		}
 	}
 
+
+	//NEED TO FIX ALL TRIGGERS also fix this one
+
+
+	[PunRPC]
+	void RPCTrigger(string anim) {
+		playerAnimator.Play(anim, 0, 0.2f);
+	}
 	IEnumerator waitForSound (AudioClip ac, string anim){
-		playerAnimator.Play(anim, 0, .2f);
+		photonView.RPC("RPCTrigger", RpcTarget.All, anim);
+		//playerAnimator.Play(anim, 0, .2f);
 		yield return new WaitForSeconds(0.35f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName(anim)){
 			audio.PlayOneShot(ac, 0.7f);
@@ -1148,6 +1195,7 @@ public class Player : MonoBehaviourPunCallbacks {
 		//needed for land animation
 	}
 	void OnTriggerEnter (Collider col) {
+		if (!photonView.IsMine){return;}
 		if (alive) {
 			if (col.gameObject.tag == "Explosion") {
 				StartCoroutine (takeBigDamage ());
@@ -1165,12 +1213,16 @@ public class Player : MonoBehaviourPunCallbacks {
 			}
 		}
 	}
+	void OnTriggerStay(Collider other) {
+		if (!photonView.IsMine){return;}
+	}
 	void OnParticleCollision(GameObject other){
 		if (other.name == "Flames") {
 			StartCoroutine(takeMediumWithFall());
 		}
 	}
  	void OnCollisionEnter (Collision col){
+		if (!photonView.IsMine){return;}
 			if (col.gameObject.tag == "Explosion") {
 				StartCoroutine (takeBigDamage ());
 			}

@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: 9676c48e3638b17468bede6b6a481672
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - grenade: {fileID: -5537067838435999860, guid: 9d7a93e78002ce04e86ca9df6e27a66f,
+      type: 3}
+  - arrow: {fileID: 2180478770354254725, guid: 8acf8431a7a2c3142b79035949420f5b, type: 3}
+  - impactEffectGround: {fileID: 1614003511068201968, guid: a475880e7da0e9548aa05cb7933752cd,
+      type: 3}
+  - impactEffectPlayer: {fileID: 1596366183097533094, guid: 83e55d3418297934fab882559d009285,
+      type: 3}
+  - impactEffectWall: {fileID: 7584970625887958744, guid: 96b2ec0239d11fa4b9792311efceb8ed,
+      type: 3}
+  - impactEffectHole: {fileID: 1724464564795427079, guid: 02a509a7fa70ed740ba4197e20c5d32d,
+      type: 3}
+  - soundEffectSwing1: {fileID: 8300000, guid: a019ac0cca88f0f41887eb77628009f3, type: 3}
+  - soundEffectSwing2: {fileID: 8300000, guid: 7aa4d7eaedaae0b40b9ee223d828ec98, type: 3}
+  - soundEffectSwing3: {fileID: 8300000, guid: e712959691e83994b90bada876463910, type: 3}
+  - soundEffectSwing4: {fileID: 8300000, guid: 56497cc828c206d4c9ab8b46038870d9, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
