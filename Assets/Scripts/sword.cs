@@ -7,10 +7,10 @@ public class sword : MonoBehaviour {
 	private AudioSource audio;
 	public AudioClip swordClash;
 	GameObject thePlayer;
-	PlayerScript playerScript;
+	PlayerManager playerManager;
 	void Start() {
 		thePlayer = gameObject.transform.root.gameObject;
-		playerScript = thePlayer.GetComponent<PlayerScript>();
+		playerManager = thePlayer.GetComponent<PlayerManager>();
 		audio = gameObject.GetComponent<AudioSource> ();
 		audio.volume = 0.2f;
 		if (gameObject.transform.GetChild (0).gameObject.GetComponent<ParticleSystem>() != null){
@@ -19,7 +19,7 @@ public class sword : MonoBehaviour {
 		
 	}
 	void OnTriggerEnter(Collider hit) {
-		if (hit.gameObject.name != "player_character" && playerScript.busy){
+		if (hit.gameObject.name != "player_character" && playerManager.busy){
 			if (shockWave != null){
 				shockWave.transform.gameObject.SetActive (true);
 				shockWave.Clear ();

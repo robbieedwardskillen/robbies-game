@@ -26,11 +26,11 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (playerPrefab == null){
             Debug.LogError("<Color=Red><a>Missing</a></Color> playerPrefab Reference. Please set it up in GameObject 'Game Manager'",this);
         } else {
-            if (PlayerScript.LocalPlayerInstance == null){
+            if (PlayerManager.LocalPlayerInstance == null){
                 Debug.LogFormat("We are Instantiating LocalPlayer from {0}", Application.loadedLevelName);
                 PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
                 //PhotonNetwork.InstantiateSceneObject(this.placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
-                //connected = true;
+                connected = true;
             }
             else 
             {

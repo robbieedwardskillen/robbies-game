@@ -7,7 +7,7 @@ using Cinemachine;
 using Photon.Pun;
 using Photon.Realtime;
  
-public class PlayerScript : MonoBehaviourPunCallbacks, IPunObservable {
+public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	public bool super = false;
 	public bool alive = true;
@@ -113,7 +113,6 @@ public class PlayerScript : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 lastRotation;
 	private Vector3 previousPos;
 	private Vector3 velocity;
-	private Launcher launcherScript;
 	
 	private bool connected = false;
 	bool moveLegs = false;
@@ -235,7 +234,7 @@ public class PlayerScript : MonoBehaviourPunCallbacks, IPunObservable {
 		// #Important
 		// used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
 		if (photonView.IsMine){
-			PlayerScript.LocalPlayerInstance = this.gameObject;
+			PlayerManager.LocalPlayerInstance = this.gameObject;
 		}
 		// #Critical
 		// we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
@@ -360,7 +359,6 @@ public class PlayerScript : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	
 	void Start() {
-		launcherScript = GameObject.Find("Launcher").GetComponent<Launcher>();
 		allColliders (gameObject.transform, false);
 		
 	}
@@ -404,8 +402,7 @@ public class PlayerScript : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 
  
-	void FixedUpdate()
-	{
+	void FixedUpdate() {
 		if (photonView.IsMine){
 			velocity = (transform.position - previousPos) / Time.deltaTime;
 			previousPos = transform.position;
@@ -417,15 +414,17 @@ public class PlayerScript : MonoBehaviourPunCallbacks, IPunObservable {
 		{
 			return;
 		}
-		if (launcherScript.connected && !connected){
+		if (GameManager.Instance.connected && !connected){
 			freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
 			virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
 			freeLookCam.Priority = 1;
 			virtualLookCam.Priority = 0;
 			connected = true;
+			//add crosshair and other stuff here
+
 		}
 
-		if (photonView.IsMine){
+		if (photonView.IsMine && connected){
 
 			playerAnimator.SetBool("jumping", isAerial);
 			rolling = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll");

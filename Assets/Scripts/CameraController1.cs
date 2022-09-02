@@ -7,8 +7,7 @@ using Cinemachine;
 
 public class CameraController1 : MonoBehaviour {
 	private GameObject player;
-	private PlayerScript playerScript;
-	private Launcher launcherScript;
+	private PlayerManager playerManager;
 	private bool connected = false;
 	private PlayerControls controls;
 	private Vector2 rotate;
@@ -39,14 +38,16 @@ public class CameraController1 : MonoBehaviour {
 	public PostProcessVolume volume;
 	private DepthOfField depthOfField;
 
-	// Use this for initialization
+	IEnumerator Loading() {
+		yield return new WaitForSeconds(1);
+		
+	}
 	void Awake()
 	{
 		controls = new PlayerControls();
 		controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Rotate.canceled += ctx => rotate = Vector2.zero;
-
-		loadingScreen = GameObject.Find("Loading Screen");
+		loadingScreen = GameObject.Find("Loading/Loading Screen");
 		loadingScreen.active = false;// testing
 		m_cam = Camera.main;
 		offset = new Vector3(0f, 1.1f, 2.3f);
@@ -63,12 +64,11 @@ public class CameraController1 : MonoBehaviour {
 
 	}
 	void Start() {
-		launcherScript = GameObject.Find("Launcher").GetComponent<Launcher>();
-
 		volume.profile.TryGetSettings(out depthOfField);
 		if (controls != null){
 			controls.Gameplay.Enable();
 		}
+		//loadingScreen.active = false;// testing
 	}
 	void OnEnable() {
 		if (controls != null){
@@ -82,13 +82,15 @@ public class CameraController1 : MonoBehaviour {
 		
 	}
 	public void Update() {
-
-		if (launcherScript.connected && !connected){
-			player = GameObject.Find("Player(Clone)");
-			playerScript = player.GetComponent<PlayerScript>();
-			aiming = playerScript.aiming;
-			connected = true;
+		if (GameManager.Instance != null){
+			if (GameManager.Instance.connected && !connected){
+				player = GameObject.Find("Player(Clone)");
+				playerManager = player.GetComponent<PlayerManager>();
+				aiming = playerManager.aiming;
+				connected = true;
+			}
 		}
+
 		if (connected){
 			if (/* !aiming */ false){
 				//blur effects
@@ -119,24 +121,24 @@ public class CameraController1 : MonoBehaviour {
 	void FixedUpdate()
 	{
 		if (connected){
-				
-			bool outside = shackRoom1.activeSelf == false && 
+			//should only be in first level scene
+			/* bool outside = shackRoom1.activeSelf == false && 
 				storeRoom1.activeSelf == false &&
 				storeRoom2.activeSelf == false && 
 				aptRoom1.activeSelf == false &&
 				aptRoom2.activeSelf == false &&
 				aptRoom3.activeSelf == false &&
 				aptRoom4.activeSelf == false &&
-				aptRoom5.activeSelf == false;
+				aptRoom5.activeSelf == false; */
 			if (gameTransition.transitioning){
 				loadingScreen.active = true;
 			} else {
 				loadingScreen.active = false;
 			}
-
-			if (outside && player != null) {
+			//outside
+			if (player != null) {
 				
-				if (!playerScript.underWater){ 
+				if (!playerManager.underWater){ 
 					m_cam.fieldOfView = 60f;
 				} else {
 					m_cam.fieldOfView = 35f;

@@ -8,17 +8,17 @@ public class bigSword : MonoBehaviour
 	private AudioSource audio;
 	//public AudioClip swordClash;
 	GameObject thePlayer;
-	PlayerScript playerScript;
+	PlayerManager playerManager;
 	void Start() {
 		thePlayer = gameObject.transform.root.gameObject;
-		playerScript = thePlayer.GetComponent<PlayerScript>();
+		playerManager = thePlayer.GetComponent<PlayerManager>();
 		audio = gameObject.GetComponent<AudioSource> ();
 		audio.volume = 0.2f;
 		bloodSprayEffect = gameObject.transform.Find("BloodSprayEffect").gameObject.GetComponent<ParticleSystem>();
 	}
 	void OnTriggerEnter(Collider hit) {
 		if ((hit.gameObject.name == "player_character" || hit.gameObject.name == "cop")
-         && playerScript.bigSwing && transform.root != hit.gameObject.transform.root){
+         && playerManager.bigSwing && transform.root != hit.gameObject.transform.root){
 			if (bloodSprayEffect != null){
 				bloodSprayEffect.transform.gameObject.SetActive (true);
 				bloodSprayEffect.Clear ();

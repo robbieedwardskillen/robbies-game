@@ -10,8 +10,16 @@ public class Launcher : MonoBehaviourPunCallbacks
     private Transition gameTransition;
     public bool connected = false;
     bool isConnecting;
-
     string gameVersion = "1";
+
+    #region stuffNotNetworkRelated
+    private GameObject crossHair;
+    private GameObject camRotateWithZeroY;
+    private GameObject m_cam;
+    private GameObject cinemachineCam1;
+    private GameObject cinemachineCam2;
+    private GameObject loading;
+    #endregion
     
 
     [Tooltip("The maximum number of players per room. When a room is full, it can't be joined by new players, and so new room will be created")]
@@ -34,12 +42,29 @@ public class Launcher : MonoBehaviourPunCallbacks
         progressLabel.SetActive(false);
         controlPanel.SetActive(true);
         PhotonNetwork.GameVersion = gameVersion;
-        //Connect();
-        //PhotonNetwork.ConnectUsingSettings();
+
+        //not related to networking
+        crossHair = GameObject.Find("UI");
+        camRotateWithZeroY = GameObject.Find("CamRotateWithZeroY");
+        m_cam = GameObject.Find("Main Camera");
+        cinemachineCam1 = GameObject.Find("CinemachineCam1");
+        cinemachineCam2 = GameObject.Find("CinemachineCam2");
+        loading = GameObject.Find("Loading");
+        //end
     }
     public void Connect() {
         progressLabel.SetActive(true);
         controlPanel.SetActive(false);
+
+        //not related to networking
+        DontDestroyOnLoad(crossHair);
+        DontDestroyOnLoad(camRotateWithZeroY);
+        DontDestroyOnLoad(m_cam);
+        DontDestroyOnLoad(cinemachineCam1);
+        DontDestroyOnLoad(cinemachineCam2);
+        DontDestroyOnLoad(loading);
+        //end
+
         if (PhotonNetwork.IsConnected)
         {
             PhotonNetwork.JoinRandomRoom();
