@@ -61716,6 +61716,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9676c48e3638b17468bede6b6a481672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Height: 0.5
+  Health: 0
   super: 0
   alive: 1
   busy: 0
@@ -61740,6 +61742,8 @@ MonoBehaviour:
   soundEffectSwing2: {fileID: 8300000, guid: 7aa4d7eaedaae0b40b9ee223d828ec98, type: 3}
   soundEffectSwing3: {fileID: 8300000, guid: e712959691e83994b90bada876463910, type: 3}
   soundEffectSwing4: {fileID: 8300000, guid: 56497cc828c206d4c9ab8b46038870d9, type: 3}
+  PlayerUiPrefab: {fileID: 8915229389397728779, guid: 40ba13ba9c9b86644a17609b862811a7,
+    type: 3}
 --- !u!95 &8841779811146987849
 Animator:
   serializedVersion: 3

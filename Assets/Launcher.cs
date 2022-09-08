@@ -19,6 +19,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     private GameObject cinemachineCam1;
     private GameObject cinemachineCam2;
     private GameObject loading;
+    private GameObject rotation;
     #endregion
     
 
@@ -50,6 +51,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         cinemachineCam1 = GameObject.Find("CinemachineCam1");
         cinemachineCam2 = GameObject.Find("CinemachineCam2");
         loading = GameObject.Find("Loading");
+        rotation = GameObject.Find("Rotation");
         //end
     }
     public void Connect() {
@@ -60,6 +62,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         DontDestroyOnLoad(crossHair);
         DontDestroyOnLoad(camRotateWithZeroY);
         DontDestroyOnLoad(m_cam);
+        DontDestroyOnLoad(rotation);
         DontDestroyOnLoad(cinemachineCam1);
         DontDestroyOnLoad(cinemachineCam2);
         DontDestroyOnLoad(loading);

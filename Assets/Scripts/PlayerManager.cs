@@ -9,6 +9,8 @@ using Photon.Realtime;
  
 public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
+	public float Height = 0.5f; // hard coding for now
+	public float Health;
 	public bool super = false;
 	public bool alive = true;
 	public bool busy = false;
@@ -35,7 +37,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 right = Vector3.zero;
 	private float transitionTime = 0f;
 	private float changeWeaponTransitionTime = 0f;
-	private float playerHealth;
 	private BoxCollider[] boxColliders;
 	private CapsuleCollider[] capsuleColliders;
 	private Transform fire;
@@ -123,6 +124,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	[Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
 	public static GameObject LocalPlayerInstance;
 
+	[Tooltip("The Player's UI GameObject Prefab")]
+	[SerializeField]
+	public GameObject PlayerUiPrefab;
+
     #region IPunObservable implementation
 
 
@@ -131,17 +136,38 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (stream.IsWriting)
 		{
 			// We own this player: send the others our data
-			//stream.SendNext(playerHealth);
+			//stream.SendNext(Health);
 		}
 		else
 		{
 			// Network player, receive data
-			//this.playerHealth = (bool)stream.ReceiveNext();
+			//this.Health = (bool)stream.ReceiveNext();
 		}
     }
-
-
     #endregion
+
+	#if UNITY_5_4_OR_NEWER
+	void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode loadingMode)
+	{
+		this.CalledOnLevelWasLoaded(scene.buildIndex);
+	}
+	#endif
+
+	#if !UNITY_5_4_OR_NEWER
+	void OnLevelWasLoaded(int level)
+	{
+		this.CalledOnLevelWasLoaded(level);
+	}
+	#endif
+
+	void CalledOnLevelWasLoaded(int level)
+	{
+		GameObject _uiGo = Instantiate(this.PlayerUiPrefab);
+		_uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
+		//check position and change if in the wrong spot here
+
+	}
+
 	//----feet
 	private void getBase(Transform parent) {
 		foreach (Transform child in parent) { 
@@ -277,7 +303,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		playerAnimator.SetFloat("speed", 1.75f);
 
 		previousPos = transform.position;
-		playerHealth = 300;
+		Health = 300;
 		alive = true;
 		audio = gameObject.GetComponent<AudioSource> ();
 		audio.volume = 0.2f;
@@ -359,6 +385,20 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	
 	void Start() {
+		#if UNITY_5_4_OR_NEWER
+			UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+		#endif
+
+		if (PlayerUiPrefab != null)
+		{
+			GameObject _uiGo =  Instantiate(PlayerUiPrefab);
+			_uiGo.SendMessage ("SetTarget", this, SendMessageOptions.RequireReceiver);
+		}
+		else
+		{
+			Debug.LogWarning("<Color=Red><a>Missing</a></Color> PlayerUiPrefab reference on player Prefab.", this);
+		}
+
 		allColliders (gameObject.transform, false);
 		
 	}
@@ -529,7 +569,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 			underWater = (transform.position.y <= 40.3f) ? true : false;
 			if (transform.position.y < 15f){
-				playerHealth = 0;
+				Health = 0;
 			}
 			isAerial = !IsGrounded ();
 			if (isAerial){
@@ -593,7 +633,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if (alive) {
 				//squatting animation
 				blocking = playerAnimator.GetBool("blocking");
-				if (playerHealth < 3) {
+				if (Health < 3) {
 					playerAnimator.SetBool("injured", true);
 				}
 				if (controls.Gameplay.Action2.triggered && !busy && !changingWeps) {
@@ -867,7 +907,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					}
 				}
 				//----begin player death
-				if (playerHealth <= 0) {
+				if (Health <= 0) {
 					playerAnimator.enabled = false;
 					allColliders (gameObject.transform, false);//don't ignore collisions
 					fire.gameObject.SetActive (false);
@@ -906,7 +946,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				} else {
 					crossHair.gameObject.SetActive(false);
 				}
-
+				
 				camRotateWithZeroY.transform.position = new Vector3(m_cam.transform.position.x, transform.position.y, m_cam.transform.position.z);
 				camRotateWithZeroY.transform.LookAt(transform.position);
 
@@ -1227,7 +1267,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 			if (col.gameObject.tag == "arrow"){
 				if (!gameTransition.transitioning){
-					playerHealth -= 3f;
+					Health -= 3f;
 					Destroy(col.gameObject);
 				}
 			}
@@ -1240,7 +1280,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (!gameTransition.transitioning){
 			knockDown = true;
 			takingDamage = true;
-			playerHealth -= 4;
+			Health -= 4;
 			yield return new WaitForSeconds (1);
 			takingDamage = false;
 			if (IsGrounded()){
@@ -1256,7 +1296,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (!gameTransition.transitioning){
 			knockDown = true;
 			takingDamage = true;
-			playerHealth -= 3;
+			Health -= 3;
 			yield return new WaitForSeconds (1);
 			takingDamage = false;
 			if (IsGrounded()){
@@ -1271,7 +1311,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	IEnumerator takeMediumDamage() {
 		if (!gameTransition.transitioning){
 			takingDamage = true;
-			playerHealth -= 3f;
+			Health -= 3f;
 			yield return new WaitForSeconds (1);
 			takingDamage = false;
 		}
@@ -1280,7 +1320,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		if (!gameTransition.transitioning){
 			takingDamage = true;
-			playerHealth -= 2f;
+			Health -= 2f;
 			yield return new WaitForSeconds (1);
 			takingDamage = false;
 		}
@@ -1288,12 +1328,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	void takeDamageNoWait(string bulletType) {
 		if (!gameTransition.transitioning){
 			if (bulletType == "bullet")
-			playerHealth -= 1f;
+			Health -= 1f;
 			if (bulletType == "bigBullet")
-			playerHealth -= 3f;
+			Health -= 3f;
 			if (bulletType == "arrow"){
 				
-				playerHealth -= 3f;
+				Health -= 3f;
 			}
 		}
 	}

@@ -37,18 +37,20 @@ public class CameraController1 : MonoBehaviour {
 	float hitDistance;
 	public PostProcessVolume volume;
 	private DepthOfField depthOfField;
-
-	IEnumerator Loading() {
-		yield return new WaitForSeconds(1);
-		
-	}
+	//private static CameraController1 instance;
 	void Awake()
 	{
+		DontDestroyOnLoad(this.gameObject);
+/* 		DontDestroyOnLoad(this);
+		if (instance == null){
+			instance = this;
+		} else {
+			DestroyObject(gameObject);
+		} */
 		controls = new PlayerControls();
 		controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Rotate.canceled += ctx => rotate = Vector2.zero;
-		loadingScreen = GameObject.Find("Loading/Loading Screen");
-		loadingScreen.active = false;// testing
+		loadingScreen = GameObject.Find("Loading");
 		m_cam = Camera.main;
 		offset = new Vector3(0f, 1.1f, 2.3f);
 		gameTransition = m_cam.GetComponent<Transition>();
@@ -68,7 +70,6 @@ public class CameraController1 : MonoBehaviour {
 		if (controls != null){
 			controls.Gameplay.Enable();
 		}
-		//loadingScreen.active = false;// testing
 	}
 	void OnEnable() {
 		if (controls != null){
@@ -120,6 +121,13 @@ public class CameraController1 : MonoBehaviour {
 	}
 	void FixedUpdate()
 	{
+		if (loadingScreen != null){
+			if (gameTransition.transitioning){
+				loadingScreen.SetActive(true);
+			} else {
+				loadingScreen.SetActive(false);
+			}
+		}
 		if (connected){
 			//should only be in first level scene
 			/* bool outside = shackRoom1.activeSelf == false && 
@@ -130,11 +138,8 @@ public class CameraController1 : MonoBehaviour {
 				aptRoom3.activeSelf == false &&
 				aptRoom4.activeSelf == false &&
 				aptRoom5.activeSelf == false; */
-			if (gameTransition.transitioning){
-				loadingScreen.active = true;
-			} else {
-				loadingScreen.active = false;
-			}
+
+
 			//outside
 			if (player != null) {
 				
