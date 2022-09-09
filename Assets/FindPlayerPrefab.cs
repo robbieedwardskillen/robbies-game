@@ -1,16 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Cinemachine;
 using Photon.Pun;
 using Photon.Realtime;
 public class FindPlayerPrefab : MonoBehaviourPunCallbacks
 {	
+    //***DO NOT DO SINGLETONS FOR THIS AS IT IS USED IN MULTIPLE OCCASIONS***
+
     private CinemachineFreeLook freeLookCam;
     private CinemachineVirtualCamera virtualLookCam;
     private GameObject[] players;
-    private bool playerFound = false;
-    
+    public bool playerFound = false;
+
     void Awake() {
 		//DontDestroyOnLoad(this.gameObject);
     }
@@ -24,30 +27,40 @@ public class FindPlayerPrefab : MonoBehaviourPunCallbacks
 
     void Update()
     {
-        if (GameManager.Instance != null && !playerFound){//playerFound issue
-            if (PhotonNetwork.IsConnected){
-                checkForPlayer();
+        if (SceneManager.GetActiveScene().name != "Launcher" && SceneManager.GetActiveScene().name != "LauncherReturned" 
+        && GameManager.Instance != null && PhotonNetwork.IsConnected) {
+            if (!playerFound){
+                players = GameObject.FindGameObjectsWithTag("Player");
+                if (players != null){        
+                    for (int i = 0; i < players.Length; i++){
+                        if (players.Length - 1 == i) {
+                            if (PhotonView.Get(players[i]).IsMine){
+                                setLookAt(players[i]); 
+                                playerFound = true;
+                            } else {
+                                playerFound = false;
+                            }
+                        }
+                        else {
+                            if (PhotonView.Get(players[i]).IsMine){
+                                setLookAt(players[i]);  
+                                playerFound = true;
+                            }
+                        }
+                    }
+                }
             }
         }
-
     }
 
-    void checkForPlayer() {
-        players = GameObject.FindGameObjectsWithTag("Player");
-        foreach (GameObject player in players)
-        {
-            if (PhotonView.Get(player).IsMine && !playerFound) 
-            {
-                if (freeLookCam != null){
-                    freeLookCam.m_Follow = player.transform;
-                    freeLookCam.m_LookAt = player.transform;
-                }
-                if (virtualLookCam != null){
-                    virtualLookCam.Follow = player.transform;
-                    virtualLookCam.LookAt = player.transform;
-                }
-                playerFound = true;
-            }
+    void setLookAt(GameObject player) {
+        if (freeLookCam != null){
+            freeLookCam.m_Follow = player.transform;
+            freeLookCam.m_LookAt = player.transform;
+        }
+        if (virtualLookCam != null){
+            virtualLookCam.Follow = player.transform;
+            virtualLookCam.LookAt = player.transform;
         }
     }
 }

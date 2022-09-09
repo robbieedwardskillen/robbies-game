@@ -50,7 +50,7 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
-    void LateUpdate()
+    void FixedUpdate()//suppoed to be LateUpdate but changing it for Cinemachine 
     {
         // Do not show the UI if we are not visible to the camera, thus avoid potential bugs with seeing the UI, but not the player itself.
         if (targetRenderer!=null)
@@ -76,8 +76,8 @@ public class PlayerUI : MonoBehaviour
     public void SetTarget(PlayerManager _target)
     {
         if (_target == null)
-        {
-            Debug.LogError("<Color=Red><a>Missing</a></Color> PlayMakerManager target for PlayerUI.SetTarget.", this);
+        {   
+            //Debug.LogError("<Color=Red><a>Missing</a></Color> PlayMakerManager target for PlayerUI.SetTarget.", this);
             return;
         }
         // Cache references for efficiency

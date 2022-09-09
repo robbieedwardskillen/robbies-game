@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Photon.Pun;
 using Photon.Realtime;
 public class Launcher : MonoBehaviourPunCallbacks
@@ -52,6 +53,13 @@ public class Launcher : MonoBehaviourPunCallbacks
         cinemachineCam2 = GameObject.Find("CinemachineCam2");
         loading = GameObject.Find("Loading");
         rotation = GameObject.Find("Rotation");
+            DontDestroyOnLoad(crossHair);
+            DontDestroyOnLoad(camRotateWithZeroY);
+            DontDestroyOnLoad(m_cam);
+            DontDestroyOnLoad(rotation);
+            DontDestroyOnLoad(cinemachineCam1);
+            DontDestroyOnLoad(cinemachineCam2);
+            //DontDestroyOnLoad(loading);
         //end
     }
     public void Connect() {
@@ -59,13 +67,6 @@ public class Launcher : MonoBehaviourPunCallbacks
         controlPanel.SetActive(false);
 
         //not related to networking
-        DontDestroyOnLoad(crossHair);
-        DontDestroyOnLoad(camRotateWithZeroY);
-        DontDestroyOnLoad(m_cam);
-        DontDestroyOnLoad(rotation);
-        DontDestroyOnLoad(cinemachineCam1);
-        DontDestroyOnLoad(cinemachineCam2);
-        DontDestroyOnLoad(loading);
         //end
 
         if (PhotonNetwork.IsConnected)
@@ -79,7 +80,11 @@ public class Launcher : MonoBehaviourPunCallbacks
         }
 
     }
-     public override void OnConnectedToMaster()
+    public void Reconnect() {//testing
+        progressLabel.SetActive(true);
+        controlPanel.SetActive(false);
+    }
+    public override void OnConnectedToMaster()
     {
         Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
         if (isConnecting){
@@ -111,7 +116,6 @@ public class Launcher : MonoBehaviourPunCallbacks
                 // Load the Room Level.
                 PhotonNetwork.LoadLevel("Room for 1");
             }
-             //PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
             //PhotonNetwork.InstantiateSceneObject(placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
             //connected = true;   
     }

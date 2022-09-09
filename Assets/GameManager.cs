@@ -17,12 +17,16 @@ public class GameManager : MonoBehaviourPunCallbacks
     public GameObject playerPrefab;
     //public GameObject placeObjects;
     public bool connected = false;
+    private FindPlayerPrefab findPlayerPrefab1;//bad way of doing things but i don't care
+    private FindPlayerPrefab findPlayerPrefab2;
     #endregion
 
     #region Photon Callbacks
 
     void Start() {
         Instance = this;
+        findPlayerPrefab1 = GameObject.Find("CinemachineCam1").GetComponent<FindPlayerPrefab>();
+        findPlayerPrefab2 = GameObject.Find("CinemachineCam2").GetComponent<FindPlayerPrefab>();
         if (playerPrefab == null){
             Debug.LogError("<Color=Red><a>Missing</a></Color> playerPrefab Reference. Please set it up in GameObject 'Game Manager'",this);
         } else {
@@ -46,7 +50,9 @@ public class GameManager : MonoBehaviourPunCallbacks
     /// </summary>
     public override void OnLeftRoom()
     {
-        SceneManager.LoadScene(0);
+        findPlayerPrefab1.playerFound = false;
+        findPlayerPrefab2.playerFound = false;
+        SceneManager.LoadScene(5);
     }
 
 
@@ -57,7 +63,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     
 
     public void LeaveRoom()
-    {
+    {   //FindPlayerPrefab.Instance.playerFound = false;
         PhotonNetwork.LeaveRoom();
     }
 
@@ -99,6 +105,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(Player other)
     {
+
         Debug.LogFormat("OnPlayerLeftRoom() {0}", other.NickName); // seen when other disconnects
 
 
