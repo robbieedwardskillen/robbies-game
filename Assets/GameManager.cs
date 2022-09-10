@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     #region Public Fields
     public static GameManager Instance;
     public GameObject playerPrefab;
-    //public GameObject placeObjects;
+    public GameObject placeObjects;
     public bool connected = false;
     private FindPlayerPrefab findPlayerPrefab1;//bad way of doing things but i don't care
     private FindPlayerPrefab findPlayerPrefab2;
@@ -33,7 +33,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             if (PlayerManager.LocalPlayerInstance == null){
                 Debug.LogFormat("We are Instantiating LocalPlayer from {0}", Application.loadedLevelName);
                 PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
-                //PhotonNetwork.InstantiateSceneObject(this.placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
+                PhotonNetwork.InstantiateRoomObject(this.placeObjects.name, new Vector3(5f, 40.65f, 5f), Quaternion.identity);
+                //UnityEngine.Random.Range(0,7f)
                 connected = true;
             }
             else 

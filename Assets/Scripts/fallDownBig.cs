@@ -2,14 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-public class fallDownBig : MonoBehaviourPunCallbacks
+using Photon.Realtime;
+
+public class fallDownBig : MonoBehaviourPunCallbacks, IPunObservable
 {
     private Rigidbody rb;
-    float health = 5;
+    public float health = 5;
     private float radius = 1.25F;
     private float power = 20.0F;
     private float speed;
-    // Start is called before the first frame update
+
+    #region IPunObservable implementation
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+		if (stream.IsWriting)
+		{
+			// We own this player: send the others our data
+			stream.SendNext(health);
+		}
+		else
+		{
+			// Network player, receive data
+			this.health = (float)stream.ReceiveNext();
+		}
+    }
+    #endregion
+    void Awake() 
+    {
+        DontDestroyOnLoad(this.gameObject);
+    }
     void Start()
     {
         gameObject.GetComponent<Rigidbody> ().isKinematic = true;
@@ -19,14 +40,11 @@ public class fallDownBig : MonoBehaviourPunCallbacks
 
     }
     void Update() {
-        if (health <= 0)
-        StartCoroutine(CalculateSpeed());
-    }
-    IEnumerator CalculateSpeed(){
-        Vector3 lastPosition = transform.position;
-        yield return new WaitForFixedUpdate();
-        speed = (lastPosition - transform.position).magnitude / Time.deltaTime;
-        //print(speed);
+        if (PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
+
     }
 
     void OnTriggerEnter(Collider col){

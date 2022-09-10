@@ -80,15 +80,10 @@ public class Launcher : MonoBehaviourPunCallbacks
         }
 
     }
-    public void Reconnect() {//testing
-        progressLabel.SetActive(true);
-        controlPanel.SetActive(false);
-    }
     public override void OnConnectedToMaster()
     {
         Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
         if (isConnecting){
-            //PhotonNetwork.JoinRandomOrCreateRoom();
             PhotonNetwork.JoinRandomRoom();
             isConnecting = false;
         }
@@ -103,10 +98,9 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-       
         //testing
-/*         progressLabel.SetActive(false);
-        controlPanel.SetActive(false); */
+        progressLabel.SetActive(false);
+        controlPanel.SetActive(false);
 
         Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
@@ -117,7 +111,7 @@ public class Launcher : MonoBehaviourPunCallbacks
                 PhotonNetwork.LoadLevel("Room for 1");
             }
             //PhotonNetwork.InstantiateSceneObject(placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
-            //connected = true;   
+            //connected = true;
     }
  
     public override void OnJoinRandomFailed(short returnCode, string message)
