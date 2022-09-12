@@ -57,9 +57,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 movement;
 	private Transform spine;
 	private Transform head;
-	private Transform[] equippedWeps = new Transform[2];
-	private Transform chosenWep1;
-	private Transform chosenWep2;
+	private GameObject[] equippedWeps = new GameObject[2];
 	public PhotonView grenade;
 	public PhotonView arrow;
 	public PhotonView impactEffectGround;
@@ -127,7 +125,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	[Tooltip("The Player's UI GameObject Prefab")]
 	[SerializeField]
 	public GameObject PlayerUiPrefab;
-
     #region IPunObservable implementation
 
 
@@ -136,12 +133,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (stream.IsWriting)
 		{
 			// We own this player: send the others our data
-			//stream.SendNext(Health);
+			stream.SendNext(Health);
+			foreach (GameObject obj in equippedWeps){
+				stream.SendNext(obj.activeSelf);
+			}
 		}
 		else
 		{
 			// Network player, receive data
-			//this.Health = (bool)stream.ReceiveNext();
+			this.Health = (float)stream.ReceiveNext();
+			foreach (GameObject obj in equippedWeps){
+				obj.SetActive((bool)stream.ReceiveNext());
+			}
+			
 		}
     }
     #endregion
@@ -165,7 +169,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		GameObject _uiGo = Instantiate(this.PlayerUiPrefab);
 		_uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
 		//check position and change if in the wrong spot here
-
 	}
 
 	//----feet
@@ -257,6 +260,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 	}
 	void Awake () {
+		
 		// #Important
 		// used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
 		if (photonView.IsMine){
@@ -303,7 +307,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		playerAnimator.SetFloat("speed", 1.75f);
 
 		previousPos = transform.position;
-		Health = 300;
+
 		alive = true;
 		audio = gameObject.GetComponent<AudioSource> ();
 		audio.volume = 0.2f;
@@ -312,7 +316,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		recursiveFindingHead(transform);
 		recursiveFindingHand(transform);
 		followTarget = gameObject.transform.Find("Follow Target");
-		crossHair = GameObject.Find("UI").transform.Find("reticle");
+
 		foreach (Transform child in spine)
 		{
 			if (child.name == "Flames"){
@@ -352,13 +356,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		
 		
-		//selection screen get chosen weps and put them into chosenWep1 & chosenWep2
-		chosenWep1 = bigSword;
-		chosenWep1.gameObject.SetActive(true);
-		chosenWep2 = handgun;
-		equippedWeps[0] = chosenWep1;
-		equippedWeps[1] = chosenWep2;
-		playerAnimator.SetBool(chosenWep1.name, true);
+		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
+
+		equippedWeps[0] = bigSword.gameObject;
+		equippedWeps[0].SetActive(true);
+		equippedWeps[1] = handgun.gameObject;
+		playerAnimator.SetBool(equippedWeps[0].name, true);
 		muzzleFlash = handgun.Find("MuzzleFlashEffect");
 		muzzleFlash2 = rifle.Find("MuzzleFlashEffect");
 		muzzleFlashParticle = muzzleFlash.gameObject.GetComponent<ParticleSystem>();
@@ -385,10 +388,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	
 	void Start() {
+		Health = 5;
 		#if UNITY_5_4_OR_NEWER
 			UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
 		#endif
-
 		if (PlayerUiPrefab != null)
 		{
 			GameObject _uiGo =  Instantiate(PlayerUiPrefab);
@@ -400,6 +403,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 
 		allColliders (gameObject.transform, false);
+		crossHair = GameObject.Find("Canvas").transform.Find("reticle");
+		
 		
 	}
 	IEnumerator waitForSecondBigHit1(){
@@ -460,7 +465,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			freeLookCam.Priority = 1;
 			virtualLookCam.Priority = 0;
 			connected = true;
-			//add crosshair and other stuff here
 
 		}
 
@@ -921,7 +925,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 			
 
-
+				
 				if(virtualLookCam.Priority > 0){
 					m_camRotation.transform.position = virtualLookCam.transform.position;
 					m_camRotation.transform.rotation = virtualLookCam.transform.rotation;
@@ -929,9 +933,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				
 				if (aiming){
 					if(bow.gameObject.activeSelf){
+						if(crossHair != null)
 						crossHair.gameObject.SetActive(false);
 					} else {
-						crossHair.gameObject.SetActive(true);
+						if (crossHair != null){
+							crossHair.gameObject.SetActive(true);
+						} else {
+							crossHair = GameObject.Find("Canvas").transform.Find("reticle");
+						}
+						
 					}
 					playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180)));//radians to degrees
 					transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
@@ -944,7 +954,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						m_camRotation.transform.eulerAngles.y, m_camRotation.transform.eulerAngles.z);
 					}
 				} else {
-					crossHair.gameObject.SetActive(false);
+					if (crossHair != null){
+						crossHair.gameObject.SetActive(false);
+					} else {
+						crossHair = GameObject.Find("Canvas").transform.Find("reticle");
+					}
 				}
 				
 				camRotateWithZeroY.transform.position = new Vector3(m_cam.transform.position.x, transform.position.y, m_cam.transform.position.z);
@@ -1179,7 +1193,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	IEnumerator shootFireball() {
 		yield return new WaitForSeconds(0.2f);
-		flames.enableEmission = true;
+		flames.enableEmission = true;//obsolete use emission.enabled instead of particlesystem.enableemission
 		embers.enableEmission = true;
 		yield return new WaitForSeconds(0.3f);
 		flames.enableEmission = false;
@@ -1199,12 +1213,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		!playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Idle Rifle") &&
 		!playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Blend Tree Rifle")){
 			bool alreadyChanged = false;
-			if (equippedWeps[0].gameObject.activeSelf){
+			if (equippedWeps[0].activeSelf){
 				alreadyChanged = true;
-				equippedWeps[0].gameObject.SetActive(false);
-				equippedWeps[1].gameObject.SetActive(true);
-				playerAnimator.SetBool(chosenWep2.name, true);
-				playerAnimator.SetBool(chosenWep1.name, false);
+				equippedWeps[0].SetActive(false);
+				equippedWeps[1].SetActive(true);
+				playerAnimator.SetBool(equippedWeps[1].name, true);
+				playerAnimator.SetBool(equippedWeps[0].name, false);
 				if (equippedWeps[1] == fireSword){
 					fireSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
 				}
@@ -1212,11 +1226,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
 				}
 			} 
-			if (equippedWeps[1].gameObject.activeSelf && !alreadyChanged){
-				equippedWeps[1].gameObject.SetActive(false);
-				equippedWeps[0].gameObject.SetActive(true);
-				playerAnimator.SetBool(chosenWep2.name, false);
-				playerAnimator.SetBool(chosenWep1.name, true);
+			if (equippedWeps[1].activeSelf && !alreadyChanged){
+				equippedWeps[1].SetActive(false);
+				equippedWeps[0].SetActive(true);
+				playerAnimator.SetBool(equippedWeps[1].name, false);
+				playerAnimator.SetBool(equippedWeps[0].name, true);
 				if (equippedWeps[0] == fireSword){
 					fireSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
 				}
@@ -1507,7 +1521,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	}
 	bool IsGrounded() {
-		RaycastHit hit;
+		//RaycastHit hit;
 		if (baseOfCharacter) {
 			return Physics.CheckSphere(baseOfCharacter.position, 0.05f, 1);//default layer is 1
 		}

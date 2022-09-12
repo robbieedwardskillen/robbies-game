@@ -61674,7 +61674,8 @@ GameObject:
   - component: {fileID: 8841779811146987844}
   - component: {fileID: 8841779811146987848}
   - component: {fileID: 8195236123159729233}
-  - component: {fileID: 7503160723288845475}
+  - component: {fileID: 4699927803949445947}
+  - component: {fileID: -3356274544263492775}
   - component: {fileID: -3905537170322577812}
   m_Layer: 6
   m_Name: Player
@@ -61909,12 +61910,29 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 8841779811146987846}
-  - {fileID: 7503160723288845475}
+  - {fileID: 4699927803949445947}
+  - {fileID: -3356274544263492775}
   - {fileID: -3905537170322577812}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &7503160723288845475
+--- !u!114 &4699927803949445947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8841779811146987845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 0
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 1
+--- !u!114 &-3356274544263492775
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -61943,7 +61961,7 @@ MonoBehaviour:
     InterpolateRotateTowardsSpeed: 180
     InterpolateLerpSpeed: 20
   m_ScaleModel:
-    SynchronizeEnabled: 0
+    SynchronizeEnabled: 1
     InterpolateOption: 0
     InterpolateMoveTowardsSpeed: 1
     InterpolateLerpSpeed: 0

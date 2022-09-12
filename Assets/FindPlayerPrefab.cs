@@ -21,7 +21,7 @@ public class FindPlayerPrefab : MonoBehaviourPunCallbacks
     {
         if (gameObject.GetComponent<CinemachineFreeLook>() != null)
         freeLookCam = gameObject.GetComponent<CinemachineFreeLook>();
-         if (gameObject.GetComponent<CinemachineVirtualCamera>() != null)
+        if (gameObject.GetComponent<CinemachineVirtualCamera>() != null)
         virtualLookCam = gameObject.GetComponent<CinemachineVirtualCamera>();
     }
 

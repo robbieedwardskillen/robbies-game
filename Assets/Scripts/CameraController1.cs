@@ -141,13 +141,15 @@ public class CameraController1 : MonoBehaviour {
 
 
 			//outside
+			
+			//need a bool here
 			if (player != null) {
 				
-				if (!playerManager.underWater){ 
-					m_cam.fieldOfView = 60f;
+/* 				if (!playerManager.underWater){ 
+					m_cam.fieldOfView =  //can't change field of view find another solution
 				} else {
-					m_cam.fieldOfView = 35f;
-				} 
+					m_cam.fieldOfView = 
+				}  */
 
 				m_cam.clearFlags = CameraClearFlags.Skybox;
 				m_cam.orthographic = false;

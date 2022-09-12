@@ -29,7 +29,7 @@ public class fallDownBig : MonoBehaviourPunCallbacks, IPunObservable
     #endregion
     void Awake() 
     {
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(this.gameObject);//should be on parent but seems to work okay
     }
     void Start()
     {

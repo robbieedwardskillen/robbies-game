@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class PlayerUI : MonoBehaviour
 {
     #region Public Fields
@@ -24,7 +25,6 @@ public class PlayerUI : MonoBehaviour
     Renderer targetRenderer;
     CanvasGroup _canvasGroup;
     Vector3 targetPosition;
-
     #endregion
 
     #region MonoBehaviour Callbacks
@@ -57,13 +57,13 @@ public class PlayerUI : MonoBehaviour
         {
             this._canvasGroup.alpha = targetRenderer.isVisible ? 1f : 0f;
         }
-
         // #Critical
         // Follow the Target GameObject on screen.
         if (targetTransform != null)
         {
             targetPosition = targetTransform.position;
             targetPosition.y += characterControllerHeight;
+            //this.transform.position = Camera.main.WorldToScreenPoint (targetPosition) + screenOffset;
             this.transform.position = Camera.main.WorldToScreenPoint (targetPosition) + screenOffset;
         }
     }

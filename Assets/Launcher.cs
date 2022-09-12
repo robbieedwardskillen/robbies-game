@@ -14,7 +14,6 @@ public class Launcher : MonoBehaviourPunCallbacks
     string gameVersion = "1";
 
     #region stuffNotNetworkRelated
-    private GameObject crossHair;
     private GameObject camRotateWithZeroY;
     private GameObject m_cam;
     private GameObject cinemachineCam1;
@@ -46,14 +45,12 @@ public class Launcher : MonoBehaviourPunCallbacks
         PhotonNetwork.GameVersion = gameVersion;
 
         //not related to networking
-        crossHair = GameObject.Find("UI");
         camRotateWithZeroY = GameObject.Find("CamRotateWithZeroY");
         m_cam = GameObject.Find("Main Camera");
         cinemachineCam1 = GameObject.Find("CinemachineCam1");
         cinemachineCam2 = GameObject.Find("CinemachineCam2");
         loading = GameObject.Find("Loading");
         rotation = GameObject.Find("Rotation");
-            DontDestroyOnLoad(crossHair);
             DontDestroyOnLoad(camRotateWithZeroY);
             DontDestroyOnLoad(m_cam);
             DontDestroyOnLoad(rotation);
@@ -88,19 +85,23 @@ public class Launcher : MonoBehaviourPunCallbacks
             isConnecting = false;
         }
         
-    } 
+    }
     public override void OnDisconnected(DisconnectCause cause) 
     {
         Debug.LogWarningFormat("PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {0}", cause);
-        progressLabel.SetActive(false);
-        controlPanel.SetActive(true);
+        if (progressLabel != null){
+            progressLabel.SetActive(false);
+        }
+        if (controlPanel != null){
+            controlPanel.SetActive(true);
+        }
         isConnecting = false;
     }
     public override void OnJoinedRoom()
     {
         //testing
-        progressLabel.SetActive(false);
-        controlPanel.SetActive(false);
+/*         progressLabel.SetActive(false);
+        controlPanel.SetActive(false); */
 
         Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
@@ -109,6 +110,7 @@ public class Launcher : MonoBehaviourPunCallbacks
                 // #Critical
                 // Load the Room Level.
                 PhotonNetwork.LoadLevel("Room for 1");
+                
             }
             //PhotonNetwork.InstantiateSceneObject(placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
             //connected = true;

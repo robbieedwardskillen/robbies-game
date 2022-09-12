@@ -31,7 +31,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             Debug.LogError("<Color=Red><a>Missing</a></Color> playerPrefab Reference. Please set it up in GameObject 'Game Manager'",this);
         } else {
             if (PlayerManager.LocalPlayerInstance == null){
-                Debug.LogFormat("We are Instantiating LocalPlayer from {0}", Application.loadedLevelName);
                 PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
                 PhotonNetwork.InstantiateRoomObject(this.placeObjects.name, new Vector3(5f, 40.65f, 5f), Quaternion.identity);
                 //UnityEngine.Random.Range(0,7f)
@@ -43,7 +42,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             }
            
         }
-
     }
 
     /// <summary>
@@ -64,7 +62,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     
 
     public void LeaveRoom()
-    {   //FindPlayerPrefab.Instance.playerFound = false;
+    {
         PhotonNetwork.LeaveRoom();
     }
 
@@ -81,6 +79,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         Debug.LogFormat("PhotonNetwork : Loading Level : {0}", PhotonNetwork.CurrentRoom.PlayerCount);
         PhotonNetwork.LoadLevel("Room for " + PhotonNetwork.CurrentRoom.PlayerCount);
+        
     }
 
 
