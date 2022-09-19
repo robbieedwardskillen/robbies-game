@@ -56,7 +56,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private float menu;
 	private Vector3 movement;
 	private Transform spine;
-	private Transform head;
 	private GameObject[] equippedWeps = new GameObject[2];
 	public PhotonView grenade;
 	public PhotonView arrow;
@@ -97,6 +96,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform fireSword;
 	private MeleeWeaponTrail mwt;
 	private MeleeWeaponTrail mwt2;
+	//photon making me hard code since they don't accept lists
+	private	GameObject head; private GameObject upperLeftArm; private GameObject lowerLeftArm; private GameObject upperRightArm;
+	private GameObject lowerRightArm; private GameObject hips; private GameObject spineGameObject; private GameObject upperLeftLeg;
+	private GameObject lowerLeftLeg; private GameObject upperRightLeg; private GameObject lowerRightLeg;
+
 	private AudioSource audio;
 	public AudioClip soundEffectSwing1;
 	public AudioClip soundEffectSwing2;
@@ -130,22 +134,93 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
+
 		if (stream.IsWriting)
 		{
 			// We own this player: send the others our data
 			stream.SendNext(Health);
+			stream.SendNext(fire.gameObject.activeSelf);
 			foreach (GameObject obj in equippedWeps){
 				stream.SendNext(obj.activeSelf);
+			}
+			if (this.Health <= 0){
+				stream.SendNext(playerAnimator.enabled);
+				stream.SendNext(alive);
+					
+				stream.SendNext(gameObject.GetComponent<CapsuleCollider> ().isTrigger);
+				stream.SendNext(gameObject.GetComponent<Rigidbody> ().isKinematic);
+				
+				//redundancy because of photon
+				stream.SendNext(head.GetComponent<SphereCollider>().enabled);
+				stream.SendNext(spineGameObject.GetComponent<BoxCollider>().enabled);
+				stream.SendNext(hips.GetComponent<BoxCollider>().enabled);
+				stream.SendNext(upperLeftArm.GetComponent<CapsuleCollider>().enabled);
+				stream.SendNext(upperRightArm.GetComponent<CapsuleCollider>().enabled);
+				stream.SendNext(upperLeftLeg.GetComponent<CapsuleCollider>().enabled);
+				stream.SendNext(upperRightLeg.GetComponent<CapsuleCollider>().enabled);
+				stream.SendNext(lowerLeftArm.GetComponent<CapsuleCollider>().enabled);
+				stream.SendNext(lowerRightArm.GetComponent<CapsuleCollider>().enabled);
+				stream.SendNext(lowerLeftLeg.GetComponent<CapsuleCollider>().enabled);
+				stream.SendNext(lowerRightLeg.GetComponent<CapsuleCollider>().enabled);
+
+				stream.SendNext(head.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(spineGameObject.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(hips.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(upperLeftArm.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(upperRightArm.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(upperLeftLeg.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(upperRightLeg.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(lowerLeftArm.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(lowerRightArm.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(lowerLeftLeg.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(lowerRightLeg.GetComponent<Rigidbody>().isKinematic);
+
+				
 			}
 		}
 		else
 		{
 			// Network player, receive data
 			this.Health = (float)stream.ReceiveNext();
+			this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
 			foreach (GameObject obj in equippedWeps){
 				obj.SetActive((bool)stream.ReceiveNext());
 			}
 			
+			if (this.Health <= 0){
+				this.playerAnimator.enabled = (bool)stream.ReceiveNext();
+				this.alive = (bool)stream.ReceiveNext();
+				
+				gameObject.GetComponent<CapsuleCollider> ().isTrigger = (bool)stream.ReceiveNext();
+				gameObject.GetComponent<Rigidbody> ().isKinematic = (bool)stream.ReceiveNext();
+
+
+				head.GetComponent<SphereCollider>().enabled = (bool)stream.ReceiveNext();
+				spineGameObject.GetComponent<BoxCollider>().enabled = (bool)stream.ReceiveNext();
+				hips.GetComponent<BoxCollider>().enabled = (bool)stream.ReceiveNext();
+				upperLeftArm.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
+				upperRightArm.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
+				upperLeftLeg.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
+				upperRightLeg.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
+				lowerLeftArm.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
+				lowerRightArm.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
+				lowerLeftLeg.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
+				lowerRightLeg.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
+
+				head.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				spineGameObject.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				hips.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				upperLeftArm.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				upperRightArm.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				upperLeftLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				upperRightLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				lowerLeftArm.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				lowerRightArm.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				lowerLeftLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				lowerRightLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+			}
+			
+
 		}
     }
     #endregion
@@ -181,40 +256,61 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 	}
 	//----end feet
-	private void allColliders(Transform parent, bool condition) {
+	private void AllColliders(Transform parent, bool condition) {
+
 		foreach (Transform t in parent) {
-			if (t.gameObject.GetComponent<SphereCollider>() != null){
+	 		if (t.gameObject.GetComponent<SphereCollider>() != null){
+				if (t.gameObject.name == "head_28_cap_A" || t.gameObject.name == "Head"){
+					head = t.gameObject;
+				}
 				t.gameObject.GetComponent<SphereCollider>().enabled = condition;
 				//Physics.IgnoreCollision(transform.GetComponent<CapsuleCollider>(), t.GetComponent<SphereCollider>(), !condition);
 			}
 			if (t.gameObject.GetComponent<CapsuleCollider> () != null) {
+				if (t.gameObject.name == "Upper_Arm_L"){
+					upperLeftArm = t.gameObject;
+				} else if (t.gameObject.name == "Upper_Arm_R"){
+					upperRightArm = t.gameObject;
+				} else if (t.gameObject.name == "Upper_Leg_L"){
+					upperLeftLeg = t.gameObject;
+				} else if (t.gameObject.name == "Upper_Leg_R"){
+					upperRightLeg = t.gameObject;
+				} else if (t.gameObject.name == "Lower_Arm_L"){
+					lowerLeftArm = t.gameObject;
+				} else if (t.gameObject.name == "Lower_Arm_R"){
+					lowerRightArm = t.gameObject;
+				} else if (t.gameObject.name == "Lower_Leg_L"){
+					lowerLeftLeg = t.gameObject;
+				} else if (t.gameObject.name == "Lower_Leg_R"){
+					lowerRightLeg = t.gameObject;
+				}
 				t.gameObject.GetComponent<CapsuleCollider>().enabled = condition;
 				//Physics.IgnoreCollision(transform.GetComponent<CapsuleCollider>(), t.GetComponent<CapsuleCollider>(), !condition);
 			}
-
 			if (t.gameObject.GetComponent<BoxCollider> () != null) {
+				if (t.gameObject.name == "Spine"){
+					spineGameObject = t.gameObject;
+				} else if (t.gameObject.name == "Hips") {
+					hips = t.gameObject;
+				}
 				t.gameObject.GetComponent<BoxCollider>().enabled = condition;
 				//Physics.IgnoreCollision(transform.GetComponent<CapsuleCollider>(), t.GetComponent<BoxCollider>(), !condition);
-
 			}
 			if (t.gameObject.GetComponent<Rigidbody> () != null) {
 				t.gameObject.GetComponent<Rigidbody> ().isKinematic = !condition;
 			}
-
-			allColliders (t, condition);
+			AllColliders (t, condition);
 		}
 	}
+	
 	void recursiveFindingHead(Transform child){
+		//I meant head objects
 		foreach(Transform c in child){
 			if (c.name == "Fire Area"){
 				fireArea = c;
 			}
 			if (c.name == "Grenade Area"){
 				grenadeArea = c;
-			}
-			if (c.name == "head_28_cap_A" || c.name == "Head"){
-				head = c;
-				return;
 			}
 			if (c.childCount > 0){
 				recursiveFindingHead(c);
@@ -402,7 +498,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			Debug.LogWarning("<Color=Red><a>Missing</a></Color> PlayerUiPrefab reference on player Prefab.", this);
 		}
 
-		allColliders (gameObject.transform, false);
+		AllColliders (gameObject.transform, false);
+
 		crossHair = GameObject.Find("Canvas").transform.Find("reticle");
 		
 		
@@ -572,7 +669,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				StartCoroutine(blinking());
 			}
 			underWater = (transform.position.y <= 40.3f) ? true : false;
-			if (transform.position.y < 15f){
+			if (transform.position.y < 0f){
 				Health = 0;
 			}
 			isAerial = !IsGrounded ();
@@ -913,11 +1010,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				//----begin player death
 				if (Health <= 0) {
 					playerAnimator.enabled = false;
-					allColliders (gameObject.transform, false);//don't ignore collisions
 					fire.gameObject.SetActive (false);
 					gameObject.GetComponent<CapsuleCollider> ().isTrigger = true;
 					gameObject.GetComponent<Rigidbody> ().isKinematic = true;
-					allColliders (gameObject.transform, true);
+					AllColliders (gameObject.transform, true);
 					alive = false;
 				}
 				//----end player death
@@ -1353,10 +1449,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	IEnumerator blinking() {
 		for (int i = 0; i < 5; i++){
-			head.gameObject.SetActive(false);
+			head.SetActive(false);
 			gameObject.transform.Find("body").gameObject.SetActive(false);
 			yield return new WaitForSeconds (0.1f);
-			head.gameObject.SetActive(true);
+			head.SetActive(true);
 			gameObject.transform.Find("body").gameObject.SetActive(true);
 			yield return new WaitForSeconds (0.1f);
 		}
