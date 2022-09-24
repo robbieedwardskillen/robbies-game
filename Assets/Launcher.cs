@@ -34,8 +34,8 @@ public class Launcher : MonoBehaviourPunCallbacks
     private GameObject progressLabel;
 
     void Awake() {
-        //PhotonNetwork.SendRate = 20;
-        //PhotonNetwork.SerializationRate = 10;
+        PhotonNetwork.SendRate = 40;
+        PhotonNetwork.SerializationRate = 20;
         PhotonNetwork.AutomaticallySyncScene = true;
         gameTransition = GameObject.Find("Main Camera").GetComponent<Transition>();
     }

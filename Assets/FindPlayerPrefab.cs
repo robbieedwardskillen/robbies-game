@@ -57,6 +57,7 @@ public class FindPlayerPrefab : MonoBehaviourPunCallbacks
         if (freeLookCam != null){
             freeLookCam.m_Follow = player.transform;
             freeLookCam.m_LookAt = player.transform;
+            freeLookCam.GetRig(2).LookAt = player.transform;
         }
         if (virtualLookCam != null){
             virtualLookCam.Follow = player.transform;

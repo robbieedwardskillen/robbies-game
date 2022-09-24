@@ -138,6 +138,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (stream.IsWriting)
 		{
 			// We own this player: send the others our data
+/* 			stream.SendNext(gameObject.transform.position);
+			stream.SendNext(gameObject.transform.rotation); */
+
 			stream.SendNext(Health);
 			stream.SendNext(fire.gameObject.activeSelf);
 			foreach (GameObject obj in equippedWeps){
@@ -181,12 +184,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		else
 		{
 			// Network player, receive data
+/* 			this.gameObject.transform.position = (Vector3)stream.ReceiveNext();
+			this.gameObject.transform.rotation = (Quaternion)stream.ReceiveNext(); */
 			this.Health = (float)stream.ReceiveNext();
 			this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
 			foreach (GameObject obj in equippedWeps){
 				obj.SetActive((bool)stream.ReceiveNext());
 			}
-			
 			if (this.Health <= 0){
 				this.playerAnimator.enabled = (bool)stream.ReceiveNext();
 				this.alive = (bool)stream.ReceiveNext();
@@ -506,14 +510,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	IEnumerator waitForSecondBigHit1(){
  		yield return new WaitForSeconds(0.25f);
-		playerAnimator.Play("bigSwing3", 0, .2f);
+		photonView.RPC("RPCTrigger", RpcTarget.All, "bigSwing3");
+		//playerAnimator.Play("bigSwing3", 0, .2f);
 		yield return new WaitForSeconds(0.1f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing3"))
 		audio.PlayOneShot(soundEffectSwing1, 0.7f); 
 	}
 	IEnumerator waitForSecondBigHit2(){
 		yield return new WaitForSeconds(0.25f);
-		playerAnimator.Play("bigSwing1", 0, .2f);
+		photonView.RPC("RPCTrigger", RpcTarget.All, "bigSwing1");
+		//playerAnimator.Play("bigSwing1", 0, .2f);
 		yield return new WaitForSeconds(0.1f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing1"))
 		audio.PlayOneShot(soundEffectSwing1, 0.7f);
@@ -792,6 +798,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 								StartCoroutine(waitForSound(soundEffectSwing1, "bigSwing4"));
 								secondHit = false;
 							}
+/* 							if (controls.Gameplay.Action1.triggered && !bigSwing){
+								StartCoroutine(waitForSound(soundEffectSwing1, "bigSwing4"));
+								secondHit = false;
+							} */
 							if (controls.Gameplay.Action1.triggered && bigSwing && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.5f && !secondHit){
 								StartCoroutine(waitForSecondBigHit1());
 								secondHit = true;
@@ -872,7 +882,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					}
 					if (equippedBigSword){
 						if (controls.Gameplay.Action1.triggered && !bigSwing){
-							playerAnimator.Play("bigSwing5", 0, .2f);
+							photonView.RPC("RPCTrigger", RpcTarget.All, "bigSwing5");
+							//playerAnimator.Play("bigSwing5", 0, .2f);
 							audio.PlayOneShot(soundEffectSwing1, 0.7f);
 						}
 						if (shoot > 0.5f){
@@ -1237,7 +1248,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		playerAnimator.Play(anim, 0, 0.2f);
 	}
 	IEnumerator waitForSound (AudioClip ac, string anim){
-		photonView.RPC("RPCTrigger", RpcTarget.All, anim);
+		photonView.RPC("RPCTrigger", RpcTarget.All, anim);//sending anim out to all
 		//playerAnimator.Play(anim, 0, .2f);
 		yield return new WaitForSeconds(0.35f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName(anim)){

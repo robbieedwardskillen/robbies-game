@@ -61931,7 +61931,7 @@ MonoBehaviour:
   m_SynchronizeVelocity: 1
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
-  m_TeleportIfDistanceGreaterThan: 1
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!114 &-3356274544263492775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61947,10 +61947,10 @@ MonoBehaviour:
   m_PositionModel:
     SynchronizeEnabled: 1
     TeleportEnabled: 1
-    TeleportIfDistanceGreaterThan: 5
+    TeleportIfDistanceGreaterThan: 10
     InterpolateOption: 2
     InterpolateMoveTowardsSpeed: 1
-    InterpolateLerpSpeed: 1
+    InterpolateLerpSpeed: 10
     ExtrapolateOption: 0
     ExtrapolateSpeed: 1
     ExtrapolateIncludingRoundTripTime: 1
@@ -61959,7 +61959,7 @@ MonoBehaviour:
     SynchronizeEnabled: 1
     InterpolateOption: 2
     InterpolateRotateTowardsSpeed: 180
-    InterpolateLerpSpeed: 20
+    InterpolateLerpSpeed: 10
   m_ScaleModel:
     SynchronizeEnabled: 1
     InterpolateOption: 0

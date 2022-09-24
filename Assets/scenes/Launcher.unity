@@ -27766,6 +27766,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7665995300371229838, guid: 59810ff1f65b90540a0eb1c11ca4658e,
+        type: 3}
+      propertyPath: m_VerticalDamping
+      value: 4.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7665995300371229838, guid: 59810ff1f65b90540a0eb1c11ca4658e,
+        type: 3}
+      propertyPath: m_HorizontalDamping
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 7665995300722954920, guid: 59810ff1f65b90540a0eb1c11ca4658e,
         type: 3}
       propertyPath: m_Name
