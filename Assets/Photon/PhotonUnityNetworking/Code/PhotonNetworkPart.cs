@@ -852,7 +852,12 @@ namespace Photon.Pun
 
             if (PhotonNetwork.LogLevel >= PunLogLevel.Full)
             {
-                Debug.Log("Network destroy Instantiated GO: " + go.name);
+
+
+                //****** Removing for now
+
+
+                //Debug.Log("Network destroy Instantiated GO: " + go.name);
             }
             
             foundPVs.Clear();           // as foundPVs is re-used, clean it to avoid lingering references
@@ -1023,7 +1028,14 @@ namespace Photon.Pun
 
             if (PhotonNetwork.LogLevel >= PunLogLevel.Full)
             {
-                Debug.Log("Registered PhotonView: " + netView.ViewID);
+
+
+                //***Removing for now
+
+                //Debug.Log("Registered PhotonView: " + netView.ViewID);
+            
+            
+            
             }
         }
 

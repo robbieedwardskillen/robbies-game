@@ -1,14 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
 
-public class DecalDestroyer : MonoBehaviour {
+public class DecalDestroyer : MonoBehaviourPunCallbacks {
 
-	public float lifeTime = 5.0f;
+	private float lifeTime;
 
 	private IEnumerator Start()
 	{
-		yield return new WaitForSeconds(lifeTime);
-		Destroy(gameObject);
+		lifeTime = gameObject.GetComponent<ParticleSystem>().duration - 0.1f;
+		yield return new WaitForSeconds(0.05f);
+		if (photonView.IsMine){
+			yield return new WaitForSeconds(lifeTime);
+			PhotonNetwork.Destroy(gameObject);
+		}
 	}
 }

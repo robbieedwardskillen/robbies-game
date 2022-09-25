@@ -57,12 +57,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 movement;
 	private Transform spine;
 	private GameObject[] equippedWeps = new GameObject[2];
-	public PhotonView grenade;
-	public PhotonView arrow;
-	public PhotonView impactEffectGround;
-	public PhotonView impactEffectPlayer;
-	public PhotonView impactEffectWall;
-	public PhotonView impactEffectHole;
+	public GameObject grenade;
+	public GameObject arrow;
+	public GameObject impactEffectGround;
+	public GameObject impactEffectPlayer;
+	public GameObject impactEffectWall;
+	public GameObject impactEffectHole;
 	private bool blocking = false;
 	private bool firing = false;
 	private bool shootingArrow = false;
@@ -83,6 +83,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform muzzleFlash2;
 	private ParticleSystem muzzleFlashParticle;
 	private ParticleSystem muzzleFlashParticle2;
+	private ParticleSystem.EmissionModule muzzleFlashParticleEmission;
+	private ParticleSystem.EmissionModule muzzleFlashParticleEmission2;
 	private Transform rightHandContainer;
 	private Transform rightForearm;
 	private Transform handgun;
@@ -138,11 +140,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (stream.IsWriting)
 		{
 			// We own this player: send the others our data
-/* 			stream.SendNext(gameObject.transform.position);
-			stream.SendNext(gameObject.transform.rotation); */
-
 			stream.SendNext(Health);
 			stream.SendNext(fire.gameObject.activeSelf);
+			stream.SendNext(muzzleFlashParticleEmission.enabled);//not working
 			foreach (GameObject obj in equippedWeps){
 				stream.SendNext(obj.activeSelf);
 			}
@@ -184,10 +184,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		else
 		{
 			// Network player, receive data
-/* 			this.gameObject.transform.position = (Vector3)stream.ReceiveNext();
-			this.gameObject.transform.rotation = (Quaternion)stream.ReceiveNext(); */
 			this.Health = (float)stream.ReceiveNext();
 			this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
+			this.muzzleFlashParticleEmission.enabled = (bool)stream.ReceiveNext();
 			foreach (GameObject obj in equippedWeps){
 				obj.SetActive((bool)stream.ReceiveNext());
 			}
@@ -465,7 +464,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		muzzleFlash = handgun.Find("MuzzleFlashEffect");
 		muzzleFlash2 = rifle.Find("MuzzleFlashEffect");
 		muzzleFlashParticle = muzzleFlash.gameObject.GetComponent<ParticleSystem>();
+		muzzleFlashParticleEmission = muzzleFlashParticle.emission;
 		muzzleFlashParticle2 = muzzleFlash2.gameObject.GetComponent<ParticleSystem>();
+		muzzleFlashParticleEmission2 = muzzleFlashParticle2.emission;
 		swordBlade = rightHandContainer.transform.Find("FireSword").transform.Find("sword blade");
 		ignitionFlame = rightHandContainer.transform.Find("FireSword").transform.Find("IgnitionFlame");
 		getBase (gameObject.transform);
@@ -510,7 +511,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	IEnumerator waitForSecondBigHit1(){
  		yield return new WaitForSeconds(0.25f);
-		photonView.RPC("RPCTrigger", RpcTarget.All, "bigSwing3");
+		photonView.RPC("RPCTrigger2", RpcTarget.All, "bigSwing3");
 		//playerAnimator.Play("bigSwing3", 0, .2f);
 		yield return new WaitForSeconds(0.1f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing3"))
@@ -518,7 +519,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	IEnumerator waitForSecondBigHit2(){
 		yield return new WaitForSeconds(0.25f);
-		photonView.RPC("RPCTrigger", RpcTarget.All, "bigSwing1");
+		photonView.RPC("RPCTrigger2", RpcTarget.All, "bigSwing1");
 		//playerAnimator.Play("bigSwing1", 0, .2f);
 		yield return new WaitForSeconds(0.1f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing1"))
@@ -551,6 +552,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
  
 	void FixedUpdate() {
+
+		if (!photonView.IsMine){
+			if (muzzleFlashParticle.isEmitting)
+				print("shooting");
+		}
+
 		if (photonView.IsMine){
 			velocity = (transform.position - previousPos) / Time.deltaTime;
 			previousPos = transform.position;
@@ -636,7 +643,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
 					if (controls.Gameplay.Shoot.triggered){
 						if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){
-							muzzleFlashParticle.Play();
+							photonView.RPC("Flash", RpcTarget.All);
 							playerAnimator.Play("Firing Handgun", -1, 0f);
 							firingHandgun();
 						}
@@ -882,7 +889,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					}
 					if (equippedBigSword){
 						if (controls.Gameplay.Action1.triggered && !bigSwing){
-							photonView.RPC("RPCTrigger", RpcTarget.All, "bigSwing5");
+							photonView.RPC("RPCTrigger2", RpcTarget.All, "bigSwing5");
 							//playerAnimator.Play("bigSwing5", 0, .2f);
 							audio.PlayOneShot(soundEffectSwing1, 0.7f);
 						}
@@ -1245,10 +1252,21 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	[PunRPC]
 	void RPCTrigger(string anim) {
+		playerAnimator.SetTrigger(anim);
+		//playerAnimator.Play(anim);
+	}
+	[PunRPC]
+	void PRCTrigger2 (string anim) {
 		playerAnimator.Play(anim, 0, 0.2f);
 	}
+	[PunRPC]
+	public void Flash (){
+        muzzleFlashParticle.Play();
+		muzzleFlashParticle2.Play();
+
+    }
 	IEnumerator waitForSound (AudioClip ac, string anim){
-		photonView.RPC("RPCTrigger", RpcTarget.All, anim);//sending anim out to all
+		photonView.RPC("RPCTrigger2", RpcTarget.All, anim);//sending anim out to all
 		//playerAnimator.Play(anim, 0, .2f);
 		yield return new WaitForSeconds(0.35f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName(anim)){
@@ -1468,6 +1486,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			yield return new WaitForSeconds (0.1f);
 		}
 	}
+
 	void firingHandgun() {
 		if(handgunAmmo > 0){
 			handgunAmmo -= 1;
@@ -1511,7 +1530,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	void firingRifle() { //for zoomed in
 		if(rifleAmmo > 0){
 			rifleAmmo -= 1;
-			muzzleFlashParticle2.Play();
+			photonView.RPC("Flash", RpcTarget.All);
 			//playerAnimator.Play("Firing Rifle", -1, 0f);
 			playerAnimator.SetTrigger("shoot");
 			RaycastHit hit;
@@ -1542,8 +1561,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			
 			if (!muzzleFlashParticle.isPlaying) {
 				handgunAmmo -= 1;
-				muzzleFlashParticle.Play();
-				playerAnimator.SetTrigger("shoot");
+				photonView.RPC("RPCTrigger", RpcTarget.All, "shoot");//not working?
 				RaycastHit hit;
 				if (Physics.Raycast(handgun.position, handgun.forward, out hit, range)){
 					if (hit.rigidbody != null) {
@@ -1559,7 +1577,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 					}
 				}
-				
+				photonView.RPC("Flash", RpcTarget.All);
 
 			}
 		} else {
@@ -1576,7 +1594,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (rifleAmmo > 0){
 			if (!muzzleFlashParticle2.isPlaying) {
 				rifleAmmo -= 1;
-				muzzleFlashParticle2.Play();
+
 				playerAnimator.SetTrigger("shoot");
 				RaycastHit hit;
 				if (IsGrounded()){//since gun is 90 degrees the wrong way
@@ -1604,7 +1622,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						}
 					}
 				}
-				
+				photonView.RPC("Flash", RpcTarget.All);
 			}
 		} else {
 			playerAnimator.Play("Rifle Reload", 4, 0);
