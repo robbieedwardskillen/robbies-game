@@ -142,7 +142,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			// We own this player: send the others our data
 			stream.SendNext(Health);
 			stream.SendNext(fire.gameObject.activeSelf);
-			stream.SendNext(muzzleFlashParticleEmission.enabled);//not working
+			stream.SendNext(muzzleFlashParticleEmission.enabled);
+			stream.SendNext(mwt.enabled);
+			stream.SendNext(mwt2.enabled);
+
 			foreach (GameObject obj in equippedWeps){
 				stream.SendNext(obj.activeSelf);
 			}
@@ -187,6 +190,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			this.Health = (float)stream.ReceiveNext();
 			this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
 			this.muzzleFlashParticleEmission.enabled = (bool)stream.ReceiveNext();
+			this.mwt.enabled = (bool)stream.ReceiveNext();
+			this.mwt2.enabled = (bool)stream.ReceiveNext();
 			foreach (GameObject obj in equippedWeps){
 				obj.SetActive((bool)stream.ReceiveNext());
 			}
@@ -359,7 +364,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 	}
 	void Awake () {
-		
 		// #Important
 		// used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
 		if (photonView.IsMine){
@@ -472,8 +476,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		getBase (gameObject.transform);
 
 		gameObject.GetComponent<Rigidbody> ().isKinematic = false;
+		
+
 		mwt = swordBlade.GetComponent<MeleeWeaponTrail> ();
 		mwt2 = bigSword.GetComponent<MeleeWeaponTrail> ();
+		
+
 		swordBlade.transform.GetComponent<CapsuleCollider> ().isTrigger = true;
 
 		//---- end player setup
@@ -552,12 +560,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
  
 	void FixedUpdate() {
-
-		if (!photonView.IsMine){
-			if (muzzleFlashParticle.isEmitting)
-				print("shooting");
-		}
-
 		if (photonView.IsMine){
 			velocity = (transform.position - previousPos) / Time.deltaTime;
 			previousPos = transform.position;
@@ -1247,26 +1249,25 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 
 
-	//NEED TO FIX ALL TRIGGERS also fix this one
 
 
 	[PunRPC]
-	void RPCTrigger(string anim) {
+	public void RPCTrigger(string anim) {
 		playerAnimator.SetTrigger(anim);
 		//playerAnimator.Play(anim);
 	}
 	[PunRPC]
-	void PRCTrigger2 (string anim) {
+	void RPCTrigger2 (string anim) { // for big swing
 		playerAnimator.Play(anim, 0, 0.2f);
 	}
 	[PunRPC]
-	public void Flash (){
+	void Flash (){
         muzzleFlashParticle.Play();
 		muzzleFlashParticle2.Play();
 
     }
-	IEnumerator waitForSound (AudioClip ac, string anim){
-		photonView.RPC("RPCTrigger2", RpcTarget.All, anim);//sending anim out to all
+	IEnumerator waitForSound (AudioClip ac, string anim){ // for big swing
+		photonView.RPC("RPCTrigger2", RpcTarget.All, anim);
 		//playerAnimator.Play(anim, 0, .2f);
 		yield return new WaitForSeconds(0.35f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName(anim)){

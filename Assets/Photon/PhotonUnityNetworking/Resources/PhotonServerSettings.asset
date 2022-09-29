@@ -40,6 +40,10 @@ MonoBehaviour:
   - Flash
   - waitToRemoveParticle
   - PRCTrigger2
+  - RPCTrigger2
+  - testingRPC
+  - rpcTest
+  - test
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

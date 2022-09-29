@@ -10,15 +10,14 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-
 public class MeleeWeaponTrail : MonoBehaviour
 {
 	[SerializeField]
 	bool _emit = true;
-	public bool Emit { set{_emit = value;} }
+	public bool Emit { set{_emit = true;} }//removed _emit = value;
 
 	bool _use = true;
-	public bool Use { set{_use = value;} }
+	public bool Use { set{_use = true;} }//removed _use = value;
 
 	[SerializeField]
 	float _emitTime = 0.0f;
@@ -78,13 +77,11 @@ public class MeleeWeaponTrail : MonoBehaviour
 	void Awake()
 	{
 		_lastPosition = transform.position;
-		_trailObject = new GameObject("Trail");
+		_trailObject = gameObject.transform.Find("Trail").gameObject;//new GameObject("Trail")
 		_trailObject.transform.parent = null;
 		_trailObject.transform.position = Vector3.zero;
 		_trailObject.transform.rotation = Quaternion.identity;
 		_trailObject.transform.localScale = Vector3.one;
-		_trailObject.AddComponent(typeof(MeshFilter));
-		_trailObject.AddComponent(typeof(MeshRenderer));
 		_trailObject.GetComponent<Renderer>().material = _material;
 
 		_trailMesh = new Mesh();
@@ -109,6 +106,7 @@ public class MeleeWeaponTrail : MonoBehaviour
 
 	void Update()
 	{
+		
 		if (!_use)
 		{
 			return;
@@ -128,7 +126,7 @@ public class MeleeWeaponTrail : MonoBehaviour
 		}
 
 		// early out if there is no camera
-		if (!Camera.main) return;
+		//if (!Camera.main) return;
 
 		// if we have moved enough, create a new vertex and make sure we rebuild the mesh
 		float theDistanceSqr = (_lastPosition - transform.position).sqrMagnitude;
