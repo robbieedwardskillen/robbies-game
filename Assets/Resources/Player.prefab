@@ -61881,6 +61881,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9676c48e3638b17468bede6b6a481672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  team: 
+  playerId: 0
+  playerCount: 0
+  pvp: 0
   Height: 0.5
   Health: 5
   super: 0

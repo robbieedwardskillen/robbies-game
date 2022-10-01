@@ -9,6 +9,11 @@ using Photon.Realtime;
  
 public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
+	public string team;
+	public int playerId;
+	public int playerCount;
+	public int pvp = 0;
+	public ExitGames.Client.Photon.Hashtable hashPvP = new ExitGames.Client.Photon.Hashtable();
 	public float Height = 0.5f; // hard coding for now
 	public float Health;
 	public bool super = false;
@@ -140,9 +145,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (stream.IsWriting)
 		{
 			// We own this player: send the others our data
+			stream.SendNext(pvp);
 			stream.SendNext(Health);
 			stream.SendNext(fire.gameObject.activeSelf);
 			stream.SendNext(muzzleFlashParticleEmission.enabled);
+			stream.SendNext(muzzleFlashParticleEmission2.enabled);
 			stream.SendNext(mwt.enabled);
 			stream.SendNext(mwt2.enabled);
 
@@ -187,9 +194,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		else
 		{
 			// Network player, receive data
+			this.pvp = (int)stream.ReceiveNext();
 			this.Health = (float)stream.ReceiveNext();
 			this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
 			this.muzzleFlashParticleEmission.enabled = (bool)stream.ReceiveNext();
+			this.muzzleFlashParticleEmission2.enabled = (bool)stream.ReceiveNext();
 			this.mwt.enabled = (bool)stream.ReceiveNext();
 			this.mwt2.enabled = (bool)stream.ReceiveNext();
 			foreach (GameObject obj in equippedWeps){
@@ -463,7 +472,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		equippedWeps[0] = bigSword.gameObject;
 		equippedWeps[0].SetActive(true);
-		equippedWeps[1] = handgun.gameObject;
+		equippedWeps[1] = rifle.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
 		muzzleFlash = handgun.Find("MuzzleFlashEffect");
 		muzzleFlash2 = rifle.Find("MuzzleFlashEffect");
@@ -497,6 +506,81 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	
 	void Start() {
+		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
+		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+		hashPvP.Add("pvp", (int)pvp);
+		//setting team
+					if (playerCount == 1){
+						team = "blue";
+					}
+					if (playerCount == 2){
+						if (pvp == 1){
+							if (playerId == 1){
+								team = "blue";
+							} else {
+								team = "red";
+							}
+						}
+						else {
+							team = "blue";
+						}
+					}
+					if (playerCount == 3){
+						if (pvp == 1){
+							if (playerId == 1){
+								team = "blue";
+							} else if (playerId == 2) {
+								team = "red";
+							} else {
+								team = "green";
+							}
+						}
+						else {
+							team = "blue";
+						}
+					}
+					if (playerCount == 4){
+						if (pvp == 1){
+							if (playerId == 1 || playerId == 2){
+								team = "blue";
+							} else {
+								team = "red";
+							}
+						}
+						else {
+							team = "blue";
+						}
+					}
+					if (playerCount == 6){
+						if (pvp == 1){
+							if (playerId == 1 || playerId == 2 || playerId == 3){
+								team = "blue";
+							} else {
+								team = "red";
+							}
+						}
+						else {
+							team = "blue";
+						}
+					}
+					if (playerCount == 10){
+						if (pvp == 1){
+							if (playerId == 1 || playerId == 2 || playerId == 3 || playerId == 4 || playerId == 5){
+								team = "blue";
+							} else {
+								team = "red";
+							}
+						}
+						else {
+							team = "blue";
+						}
+					}
+					foreach (Player player in PhotonNetwork.PlayerList) 
+					{
+						player.SetCustomProperties(hashPvP);
+					}
+		//end seting team
+
 		Health = 5;
 		#if UNITY_5_4_OR_NEWER
 			UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
@@ -567,6 +651,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
  
 	void Update () {
+
+		//check for PvP here
+		//print(PhotonNetwork.LocalPlayer.CustomProperties["pvp"]);
+
+
 		if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
 		{
 			return;
@@ -1247,7 +1336,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		}
 	}
-
 
 
 

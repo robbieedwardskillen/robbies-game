@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.SceneManagement;
 using Cinemachine;
 
 public class CameraController1 : MonoBehaviour {
@@ -37,6 +38,8 @@ public class CameraController1 : MonoBehaviour {
 	float hitDistance;
 	public PostProcessVolume volume;
 	private DepthOfField depthOfField;
+	private Scene scene;
+
 	//private static CameraController1 instance;
 	void Awake()
 	{
@@ -63,12 +66,18 @@ public class CameraController1 : MonoBehaviour {
 		storeRoom1 = GameObject.Find ("store room 1");
 		storeRoom2 = GameObject.Find ("store room 2");
 		shackRoom1 = GameObject.Find ("shack room 1");
-
+		scene = SceneManager.GetActiveScene();
 	}
 	void Start() {
 		volume.profile.TryGetSettings(out depthOfField);
 		if (controls != null){
 			controls.Gameplay.Enable();
+		}
+		if (scene.name == "Launcher"){
+			RenderSettings.fogDensity = 0.02f;
+		}
+		if (scene.name == "Room for 1"){
+			RenderSettings.fogDensity = 0.02f;
 		}
 	}
 	void OnEnable() {
