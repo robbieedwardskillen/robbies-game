@@ -10,6 +10,7 @@ using Photon.Realtime;
 public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	public string team;
+	public ExitGames.Client.Photon.Hashtable hashTeam = new ExitGames.Client.Photon.Hashtable();
 	public int playerId;
 	public int playerCount;
 	public int pvp = 0;
@@ -146,6 +147,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		{
 			// We own this player: send the others our data
 			stream.SendNext(pvp);
+			stream.SendNext(team);
 			stream.SendNext(Health);
 			stream.SendNext(fire.gameObject.activeSelf);
 			stream.SendNext(muzzleFlashParticleEmission.enabled);
@@ -195,6 +197,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		{
 			// Network player, receive data
 			this.pvp = (int)stream.ReceiveNext();
+			this.team = (string)stream.ReceiveNext();
 			this.Health = (float)stream.ReceiveNext();
 			this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
 			this.muzzleFlashParticleEmission.enabled = (bool)stream.ReceiveNext();
@@ -510,6 +513,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
 		hashPvP.Add("pvp", (int)pvp);
 		//setting team
+	
 					if (playerCount == 1){
 						team = "blue";
 					}
@@ -575,9 +579,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 							team = "blue";
 						}
 					}
+					hashTeam.Add("team", (string)team);
 					foreach (Player player in PhotonNetwork.PlayerList) 
 					{
 						player.SetCustomProperties(hashPvP);
+						player.SetCustomProperties(hashTeam);
 					}
 		//end seting team
 
@@ -651,15 +657,32 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
  
 	void Update () {
-
-		//check for PvP here
-		//print(PhotonNetwork.LocalPlayer.CustomProperties["pvp"]);
-
-
 		if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
 		{
 			return;
 		}
+		//check for PvP here
+		//print(PhotonNetwork.LocalPlayer.CustomProperties["pvp"]);
+
+		print(PhotonNetwork.LocalPlayer.CustomProperties["pvp"]);
+
+		if (controls.Gameplay.DPadUp.triggered){
+			pvp = 1;
+			hashPvP["pvp"] = pvp;
+			PhotonNetwork.LocalPlayer.SetCustomProperties(hashPvP);
+			
+		}
+		if (controls.Gameplay.DPadDown.triggered){
+			pvp = 0;
+			hashPvP["pvp"] = pvp;
+			PhotonNetwork.LocalPlayer.SetCustomProperties(hashPvP);
+		}
+
+			print(PhotonNetwork.LocalPlayer.CustomProperties["pvp"]);
+
+
+
+
 		if (GameManager.Instance.connected && !connected){
 			freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
 			virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
