@@ -5,11 +5,11 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using Cinemachine;
-
-public class CameraController1 : MonoBehaviour {
+using Photon.Pun;
+using Photon.Realtime;
+public class CameraController1 : MonoBehaviourPunCallbacks {
 	private GameObject player;
 	private PlayerManager playerManager;
-	private bool connected = false;
 	private PlayerControls controls;
 	private Vector2 rotate;
 	private bool aiming = false;
@@ -39,17 +39,12 @@ public class CameraController1 : MonoBehaviour {
 	public PostProcessVolume volume;
 	private DepthOfField depthOfField;
 	private Scene scene;
+	private bool playerFound = false;
+	private GameObject[] players;
 
-	//private static CameraController1 instance;
 	void Awake()
 	{
 		DontDestroyOnLoad(this.gameObject);
-/* 		DontDestroyOnLoad(this);
-		if (instance == null){
-			instance = this;
-		} else {
-			DestroyObject(gameObject);
-		} */
 		controls = new PlayerControls();
 		controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Rotate.canceled += ctx => rotate = Vector2.zero;
@@ -92,16 +87,33 @@ public class CameraController1 : MonoBehaviour {
 		
 	}
 	public void Update() {
-		if (GameManager.Instance != null){
-			if (GameManager.Instance.connected && !connected){
-				player = GameObject.Find("Player(Clone)");
-				playerManager = player.GetComponent<PlayerManager>();
-				aiming = playerManager.aiming;
-				connected = true;
-			}
-		}
 
-		if (connected){
+        if (SceneManager.GetActiveScene().name != "Launcher" && SceneManager.GetActiveScene().name != "LauncherReturned" 
+        && GameManager.Instance != null && PhotonNetwork.IsConnected) {
+            if (!playerFound){
+                players = GameObject.FindGameObjectsWithTag("Player");
+                if (players != null){        
+                    for (int i = 0; i < players.Length; i++){
+                            if (PhotonView.Get(players[i]).IsMine){
+                                playerFound = true;
+								player = players[i];
+								playerManager = player.GetComponent<PlayerManager>();
+								aiming = playerManager.aiming;
+                            } else {
+                                playerFound = false;
+                            }
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
+		if (PhotonNetwork.IsConnected){
 			if (/* !aiming */ false){
 				//blur effects
 				depthOfField.active = true;
@@ -137,7 +149,7 @@ public class CameraController1 : MonoBehaviour {
 				loadingScreen.SetActive(false);
 			}
 		}
-		if (connected){
+		if (PhotonNetwork.IsConnected){
 			//should only be in first level scene
 			/* bool outside = shackRoom1.activeSelf == false && 
 				storeRoom1.activeSelf == false &&
@@ -152,20 +164,15 @@ public class CameraController1 : MonoBehaviour {
 			//outside
 			
 			//need a bool here
-			if (player != null) {
-				
 /* 				if (!playerManager.underWater){ 
-					m_cam.fieldOfView =  //can't change field of view find another solution
-				} else {
-					m_cam.fieldOfView = 
-				}  */
-
-				m_cam.clearFlags = CameraClearFlags.Skybox;
-				m_cam.orthographic = false;
-				
+				m_cam.fieldOfView =  //can't change field of view find another solution
 			} else {
-				m_cam.clearFlags = CameraClearFlags.Depth;
-			}
+				m_cam.fieldOfView = 
+			}  */
+
+			m_cam.clearFlags = CameraClearFlags.Skybox;
+			m_cam.orthographic = false;
+
 
 		}
 	

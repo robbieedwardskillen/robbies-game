@@ -14,10 +14,12 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     #region Public Fields
     public static GameManager Instance;
-    public GameObject playerPrefab;
+    public GameObject testPrefab;
+    public GameObject knightPrefab;
+    //
     public GameObject placeObjects;
     public bool connected = false;
-    private FindPlayerPrefab findPlayerPrefab1;//bad way of doing things but i don't care
+    private FindPlayerPrefab findPlayerPrefab1;//bad coding but i don't care
     private FindPlayerPrefab findPlayerPrefab2;
     #endregion
 
@@ -27,21 +29,28 @@ public class GameManager : MonoBehaviourPunCallbacks
         Instance = this;
         findPlayerPrefab1 = GameObject.Find("CinemachineCam1").GetComponent<FindPlayerPrefab>();
         findPlayerPrefab2 = GameObject.Find("CinemachineCam2").GetComponent<FindPlayerPrefab>();
-        if (playerPrefab == null){
-            Debug.LogError("<Color=Red><a>Missing</a></Color> playerPrefab Reference. Please set it up in GameObject 'Game Manager'",this);
-        } else {
-            if (PlayerManager.LocalPlayerInstance == null){
-                PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
-                PhotonNetwork.InstantiateRoomObject(this.placeObjects.name, new Vector3(5f, 40.65f, 5f), Quaternion.identity);
-                //UnityEngine.Random.Range(0,7f)
-                connected = true;
+
+        if (PlayerManager.LocalPlayerInstance == null){
+
+            if (1 == 1){
+                PhotonNetwork.Instantiate(this.knightPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
             }
-            else 
-            {
-                Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
-            }
-           
+            //if (){} 
+            
+
+
+
+
+            PhotonNetwork.InstantiateRoomObject(this.placeObjects.name, new Vector3(5f, 40.65f, 5f), Quaternion.identity);
+            //UnityEngine.Random.Range(0,7f)
+            connected = true;
         }
+        else 
+        {
+            Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
+        }
+           
+        
     }
 
     /// <summary>

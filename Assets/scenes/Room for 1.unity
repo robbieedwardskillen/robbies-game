@@ -26447,6 +26447,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameManager
       objectReference: {fileID: 0}
+    - target: {fileID: 4551216723710014099, guid: 5b80046f97f905342b27497f58bcfb4c,
+        type: 3}
+      propertyPath: testPrefab
+      value: 
+      objectReference: {fileID: 8841779811146987845, guid: 3fc8e123fa09cf64787626ad11483435,
+        type: 3}
+    - target: {fileID: 4551216723710014099, guid: 5b80046f97f905342b27497f58bcfb4c,
+        type: 3}
+      propertyPath: knightPrefab
+      value: 
+      objectReference: {fileID: 4819016225374194644, guid: 2cd0440ab73bebc478ae554422604c11,
+        type: 3}
     - target: {fileID: 6156206955697914606, guid: 5b80046f97f905342b27497f58bcfb4c,
         type: 3}
       propertyPath: m_RootOrder

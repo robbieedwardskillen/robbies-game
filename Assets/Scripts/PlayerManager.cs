@@ -96,10 +96,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform handgun;
 	private Transform rifle;
 	private Transform bow;
-	private Transform spear;
+/* 	private Transform spear;
 	private Transform mace;
 	private Transform staff;
-	private Transform knife;
+	private Transform knife; */
 	private Transform bigSword;
 	private Transform fireSword;
 	private MeleeWeaponTrail mwt;
@@ -280,37 +280,37 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		foreach (Transform t in parent) {
 	 		if (t.gameObject.GetComponent<SphereCollider>() != null){
-				if (t.gameObject.name == "head_28_cap_A" || t.gameObject.name == "Head"){
+				if (t.gameObject.name == "head_28_cap_A" || t.gameObject.name == "Head" || t.gameObject.name =="rig:Head"){
 					head = t.gameObject;
 				}
 				t.gameObject.GetComponent<SphereCollider>().enabled = condition;
 				//Physics.IgnoreCollision(transform.GetComponent<CapsuleCollider>(), t.GetComponent<SphereCollider>(), !condition);
 			}
 			if (t.gameObject.GetComponent<CapsuleCollider> () != null) {
-				if (t.gameObject.name == "Upper_Arm_L"){
+				if (t.gameObject.name == "Upper_Arm_L" || t.gameObject.name == "rig:LBicep"){
 					upperLeftArm = t.gameObject;
-				} else if (t.gameObject.name == "Upper_Arm_R"){
+				} else if (t.gameObject.name == "Upper_Arm_R" || t.gameObject.name == "rig:RBicep"){
 					upperRightArm = t.gameObject;
-				} else if (t.gameObject.name == "Upper_Leg_L"){
+				} else if (t.gameObject.name == "Upper_Leg_L" || t.gameObject.name == "rig:LThigh" ){
 					upperLeftLeg = t.gameObject;
-				} else if (t.gameObject.name == "Upper_Leg_R"){
+				} else if (t.gameObject.name == "Upper_Leg_R" || t.gameObject.name == "rig:RThigh"){
 					upperRightLeg = t.gameObject;
-				} else if (t.gameObject.name == "Lower_Arm_L"){
+				} else if (t.gameObject.name == "Lower_Arm_L" || t.gameObject.name == "rig:LForearm"){
 					lowerLeftArm = t.gameObject;
-				} else if (t.gameObject.name == "Lower_Arm_R"){
+				} else if (t.gameObject.name == "Lower_Arm_R" || t.gameObject.name == "rig:RForearm"){
 					lowerRightArm = t.gameObject;
-				} else if (t.gameObject.name == "Lower_Leg_L"){
+				} else if (t.gameObject.name == "Lower_Leg_L" || t.gameObject.name == "rig:LShin"){
 					lowerLeftLeg = t.gameObject;
-				} else if (t.gameObject.name == "Lower_Leg_R"){
+				} else if (t.gameObject.name == "Lower_Leg_R" || t.gameObject.name == "rig:RShin"){
 					lowerRightLeg = t.gameObject;
 				}
 				t.gameObject.GetComponent<CapsuleCollider>().enabled = condition;
 				//Physics.IgnoreCollision(transform.GetComponent<CapsuleCollider>(), t.GetComponent<CapsuleCollider>(), !condition);
 			}
 			if (t.gameObject.GetComponent<BoxCollider> () != null) {
-				if (t.gameObject.name == "Spine"){
+				if (t.gameObject.name == "Spine" || t.gameObject.name == "rig:Lumbar2"){
 					spineGameObject = t.gameObject;
-				} else if (t.gameObject.name == "Hips") {
+				} else if (t.gameObject.name == "Hips" || t.gameObject.name == "rig:Lumbar1") {
 					hips = t.gameObject;
 				}
 				t.gameObject.GetComponent<BoxCollider>().enabled = condition;
@@ -339,10 +339,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	void recursiveFindingHand(Transform child){
 		foreach(Transform c in child){
-			if (c.name == "Bip001 R Forearm" || c.name == "Lower_Arm_R"){
+			if (c.name == "Bip001 R Forearm" || c.name == "Lower_Arm_R" || c.name == "rig:RForearm"){
 				rightForearm = c;
 			}
-			if (c.name == "R_hand_container"){
+			if (c.name == "R_hand_container" || c.name == "rig:right_weapon"){
 				rightHandContainer = c;
 				return;
 			}
@@ -354,7 +354,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	void recursiveFindingSpine(Transform child){
 		foreach(Transform c in child){
-			if (c.name == "Spine" || c.name == "Bip001 Spine"){
+			if (c.name == "Spine" || c.name == "rig:Lumbar1"){
 				spine = c;
 				return;
 			} 
@@ -451,10 +451,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		handgun = rightHandContainer.transform.Find("Handgun");
 		rifle = rightHandContainer.transform.Find("Rifle");
 		bow = rightHandContainer.transform.Find("Bow");
-		spear = rightHandContainer.transform.Find("Spear");
+/* 		spear = rightHandContainer.transform.Find("Spear");
 		mace = rightHandContainer.transform.Find("Mace");
 		staff = rightHandContainer.transform.Find("Staff");
-		knife = rightHandContainer.transform.Find("Knife");
+		knife = rightHandContainer.transform.Find("Knife"); */
 		bigSword = rightHandContainer.transform.Find("BigSword");
 		fireSword = rightHandContainer.transform.Find("FireSword");
 		shootZone = rightHandContainer.transform.Find("Shoot Zone");
@@ -462,10 +462,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		handgun.transform.gameObject.SetActive(false);
 		rifle.transform.gameObject.SetActive(false);
 		bow.transform.gameObject.SetActive(false);
-		spear.transform.gameObject.SetActive(false);
+/* 		spear.transform.gameObject.SetActive(false);
 		mace.transform.gameObject.SetActive(false);
 		staff.transform.gameObject.SetActive(false);
-		knife.transform.gameObject.SetActive(false);
+		knife.transform.gameObject.SetActive(false); */
 		bigSword.transform.gameObject.SetActive(false);
 		fireSword.transform.gameObject.SetActive(false);
 		
@@ -507,84 +507,86 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	
 	}
-	
+	void setTeams() {
+		if (playerCount == 1){
+			team = "blue";
+		}
+		if (playerCount == 2){
+			if (pvp == 1){
+				if (playerId == 1){
+					team = "blue";
+				} else {
+					team = "red";
+				}
+			}
+			else {
+				team = "blue";
+			}
+		}
+		if (playerCount == 3){
+			if (pvp == 1){
+				if (playerId == 1){
+					team = "blue";
+				} else if (playerId == 2) {
+					team = "red";
+				} else {
+					team = "green";
+				}
+			}
+			else {
+				team = "blue";
+			}
+		}
+		if (playerCount == 4){
+			if (pvp == 1){
+				if (playerId == 1 || playerId == 2){
+					team = "blue";
+				} else {
+					team = "red";
+				}
+			}
+			else {
+				team = "blue";
+			}
+		}
+		if (playerCount == 6){
+			if (pvp == 1){
+				if (playerId == 1 || playerId == 2 || playerId == 3){
+					team = "blue";
+				} else {
+					team = "red";
+				}
+			}
+			else {
+				team = "blue";
+			}
+		}
+		if (playerCount == 10){
+			if (pvp == 1){
+				if (playerId == 1 || playerId == 2 || playerId == 3 || playerId == 4 || playerId == 5){
+					team = "blue";
+				} else {
+					team = "red";
+				}
+			}
+			else {
+				team = "blue";
+			}
+		}
+		hashTeam.Add("team", (string)team);
+		foreach (Player player in PhotonNetwork.PlayerList) 
+		{
+			player.SetCustomProperties(hashPvP);
+			player.SetCustomProperties(hashTeam);
+		}
+	}
 	void Start() {
 		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
 		hashPvP.Add("pvp", (int)pvp);
 		//setting team
-	
-					if (playerCount == 1){
-						team = "blue";
-					}
-					if (playerCount == 2){
-						if (pvp == 1){
-							if (playerId == 1){
-								team = "blue";
-							} else {
-								team = "red";
-							}
-						}
-						else {
-							team = "blue";
-						}
-					}
-					if (playerCount == 3){
-						if (pvp == 1){
-							if (playerId == 1){
-								team = "blue";
-							} else if (playerId == 2) {
-								team = "red";
-							} else {
-								team = "green";
-							}
-						}
-						else {
-							team = "blue";
-						}
-					}
-					if (playerCount == 4){
-						if (pvp == 1){
-							if (playerId == 1 || playerId == 2){
-								team = "blue";
-							} else {
-								team = "red";
-							}
-						}
-						else {
-							team = "blue";
-						}
-					}
-					if (playerCount == 6){
-						if (pvp == 1){
-							if (playerId == 1 || playerId == 2 || playerId == 3){
-								team = "blue";
-							} else {
-								team = "red";
-							}
-						}
-						else {
-							team = "blue";
-						}
-					}
-					if (playerCount == 10){
-						if (pvp == 1){
-							if (playerId == 1 || playerId == 2 || playerId == 3 || playerId == 4 || playerId == 5){
-								team = "blue";
-							} else {
-								team = "red";
-							}
-						}
-						else {
-							team = "blue";
-						}
-					}
-					hashTeam.Add("team", (string)team);
-					foreach (Player player in PhotonNetwork.PlayerList) 
-					{
-						player.SetCustomProperties(hashPvP);
-						player.SetCustomProperties(hashTeam);
-					}
+		//needs to check again after another player enters
+		setTeams();
 		//end seting team
 
 		Health = 5;
@@ -657,14 +659,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
  
 	void Update () {
+
 		if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
 		{
 			return;
 		}
 		//check for PvP here
-		//print(PhotonNetwork.LocalPlayer.CustomProperties["pvp"]);
+		//PhotonNetwork.LocalPlayer.CustomProperties["pvp"];
 
-		print(PhotonNetwork.LocalPlayer.CustomProperties["pvp"]);
+		print(IsGrounded());
 
 		if (controls.Gameplay.DPadUp.triggered){
 			pvp = 1;
@@ -677,8 +680,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			hashPvP["pvp"] = pvp;
 			PhotonNetwork.LocalPlayer.SetCustomProperties(hashPvP);
 		}
-
-			print(PhotonNetwork.LocalPlayer.CustomProperties["pvp"]);
 
 
 
@@ -743,7 +744,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						if(playerAnimator.GetCurrentAnimatorStateInfo(6).normalizedTime > 0.9f){
 							firingRifle();
 						}
-
 					}
 				} else {
 					lerpVal = 0f;
@@ -1171,7 +1171,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						}
 						
 					}
-					playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180)));//radians to degrees
+					playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180) + 0.4f));//radians to degrees offsetting 40% because animations are off
 					transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
 					RaycastHit hit;
 					if(Physics.Raycast(m_camRotation.transform.position, m_camRotation.transform.forward, out hit, 200.0f)){
@@ -1361,7 +1361,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 
 
-
+	public void makeTransparent() {
+		//change shader from Mobile/Bumped Diffuse to Unlit/Texture
+	}
+	public void makeNonTransparent() {
+		//change shader from Unlit/Texture to Mobile/Bumped Diffuse
+	}
 	[PunRPC]
 	public void RPCTrigger(string anim) {
 		playerAnimator.SetTrigger(anim);
@@ -1589,6 +1594,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 	}
 	IEnumerator blinking() {
+		
 		for (int i = 0; i < 5; i++){
 			head.SetActive(false);
 			gameObject.transform.Find("body").gameObject.SetActive(false);
@@ -1675,7 +1681,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				handgunAmmo -= 1;
 				photonView.RPC("RPCTrigger", RpcTarget.All, "shoot");//not working?
 				RaycastHit hit;
-				if (Physics.Raycast(handgun.position, handgun.forward, out hit, range)){
+				if (Physics.Raycast(handgun.position, shootZone.forward, out hit, range)){
 					if (hit.rigidbody != null) {
 						hit.rigidbody.AddForce(hit.normal * -15f);
 					}
@@ -1762,7 +1768,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (baseOfCharacter) {
 			return Physics.CheckSphere(baseOfCharacter.position, 0.05f, 1);//default layer is 1
 		}
-		return false;
+		return false;    
 	}
 	public static void DumpToConsole(object obj){
 		var output = JsonUtility.ToJson(obj, true);

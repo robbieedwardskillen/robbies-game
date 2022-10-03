@@ -33,20 +33,20 @@ public class FindPlayerPrefab : MonoBehaviourPunCallbacks
                 players = GameObject.FindGameObjectsWithTag("Player");
                 if (players != null){        
                     for (int i = 0; i < players.Length; i++){
-                        if (players.Length - 1 == i) {
+                        //if (players.Length - 1 == i) {
                             if (PhotonView.Get(players[i]).IsMine){
                                 setLookAt(players[i]); 
                                 playerFound = true;
                             } else {
                                 playerFound = false;
                             }
-                        }
-                        else {
+                        //}
+/*                         else {
                             if (PhotonView.Get(players[i]).IsMine){
                                 setLookAt(players[i]);  
                                 playerFound = true;
                             }
-                        }
+                        } */
                     }
                 }
             }
