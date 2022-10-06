@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (PlayerManager.LocalPlayerInstance == null){
 
+
+
             if (1 == 1){
                 PhotonNetwork.Instantiate(this.knightPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
             }

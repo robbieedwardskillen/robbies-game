@@ -76,6 +76,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private int rifleAmmo = 20;
 	private int handgunAmmo = 10;
 	private float attackSpeed = 1f;
+	private bool handgunShooting = true;
 	private Transform grenadeArea;
 	private Transform fireArea;
 	private Transform followTarget;
@@ -473,7 +474,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
 
-		equippedWeps[0] = bigSword.gameObject;
+		equippedWeps[0] = handgun.gameObject;
 		equippedWeps[0].SetActive(true);
 		equippedWeps[1] = rifle.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
@@ -581,12 +582,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 	}
 	void Start() {
-		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
+/* 		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
-		hashPvP.Add("pvp", (int)pvp);
+		hashPvP.Add("pvp", (int)pvp); */
 		//setting team
 		//needs to check again after another player enters
-		setTeams();
+		//setTeams();
 		//end seting team
 
 		Health = 5;
@@ -606,7 +607,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		AllColliders (gameObject.transform, false);
 
 		crossHair = GameObject.Find("Canvas").transform.Find("reticle");
-		
+		GameObject.Find("Canvas").transform.Find("Control Panel").transform.gameObject.SetActive(false);
+
 		
 	}
 	IEnumerator waitForSecondBigHit1(){
@@ -667,8 +669,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		//check for PvP here
 		//PhotonNetwork.LocalPlayer.CustomProperties["pvp"];
 
-		print(IsGrounded());
-
 		if (controls.Gameplay.DPadUp.triggered){
 			pvp = 1;
 			hashPvP["pvp"] = pvp;
@@ -683,15 +683,17 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 
 
+		if (GameManager.Instance != null){
+			if (GameManager.Instance.connected && !connected){
+				freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
+				virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
+				freeLookCam.Priority = 1;
+				virtualLookCam.Priority = 0;
+				connected = true;
 
-		if (GameManager.Instance.connected && !connected){
-			freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
-			virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
-			freeLookCam.Priority = 1;
-			virtualLookCam.Priority = 0;
-			connected = true;
-
+			}
 		}
+
 
 		if (photonView.IsMine && connected){
 
@@ -1032,17 +1034,22 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 							playerAnimator.SetLayerWeight(4, 0f);
 						}
 						if (shoot > 0.5f && !aiming) {
-							if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
+							//if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
+							if (!playerAnimator.IsInTransition(4)){
 								if (handgunAmmo > 0){
 									playerAnimator.SetBool("ShootingHandgun", true);
 								} else {
 									playerAnimator.SetBool("ShootingHandgun", false);
 								}
-								StartCoroutine(shootingHandgun());
+								if (handgunShooting){
+									StartCoroutine(shootingHandgun());
+								}
+
 							}
 						}  else {
 							playerAnimator.SetBool("ShootingHandgun", false);
 						}
+						
 						
 					}
 					if (equippedRifle){
@@ -1171,7 +1178,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						}
 						
 					}
-					playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180) + 0.4f));//radians to degrees offsetting 40% because animations are off
+					playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180) + 0f));//radians to degrees offsetting 0-x% because animations are off
 					transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
 					RaycastHit hit;
 					if(Physics.Raycast(m_camRotation.transform.position, m_camRotation.transform.forward, out hit, 200.0f)){
@@ -1271,22 +1278,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						playerAnimator.SetLayerWeight(9, 0f);
 						playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal) * 2); 
 					}
-					
-					if((!moveLegs && Mathf.Abs(howHorizontal) == 0f && Mathf.Abs(rotate.x) > 0.01f)){ //not moving and rotating
-						playerAnimator.SetFloat("turn", 1f);
+
+					if (howVertical < 0f){
+						playerAnimator.SetLayerWeight(3, Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+						playerAnimator.SetFloat("turn", Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
 					} else {
-						if (howVertical < 0f){
-							playerAnimator.SetLayerWeight(3, Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
-							playerAnimator.SetFloat("turn", Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
-						} else {
-							if (howVertical >= 0f && !blockTurning){
-								playerAnimator.SetLayerWeight(3, 0f);
-								playerAnimator.SetFloat("turn", 0f);
-							}
+						if (howVertical >= 0f && !blockTurning){
+							playerAnimator.SetLayerWeight(3, 0f);
+							playerAnimator.SetFloat("turn", 0f);
 						}
 					}
+					
 				}
-				else if (!aiming) {
+				else if (!aiming) {//not shooting and not aiming
 					firing = false;
 					freeLookCam.m_YAxis.m_MaxSpeed = 2; //can rotate vertically again
 					freeLookCam.m_XAxis.m_MaxSpeed = 200;
@@ -1360,7 +1364,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 	}
 
-
 	public void makeTransparent() {
 		//change shader from Mobile/Bumped Diffuse to Unlit/Texture
 	}
@@ -1380,8 +1383,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	void Flash (){
         muzzleFlashParticle.Play();
 		muzzleFlashParticle2.Play();
-
     }
+	void callFlash() {
+		photonView.RPC("Flash", RpcTarget.All);
+	}
 	IEnumerator waitForSound (AudioClip ac, string anim){ // for big swing
 		photonView.RPC("RPCTrigger2", RpcTarget.All, anim);
 		//playerAnimator.Play(anim, 0, .2f);
@@ -1673,13 +1678,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			rifleAmmo = 30;
 		}
 	}
+
 	IEnumerator shootingHandgun() {
+		handgunShooting = false;
 		yield return new WaitForSeconds (0.15f);
 		if(handgunAmmo > 0){
-			
 			if (!muzzleFlashParticle.isPlaying) {
 				handgunAmmo -= 1;
-				photonView.RPC("RPCTrigger", RpcTarget.All, "shoot");//not working?
+				
 				RaycastHit hit;
 				if (Physics.Raycast(handgun.position, shootZone.forward, out hit, range)){
 					if (hit.rigidbody != null) {
@@ -1695,28 +1701,29 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 					}
 				}
-				photonView.RPC("Flash", RpcTarget.All);
-
+				photonView.RPC("RPCTrigger", RpcTarget.All, "shoot");
+	
 			}
 		} else {
 			playerAnimator.Play("Handgun Reload", 4, 0);
 			handgunAmmo = 1000;
 		}
-		
+		handgunShooting = true;
 	}
 	IEnumerator shootingRifle() {
 		yield return new WaitForSeconds (0.15f);
-		Vector3 eulerRot = new Vector3(rifle.eulerAngles.x, rifle.eulerAngles.y, rifle.eulerAngles.z);
-		shootZone.eulerAngles = eulerRot;
+/* 		Vector3 eulerRot = new Vector3(rifle.eulerAngles.x, rifle.eulerAngles.y, rifle.eulerAngles.z);
+		shootZone.eulerAngles = eulerRot; */
 
 		if (rifleAmmo > 0){
 			if (!muzzleFlashParticle2.isPlaying) {
 				rifleAmmo -= 1;
-
 				playerAnimator.SetTrigger("shoot");
 				RaycastHit hit;
 				if (IsGrounded()){//since gun is 90 degrees the wrong way
-					if (Physics.Raycast(shootZone.position, -shootZone.up, out hit, range)){
+					if (Physics.Raycast(rifle.position, fireArea.forward, out hit, range)){
+
+
 						if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
 							impactEffectPlayer.tag = "bullet";
 							PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
