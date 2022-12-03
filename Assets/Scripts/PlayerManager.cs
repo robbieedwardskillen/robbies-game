@@ -74,9 +74,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private bool shootingArrow = false;
 	private int grenades = 1;
 	private int rifleAmmo = 20;
-	private int handgunAmmo = 10;
+	public int handgunAmmo = 2;
+	private bool reloadedPassively = false;
 	private float attackSpeed = 1f;
-	private bool handgunShooting = true;
 	private Transform grenadeArea;
 	private Transform fireArea;
 	private Transform followTarget;
@@ -758,7 +758,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						lerpVal += Time.deltaTime * 8f;
 						playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
 					if (controls.Gameplay.Shoot.triggered){
-						if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){
+						if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime >= 0.9f){
 							photonView.RPC("Flash", RpcTarget.All);
 							playerAnimator.Play("Firing Handgun", -1, 0f);
 							firingHandgun();
@@ -1028,33 +1028,49 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					}
 					if (equippedHandgun){
 						playerAnimator.SetLayerWeight(1, 0f);
-						if (handgunAmmo <= 0 || playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
+						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 0.99f){
 							playerAnimator.SetLayerWeight(4, 1f);
 						} else {
 							playerAnimator.SetLayerWeight(4, 0f);
+
 						}
 						if (shoot > 0.5f && !aiming) {
+
 							//if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
-							if (!playerAnimator.IsInTransition(4)){
+							if (playerAnimator.GetLayerWeight(4) < 1f){// not reloading
 								if (handgunAmmo > 0){
 									playerAnimator.SetBool("ShootingHandgun", true);
+								} 
+							}
+							else {
+								//reloading
+								if (handgunAmmo <= 0 && playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime <= 0.98f && 
+								playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime > 0.95f){ //finishing the reload
+									playerAnimator.SetBool("reloading", true);
+									if (!playerAnimator.IsInTransition(4)){
+										handgunAmmo = 2;
+									}
 								} else {
-									playerAnimator.SetBool("ShootingHandgun", false);
+									playerAnimator.SetBool("reloading", false);
 								}
-								if (handgunShooting){
-									StartCoroutine(shootingHandgun());
-								}
-
 							}
 						}  else {
+							
+							
+							if (!reloadedPassively){
+								StartCoroutine(passiveReload());
+							}
+
+						}
+						if (shoot < 0.5f) {
 							playerAnimator.SetBool("ShootingHandgun", false);
 						}
-						
+
 						
 					}
 					if (equippedRifle){
 						playerAnimator.SetLayerWeight(1, 0f);
-						if (rifleAmmo <= 0 || playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
+						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 0.99f){
 							playerAnimator.SetLayerWeight(4, 1f);
 						} else {
 							playerAnimator.SetLayerWeight(4, 0f);
@@ -1234,7 +1250,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				
 				if (!aiming && (playerAnimator.GetBool("ShootingHandgun") || playerAnimator.GetBool("ShootingRifle") ||
 				playerAnimator.GetBool("ShootingBow") || dynamicHitting) || playerAnimator.GetLayerWeight(4) >= 1 && !playerAnimator.GetBool("blocking")){
-					if (playerAnimator.GetLayerWeight(4) < 1f){//reloading
+					if (playerAnimator.GetLayerWeight(4) < 1f){//not reloading
 						firing = true;
 					} else {
 						firing = false;
@@ -1384,8 +1400,36 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
         muzzleFlashParticle.Play();
 		muzzleFlashParticle2.Play();
     }
-	void callFlash() {
+	[PunRPC]
+	void ShootHandgun() {
+		if(handgunAmmo > 0){ //does an extra shot because I have to start at the end of an animation
+				handgunAmmo -= 1;
+				RaycastHit hit;
+				if (Physics.Raycast(handgun.position, shootZone.forward, out hit, range)){
+					if (hit.rigidbody != null) {
+						hit.rigidbody.AddForce(hit.normal * -15f);
+					}
+					if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
+						impactEffectPlayer.tag = "bullet";
+						PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
+					} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
+						PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
+						PhotonNetwork.Instantiate(impactEffectWall.name, hit.point, Quaternion.LookRotation(hit.normal));
+					} else {
+						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
+					}
+				}
+				playerAnimator.SetTrigger("Shoot");
+			
+		} else {
+			playerAnimator.Play("Handgun Reload", 4, 0);
+			reloadedPassively = false;
+			playerAnimator.SetBool("ShootingHandgun", false);
+		}
+	}
+	void callFlash() {// called from the scene's animator
 		photonView.RPC("Flash", RpcTarget.All);
+		photonView.RPC("ShootHandgun", RpcTarget.All);
 	}
 	IEnumerator waitForSound (AudioClip ac, string anim){ // for big swing
 		photonView.RPC("RPCTrigger2", RpcTarget.All, anim);
@@ -1394,6 +1438,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName(anim)){
 			audio.PlayOneShot(ac, 0.7f);
 		}
+	}
+	IEnumerator passiveReload() {
+
+		yield return new WaitForSeconds(1);
+		handgunAmmo = 2;
+		reloadedPassively = true;
 	}
 	IEnumerator checkForMovement(Vector3 lastRotation){
 		yield return new WaitForSeconds(0.1f);
@@ -1647,7 +1697,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		} else {
 			playerAnimator.Play("Handgun Reload", 4, 0);
-			handgunAmmo = 1000;//testing
+			handgunAmmo = 2;//testing
 		}
 	}
 	void firingRifle() { //for zoomed in
@@ -1679,37 +1729,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 	}
 
-	IEnumerator shootingHandgun() {
-		handgunShooting = false;
-		yield return new WaitForSeconds (0.15f);
-		if(handgunAmmo > 0){
-			if (!muzzleFlashParticle.isPlaying) {
-				handgunAmmo -= 1;
-				
-				RaycastHit hit;
-				if (Physics.Raycast(handgun.position, shootZone.forward, out hit, range)){
-					if (hit.rigidbody != null) {
-						hit.rigidbody.AddForce(hit.normal * -15f);
-					}
-					if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
-						impactEffectPlayer.tag = "bullet";
-						PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
-					} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
-						PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
-						PhotonNetwork.Instantiate(impactEffectWall.name, hit.point, Quaternion.LookRotation(hit.normal));
-					} else {
-						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
-					}
-				}
-				photonView.RPC("RPCTrigger", RpcTarget.All, "shoot");
-	
-			}
-		} else {
-			playerAnimator.Play("Handgun Reload", 4, 0);
-			handgunAmmo = 1000;
-		}
-		handgunShooting = true;
-	}
+
 	IEnumerator shootingRifle() {
 		yield return new WaitForSeconds (0.15f);
 /* 		Vector3 eulerRot = new Vector3(rifle.eulerAngles.x, rifle.eulerAngles.y, rifle.eulerAngles.z);

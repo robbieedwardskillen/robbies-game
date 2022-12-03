@@ -1331,6 +1331,7 @@ MonoBehaviour:
     type: 3}
   impactEffectHole: {fileID: 1000010355441670, guid: 02a509a7fa70ed740ba4197e20c5d32d,
     type: 3}
+  handgunAmmo: 2
   soundEffectSwing1: {fileID: 8300000, guid: a019ac0cca88f0f41887eb77628009f3, type: 3}
   soundEffectSwing2: {fileID: 8300000, guid: 7aa4d7eaedaae0b40b9ee223d828ec98, type: 3}
   soundEffectSwing3: {fileID: 8300000, guid: e712959691e83994b90bada876463910, type: 3}
