@@ -43,6 +43,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 right = Vector3.zero;
 	private float transitionTime = 0f;
 	private float changeWeaponTransitionTime = 0f;
+	private float reloadToShootTime = 0f;
+	private float desiredDuration = 0.5f;
 	private BoxCollider[] boxColliders;
 	private CapsuleCollider[] capsuleColliders;
 	private Transform fire;
@@ -74,8 +76,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private bool shootingArrow = false;
 	private int grenades = 1;
 	private int rifleAmmo = 20;
+	private int maxRifleAmmo;
 	public int handgunAmmo = 2;
-	private bool reloadedPassively = false;
+	private int maxHandgunAmmo;
 	private float attackSpeed = 1f;
 	private Transform grenadeArea;
 	private Transform fireArea;
@@ -591,6 +594,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		//end seting team
 
 		Health = 5;
+		maxHandgunAmmo = handgunAmmo;
+		maxRifleAmmo = rifleAmmo;
 		#if UNITY_5_4_OR_NEWER
 			UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
 		#endif
@@ -721,7 +726,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				} else {
 					aiming = false;
 				}
-			} 
+			}
 			if (!aiming){
 				if (controls.Gameplay.Action4.triggered){ //left shoulder button
 					//add target
@@ -1027,45 +1032,42 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						}
 					}
 					if (equippedHandgun){
-						playerAnimator.SetLayerWeight(1, 0f);
-						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 0.99f){
+
+						playerAnimator.SetBool("firing", shoot > 0.5f);
+
+						playerAnimator.SetLayerWeight(1, 0f);//arrowswhilewalking (shooting while walking layer)
+						
+						//playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 0.98f check if animation is playing
+						//!playerAnimator.IsInTransition(4)
+/* 						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 0.98f){
 							playerAnimator.SetLayerWeight(4, 1f);
 						} else {
 							playerAnimator.SetLayerWeight(4, 0f);
 
-						}
-						if (shoot > 0.5f && !aiming) {
+						} */
+						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
+							playerAnimator.SetBool("reloading", true);
+						} else {
+							playerAnimator.SetBool("reloading", false);
 
-							//if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
-							if (playerAnimator.GetLayerWeight(4) < 1f){// not reloading
+						}
+						if (shoot >= 0.5f && !aiming) {
+							if (playerAnimator.GetLayerWeight(4) < 0.01f){// not reloading
 								if (handgunAmmo > 0){
 									playerAnimator.SetBool("ShootingHandgun", true);
 								} 
 							}
-							else {
-								//reloading
-								if (handgunAmmo <= 0 && playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime <= 0.98f && 
-								playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime > 0.95f){ //finishing the reload
-									playerAnimator.SetBool("reloading", true);
-									if (!playerAnimator.IsInTransition(4)){
-										handgunAmmo = 2;
-									}
-								} else {
-									playerAnimator.SetBool("reloading", false);
-								}
+							else {//reloading
+								playerAnimator.SetBool("ShootingHandgun", false);
+								
 							}
-						}  else {
-							
-							
-							if (!reloadedPassively){
-								StartCoroutine(passiveReload());
-							}
-
-						}
+						} 
 						if (shoot < 0.5f) {
 							playerAnimator.SetBool("ShootingHandgun", false);
+							if (handgunAmmo < maxHandgunAmmo){
+								//manual reload here
+							}
 						}
-
 						
 					}
 					if (equippedRifle){
@@ -1075,7 +1077,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						} else {
 							playerAnimator.SetLayerWeight(4, 0f);
 						}
-						if (shoot > 0.5f && !aiming) {
+						if (shoot >= 0.5f && !aiming) {
 							if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime >= 1 && !playerAnimator.IsInTransition(4)){
 								if (rifleAmmo > 0) {
 									playerAnimator.SetBool("ShootingRifle", true);
@@ -1089,7 +1091,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						}
 					} 
 					if (equippedBow && !blocking) {
-						if (shoot > 0.5f && !aiming) {
+						if (shoot >= 0.5f && !aiming) {
 							//bow has infinite ammo
 							playerAnimator.SetBool("ShootingBow", true);
 							transitionTime += Time.deltaTime * 8; // so it doesn't teleport arms up
@@ -1249,12 +1251,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				}  
 				
 				if (!aiming && (playerAnimator.GetBool("ShootingHandgun") || playerAnimator.GetBool("ShootingRifle") ||
-				playerAnimator.GetBool("ShootingBow") || dynamicHitting) || playerAnimator.GetLayerWeight(4) >= 1 && !playerAnimator.GetBool("blocking")){
-					if (playerAnimator.GetLayerWeight(4) < 1f){//not reloading
+				playerAnimator.GetBool("ShootingBow") || dynamicHitting) || playerAnimator.GetBool("firing") && !playerAnimator.GetBool("blocking")){
+					if (playerAnimator.GetLayerWeight(4) < 0.01f){//not reloading
 						firing = true;
 					} else {
 						firing = false;
 					}
+
+					
 					freeLookCam.m_YAxis.m_MaxSpeed = 0; //can't rotate vertically
 					freeLookCam.m_XAxis.m_MaxSpeed = 0; //can't rotate horizontally
 					playerAnimator.SetFloat("rotateY", rotate.y); //freelook aim up/down
@@ -1270,7 +1274,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					var angleB = Mathf.Atan2(forwardB.x, forwardB.z) * Mathf.Rad2Deg;
 
 					// get the signed difference in these angles
-					var relativeAngle = -Mathf.DeltaAngle(angleA, angleB);
+					var relativeAngle = -Mathf.DeltaAngle(angleA, angleB);//delta angle calculates shortest distance of angle ex. 340 degrees is 20 degrees -delta because.. idk it works
 					Vector3 relativeRotationVec = new Vector3(0f, relativeAngle, 0f);
 					Quaternion relativeRotation = Quaternion.Euler(relativeRotationVec);
 					Vector3 relativeRotationForward = relativeRotation * Vector3.forward;
@@ -1396,6 +1400,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		playerAnimator.Play(anim, 0, 0.2f);
 	}
 	[PunRPC]
+	void RPCTrigger3 (string anim) {
+		playerAnimator.Play(anim, 4, 0); //handgun animation
+	}
+	[PunRPC]
 	void Flash (){
         muzzleFlashParticle.Play();
 		muzzleFlashParticle2.Play();
@@ -1419,17 +1427,21 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						PhotonNetwork.Instantiate(impactEffectGround.name, hit.point, Quaternion.LookRotation(hit.normal));
 					}
 				}
-				playerAnimator.SetTrigger("Shoot");
-			
-		} else {
-			playerAnimator.Play("Handgun Reload", 4, 0);
-			reloadedPassively = false;
-			playerAnimator.SetBool("ShootingHandgun", false);
-		}
+				//still runs the rest of the if statement even though it is false, learned something new
+				if (handgunAmmo <= 0){
+					if (playerAnimator.GetBool("reloading") == false){
+						StartCoroutine(ReloadHandgunContinueShooting());
+					}
+				}
+		} 
 	}
 	void callFlash() {// called from the scene's animator
-		photonView.RPC("Flash", RpcTarget.All);
-		photonView.RPC("ShootHandgun", RpcTarget.All);
+		if(playerAnimator.GetLayerWeight(4) < 1f){
+			if (handgunAmmo > 0){
+				photonView.RPC("Flash", RpcTarget.All);
+				photonView.RPC("ShootHandgun", RpcTarget.All);
+			}
+		}
 	}
 	IEnumerator waitForSound (AudioClip ac, string anim){ // for big swing
 		photonView.RPC("RPCTrigger2", RpcTarget.All, anim);
@@ -1439,12 +1451,39 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			audio.PlayOneShot(ac, 0.7f);
 		}
 	}
-	IEnumerator passiveReload() {
-
+	IEnumerator ReloadHandgun() {
+		yield return new WaitForSeconds(0.1f);
+		playerAnimator.SetLayerWeight(4, 1f);
+		photonView.RPC("RPCTrigger3", RpcTarget.All, "Handgun Reload");
+		//playerAnimator.SetBool("reloading", true);
 		yield return new WaitForSeconds(1);
+		playerAnimator.SetLayerWeight(4, 0f);
+		//playerAnimator.SetBool("reloading", false);
 		handgunAmmo = 2;
-		reloadedPassively = true;
 	}
+
+	IEnumerator ReloadHandgunContinueShooting() {
+		yield return new WaitForSeconds(0.1f);
+		playerAnimator.SetLayerWeight(4, 1f);
+		photonView.RPC("RPCTrigger3", RpcTarget.All, "Handgun Reload");
+		//playerAnimator.SetBool("reloading", true);
+		yield return new WaitForSeconds(0.5f);
+
+
+		while (reloadToShootTime < desiredDuration){
+			reloadToShootTime += Time.deltaTime;
+			float percentageComplete = reloadToShootTime / desiredDuration;
+			playerAnimator.SetLayerWeight(4, Mathf.Lerp(1f, 0f, percentageComplete));
+			yield return null;
+		}
+		yield return new WaitForSeconds(0.5f);
+		reloadToShootTime = 0f;
+		//playerAnimator.SetLayerWeight(4, 0f);
+
+		//playerAnimator.SetBool("reloading", false);
+		handgunAmmo = 2;
+	}
+
 	IEnumerator checkForMovement(Vector3 lastRotation){
 		yield return new WaitForSeconds(0.1f);
 		currentRotation = transform.rotation.eulerAngles;
@@ -1506,8 +1545,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		playerAnimator.Play("changeWep", 10, 0);
 		yield return new WaitForSeconds(0.4f);
 		if (!playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Shoot") &&
-		!playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Fireing") && 
-		!playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Idle Rifle") &&
 		!playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Blend Tree Rifle")){
 			bool alreadyChanged = false;
 			if (equippedWeps[0].activeSelf){
