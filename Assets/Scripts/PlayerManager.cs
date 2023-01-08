@@ -44,7 +44,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private float transitionTime = 0f;
 	private float changeWeaponTransitionTime = 0f;
 	private float reloadToShootTime = 0f;
-	private float desiredDuration = 0.5f;
+	private float desiredDuration = 0.3f;
 	private BoxCollider[] boxColliders;
 	private CapsuleCollider[] capsuleColliders;
 	private Transform fire;
@@ -1036,16 +1036,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 						playerAnimator.SetBool("firing", shoot > 0.5f);
 
-						playerAnimator.SetLayerWeight(1, 0f);//arrowswhilewalking (shooting while walking layer)
+						playerAnimator.SetLayerWeight(1, 0f);//arrowswhilewalking layer
 						
-						//playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 0.98f check if animation is playing
-						//!playerAnimator.IsInTransition(4)
-/* 						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 0.98f){
-							playerAnimator.SetLayerWeight(4, 1f);
-						} else {
-							playerAnimator.SetLayerWeight(4, 0f);
-
-						} */
+	
 						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
 							playerAnimator.SetBool("reloading", true);
 						} else {
@@ -1514,24 +1507,24 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			audio.PlayOneShot(ac, 0.7f);
 		}
 	}
-	IEnumerator ReloadHandgun() {
+	IEnumerator ReloadHandgun() {//not used
 		yield return new WaitForSeconds(0.1f);
 		playerAnimator.SetLayerWeight(4, 1f);
 		photonView.RPC("RPCTrigger3", RpcTarget.All, "Handgun Reload");
 		//playerAnimator.SetBool("reloading", true);
-		yield return new WaitForSeconds(1);
+		yield return new WaitForSeconds(1f);
 		playerAnimator.SetLayerWeight(4, 0f);
 		//playerAnimator.SetBool("reloading", false);
 		handgunAmmo = 2;
 	}
 
 	IEnumerator ReloadHandgunContinueShooting() {
-		yield return new WaitForSeconds(0.1f);
+		
+		yield return new WaitForSeconds(0.01f);//so hand doesn't go down idk why 0.01 seconds seems enough time to delay weight
 		playerAnimator.SetLayerWeight(4, 1f);
 		photonView.RPC("RPCTrigger3", RpcTarget.All, "Handgun Reload");
 		//playerAnimator.SetBool("reloading", true);
 		yield return new WaitForSeconds(0.5f);
-
 
 		while (reloadToShootTime < desiredDuration){
 			reloadToShootTime += Time.deltaTime;
@@ -1539,7 +1532,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			playerAnimator.SetLayerWeight(4, Mathf.Lerp(1f, 0f, percentageComplete));
 			yield return null;
 		}
-		yield return new WaitForSeconds(0.5f);
+
 		reloadToShootTime = 0f;
 		//playerAnimator.SetLayerWeight(4, 0f);
 
