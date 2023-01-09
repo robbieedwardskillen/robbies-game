@@ -77,7 +77,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private int grenades = 1;
 	private int rifleAmmo = 40;
 	private int maxRifleAmmo;
-	public int handgunAmmo = 2;
+	public int handgunAmmo = 10;
 	private int maxHandgunAmmo;
 	private float attackSpeed = 1f;
 	private Transform grenadeArea;
@@ -1481,21 +1481,26 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 	}
 
-	//handgun (bad naming convention but I don't care because fuck)
-	void callFlash() {// called from the scene's animator
-		if(playerAnimator.GetLayerWeight(4) < 1f){
-			if (handgunAmmo > 0){
-				photonView.RPC("Flash", RpcTarget.All);
-				photonView.RPC("ShootHandgun", RpcTarget.All);
+	//for handgun (bad naming convention but I don't care)
+	void callFlash(AnimationEvent myEvent) {// called from the scene's animator
+		if (myEvent.intParameter == 3){ //only call from center shot to avoid multi calls when anim tree combines animations
+			if(playerAnimator.GetLayerWeight(4) < 1f){
+				if (handgunAmmo > 0){
+					photonView.RPC("Flash", RpcTarget.All);
+					photonView.RPC("ShootHandgun", RpcTarget.All);
+				}
 			}
 		}
+
 	}
 	//rifle
-	void callFlash2() {
-		if(playerAnimator.GetLayerWeight(4) < 1f){
-			if (rifleAmmo > 0){
-				photonView.RPC("Flash", RpcTarget.All);
-				photonView.RPC("ShootRifle", RpcTarget.All);
+	void callFlash2(AnimationEvent myEvent) {
+		if (myEvent.intParameter == 3){ 
+			if(playerAnimator.GetLayerWeight(4) < 1f){
+				if (rifleAmmo > 0){
+					photonView.RPC("Flash", RpcTarget.All);
+					photonView.RPC("ShootRifle", RpcTarget.All);
+				}
 			}
 		}
 	}
@@ -1515,7 +1520,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		yield return new WaitForSeconds(1f);
 		playerAnimator.SetLayerWeight(4, 0f);
 		//playerAnimator.SetBool("reloading", false);
-		handgunAmmo = 2;
+		handgunAmmo = 10;
 	}
 
 	IEnumerator ReloadHandgunContinueShooting() {
@@ -1537,7 +1542,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		//playerAnimator.SetLayerWeight(4, 0f);
 
 		//playerAnimator.SetBool("reloading", false);
-		handgunAmmo = 2;
+		handgunAmmo = 10;
 	}
 
 	IEnumerator ReloadRifleContinueShooting() {
@@ -1775,6 +1780,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 
 	void firingHandgun() {
+
 		if(handgunAmmo > 0){
 			handgunAmmo -= 1;
 			RaycastHit hit;
@@ -1811,7 +1817,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		} else {
 			playerAnimator.Play("Handgun Reload", 4, 0);
-			handgunAmmo = 2;//testing
+			handgunAmmo = 10;
 		}
 	}
 	void firingRifle() { //for zoomed in
