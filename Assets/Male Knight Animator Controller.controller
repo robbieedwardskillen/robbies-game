@@ -9026,7 +9026,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Blend Tree Rifle Shoot
-  m_Speed: 2
+  m_Speed: 1.75
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 8477164805676421935}
@@ -15295,7 +15295,7 @@ BlendTree:
   m_Name: BlendTree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: d4025c17a7d410f48b15e6f5b14ec5c9, type: 2}
+    m_Motion: {fileID: 7400000, guid: 87271678de90b8440ab8e9ee8c1ce448, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: -1}
     m_TimeScale: 1
@@ -15303,7 +15303,7 @@ BlendTree:
     m_DirectBlendParameter: horizontalSpeed
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 2ba60af593c35a648a3110575466a3cd, type: 2}
+    m_Motion: {fileID: 7400000, guid: 290207f69c3f8814ead73d6a8e4d42d6, type: 2}
     m_Threshold: 0.15
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1
@@ -15311,7 +15311,7 @@ BlendTree:
     m_DirectBlendParameter: horizontalSpeed
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 1e6e051e73742464490db4d07e3bb2f4, type: 2}
+    m_Motion: {fileID: 7400000, guid: 03e67a1c29877a14db2176bfd881f2a0, type: 2}
     m_Threshold: 0.3
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -15319,7 +15319,7 @@ BlendTree:
     m_DirectBlendParameter: horizontalSpeed
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 62daf9ef4fe38e142aa68318bda80d0d, type: 2}
+    m_Motion: {fileID: 7400000, guid: 0908e86fe3da0c44d84f15198e401b3e, type: 2}
     m_Threshold: 0.45000002
     m_Position: {x: 1, y: 0}
     m_TimeScale: 1
@@ -15327,7 +15327,7 @@ BlendTree:
     m_DirectBlendParameter: horizontalSpeed
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: d149536d77b2282418deacee2eb58cfa, type: 2}
+    m_Motion: {fileID: 7400000, guid: 474d65b5c918bf84e8e482fd0251803c, type: 2}
     m_Threshold: 0.6
     m_Position: {x: -1, y: 0}
     m_TimeScale: 1
@@ -19174,7 +19174,7 @@ AnimatorStateTransition:
   m_TransitionDuration: 0.25
   m_TransitionOffset: 0
   m_ExitTime: 0.875
-  m_HasExitTime: 1
+  m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1

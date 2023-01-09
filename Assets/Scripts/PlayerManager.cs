@@ -75,7 +75,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private bool firing = false;
 	private bool shootingArrow = false;
 	private int grenades = 1;
-	private int rifleAmmo = 2;
+	private int rifleAmmo = 40;
 	private int maxRifleAmmo;
 	public int handgunAmmo = 2;
 	private int maxHandgunAmmo;
@@ -1558,7 +1558,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		//playerAnimator.SetLayerWeight(4, 0f);
 
 		//playerAnimator.SetBool("reloading", false);
-		rifleAmmo = 2;
+		rifleAmmo = 40;
 	}
 
 	IEnumerator checkForMovement(Vector3 lastRotation){
@@ -1839,7 +1839,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			} 
 		} else {
 			playerAnimator.Play("Rifle Reload", 4, 0);
-			rifleAmmo = 2;
+			rifleAmmo = 40;
 		}
 	}
 
@@ -1885,7 +1885,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		} else {
 			playerAnimator.Play("Rifle Reload", 4, 0);
-			rifleAmmo = 2;
+			rifleAmmo = 40;
 		}	
 	}
 	IEnumerator shootArrow() {
