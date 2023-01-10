@@ -1525,10 +1525,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	IEnumerator ReloadHandgunContinueShooting() {
 		
-		yield return new WaitForSeconds(0.01f);//so hand doesn't go down idk why 0.01 seconds seems enough time to delay weight
-		playerAnimator.SetLayerWeight(4, 1f);
+		yield return new WaitForSeconds(0.01f);//so hand doesn't go down idk why 0.01 seconds is enough time
+
 		photonView.RPC("RPCTrigger3", RpcTarget.All, "Handgun Reload");
-		//playerAnimator.SetBool("reloading", true);
+
+		while (reloadToShootTime < desiredDuration){
+			reloadToShootTime += Time.deltaTime;
+			float percentageComplete = reloadToShootTime / desiredDuration;
+			playerAnimator.SetLayerWeight(4, Mathf.Lerp(0f, 1f, percentageComplete));
+			yield return null;
+		}
+
+		reloadToShootTime = 0f;
+
 		yield return new WaitForSeconds(0.5f);
 
 		while (reloadToShootTime < desiredDuration){
@@ -1539,16 +1548,24 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 
 		reloadToShootTime = 0f;
-		//playerAnimator.SetLayerWeight(4, 0f);
 
-		//playerAnimator.SetBool("reloading", false);
 		handgunAmmo = 10;
 	}
 
 	IEnumerator ReloadRifleContinueShooting() {
 		yield return new WaitForSeconds(0.1f);
-		playerAnimator.SetLayerWeight(4, 1f);
+
 		photonView.RPC("RPCTrigger3", RpcTarget.All, "Rifle Reload");;
+
+		while (reloadToShootTime < desiredDuration){
+			reloadToShootTime += Time.deltaTime;
+			float percentageComplete = reloadToShootTime / desiredDuration;
+			playerAnimator.SetLayerWeight(4, Mathf.Lerp(0f, 1f, percentageComplete));
+			yield return null;
+		}
+
+		reloadToShootTime = 0f;
+		
 		yield return new WaitForSeconds(0.5f);
 
 
