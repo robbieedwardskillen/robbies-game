@@ -477,7 +477,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
 
-		equippedWeps[0] = handgun.gameObject;
+		equippedWeps[0] = bow.gameObject;
 		equippedWeps[0].SetActive(true);
 		equippedWeps[1] = rifle.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
@@ -1412,6 +1412,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
         muzzleFlashParticle.Play();
 		muzzleFlashParticle2.Play();
     }
+
+	[PunRPC]
+	void ShootArrow() {
+		StartCoroutine(CreateThenDeleteArrow());
+	}
+
 	[PunRPC]
 	void ShootHandgun() {
 		if(handgunAmmo > 0){ //does an extra shot because I have to start at the end of an animation
@@ -1502,6 +1508,29 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					photonView.RPC("ShootRifle", RpcTarget.All);
 				}
 			}
+		}
+	}
+	void callArrow(AnimationEvent myEvent) {
+		if (myEvent.intParameter == 3){ 
+			if(playerAnimator.GetLayerWeight(4) < 1f){
+				photonView.RPC("ShootArrow", RpcTarget.All);
+			}
+		}
+	}
+	IEnumerator CreateThenDeleteArrow() {
+		//shootingArrow = true;
+		GameObject newArrow = null;
+		Vector3 eulerRot = new Vector3(shootZone.eulerAngles.x, shootZone.eulerAngles.y, shootZone.eulerAngles.z);
+		newArrow = PhotonNetwork.Instantiate (arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
+		newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 50);
+		newArrow.gameObject.tag = "arrow";
+/* 		yield return new WaitForSeconds(0.25f);
+		shootingArrow = false; */
+
+		if (newArrow != null){
+			yield return new WaitForSeconds (5);
+			if (photonView.IsMine)
+			PhotonNetwork.Destroy (newArrow);
 		}
 	}
 	IEnumerator waitForSound (AudioClip ac, string anim){ // for big swing

@@ -48,6 +48,7 @@ MonoBehaviour:
   - RPCTrigger3
   - RPCTrigger4
   - ShootRifle
+  - ShootArrow
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
