@@ -42,6 +42,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 forward = Vector3.zero;
 	private Vector3 right = Vector3.zero;
 	private float transitionTime = 0f;
+	private float transitionTime2 = 0f;
 	private float changeWeaponTransitionTime = 0f;
 	private float reloadToShootTime = 0f;
 	private float desiredDuration = 0.3f;
@@ -73,7 +74,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public GameObject impactEffectHole;
 	private bool blocking = false;
 	private bool firing = false;
-	private bool shootingArrow = false;
+	//private bool shootingArrow = false;
 	private int grenades = 1;
 	private int rifleAmmo = 40;
 	private int maxRifleAmmo;
@@ -1098,6 +1099,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						if (shoot >= 0.5f && !aiming) {
 							//bow has infinite ammo
 							playerAnimator.SetBool("ShootingBow", true);
+							transitionTime2 = 0f;
 							transitionTime += Time.deltaTime * 8; // so it doesn't teleport arms up
 							playerAnimator.SetLayerWeight(1, Mathf.Lerp(0f, 1f, transitionTime));
 							//float bowShootTime = playerAnimator.GetCurrentAnimatorStateInfo(1).normalizedTime % 1;
@@ -1105,7 +1107,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						} else {
 							playerAnimator.SetBool("ShootingBow", false);
 							transitionTime = 0f;
-							playerAnimator.SetLayerWeight(1, 0f);
+							//playerAnimator.SetLayerWeight(1, 0f);
+							transitionTime2 += Time.deltaTime * 8; // so it doesn't teleport arms down
+							playerAnimator.SetLayerWeight(1, Mathf.Lerp(1f, 0f, transitionTime2));
 						}
 						
 						//if holding fire button
@@ -1520,7 +1524,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	void callArrow(AnimationEvent myEvent) {
 		if (photonView.IsMine){
 			if (myEvent.intParameter == 3){
-				if(playerAnimator.GetLayerWeight(4) < 1f){
+				if(playerAnimator.GetLayerWeight(1) >= 0.9f){
 					photonView.RPC("ShootArrow", RpcTarget.All);
 				}
 			}
