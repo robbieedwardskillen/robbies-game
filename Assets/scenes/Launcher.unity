@@ -66227,7 +66227,7 @@ PrefabInstance:
     - target: {fileID: 2385157161095247591, guid: 8624b2b778499614ca477b89f1932617,
         type: 3}
       propertyPath: field of view
-      value: 50
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 2385157161095247591, guid: 8624b2b778499614ca477b89f1932617,
         type: 3}
@@ -66237,7 +66237,7 @@ PrefabInstance:
     - target: {fileID: 2385157161095247591, guid: 8624b2b778499614ca477b89f1932617,
         type: 3}
       propertyPath: m_FocalLength
-      value: 25.734083
+      value: 32.96973
       objectReference: {fileID: 0}
     - target: {fileID: 2385157161095247591, guid: 8624b2b778499614ca477b89f1932617,
         type: 3}

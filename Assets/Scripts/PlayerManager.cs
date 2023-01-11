@@ -1100,12 +1100,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 							playerAnimator.SetBool("ShootingBow", true);
 							transitionTime += Time.deltaTime * 8; // so it doesn't teleport arms up
 							playerAnimator.SetLayerWeight(1, Mathf.Lerp(0f, 1f, transitionTime));
-							float bowShootTime = playerAnimator.GetCurrentAnimatorStateInfo(1).normalizedTime % 1;
-							if (bowShootTime >= 0.2f && bowShootTime <= 0.4f){
-								if (shootingArrow == false) {
-									StartCoroutine (shootArrow ());
-								}
-							} 
+							//float bowShootTime = playerAnimator.GetCurrentAnimatorStateInfo(1).normalizedTime % 1;
+
 						} else {
 							playerAnimator.SetBool("ShootingBow", false);
 							transitionTime = 0f;
@@ -1116,7 +1112,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					}
 					else if (!equippedBow) {
 						playerAnimator.SetBool("ShootingBow", false);
-						playerAnimator.SetLayerWeight(1,0f);
+						playerAnimator.SetLayerWeight(1, 0f);
 					}
 
 					//end attacks
@@ -1415,7 +1411,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	[PunRPC]
 	void ShootArrow() {
-		StartCoroutine(CreateThenDeleteArrow());
+		if (photonView.IsMine){
+			GameObject newArrow = null;
+			Vector3 eulerRot = new Vector3(shootZone.eulerAngles.x, shootZone.eulerAngles.y, shootZone.eulerAngles.z);
+			newArrow = PhotonNetwork.Instantiate (arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
+			//newArrow = Instantiate (arrow, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
+			newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 75);
+			newArrow.gameObject.tag = "arrow";
+		}
+
 	}
 
 	[PunRPC]
@@ -1489,50 +1493,41 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	//for handgun (bad naming convention but I don't care)
 	void callFlash(AnimationEvent myEvent) {// called from the scene's animator
-		if (myEvent.intParameter == 3){ //only call from center shot to avoid multi calls when anim tree combines animations
-			if(playerAnimator.GetLayerWeight(4) < 1f){
-				if (handgunAmmo > 0){
-					photonView.RPC("Flash", RpcTarget.All);
-					photonView.RPC("ShootHandgun", RpcTarget.All);
+		if (photonView.IsMine){
+			if (myEvent.intParameter == 3){ //only call from center shot to avoid multi calls when anim tree combines animations
+				if(playerAnimator.GetLayerWeight(4) < 1f){
+					if (handgunAmmo > 0){
+						photonView.RPC("Flash", RpcTarget.All);
+						photonView.RPC("ShootHandgun", RpcTarget.All);
+					}
 				}
 			}
 		}
-
 	}
 	//rifle
 	void callFlash2(AnimationEvent myEvent) {
-		if (myEvent.intParameter == 3){ 
-			if(playerAnimator.GetLayerWeight(4) < 1f){
-				if (rifleAmmo > 0){
-					photonView.RPC("Flash", RpcTarget.All);
-					photonView.RPC("ShootRifle", RpcTarget.All);
+		if (photonView.IsMine){
+			if (myEvent.intParameter == 3){ 
+				if(playerAnimator.GetLayerWeight(4) < 1f){
+					if (rifleAmmo > 0){
+						photonView.RPC("Flash", RpcTarget.All);
+						photonView.RPC("ShootRifle", RpcTarget.All);
+					}
 				}
 			}
 		}
 	}
 	void callArrow(AnimationEvent myEvent) {
-		if (myEvent.intParameter == 3){ 
-			if(playerAnimator.GetLayerWeight(4) < 1f){
-				photonView.RPC("ShootArrow", RpcTarget.All);
+		if (photonView.IsMine){
+			if (myEvent.intParameter == 3){
+				if(playerAnimator.GetLayerWeight(4) < 1f){
+					photonView.RPC("ShootArrow", RpcTarget.All);
+				}
 			}
 		}
-	}
-	IEnumerator CreateThenDeleteArrow() {
-		//shootingArrow = true;
-		GameObject newArrow = null;
-		Vector3 eulerRot = new Vector3(shootZone.eulerAngles.x, shootZone.eulerAngles.y, shootZone.eulerAngles.z);
-		newArrow = PhotonNetwork.Instantiate (arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
-		newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 50);
-		newArrow.gameObject.tag = "arrow";
-/* 		yield return new WaitForSeconds(0.25f);
-		shootingArrow = false; */
 
-		if (newArrow != null){
-			yield return new WaitForSeconds (5);
-			if (photonView.IsMine)
-			PhotonNetwork.Destroy (newArrow);
-		}
 	}
+
 	IEnumerator waitForSound (AudioClip ac, string anim){ // for big swing
 		photonView.RPC("RPCTrigger2", RpcTarget.All, anim);
 		//playerAnimator.Play(anim, 0, .2f);
@@ -1940,22 +1935,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			rifleAmmo = 40;
 		}	
 	}
-	IEnumerator shootArrow() {
-		shootingArrow = true;
-		GameObject newArrow = null;
-		Vector3 eulerRot = new Vector3(shootZone.eulerAngles.x, shootZone.eulerAngles.y, shootZone.eulerAngles.z);
-		newArrow = PhotonNetwork.Instantiate (arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
-		newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 50);
-		newArrow.gameObject.tag = "arrow";
-		yield return new WaitForSeconds(0.25f);
-		shootingArrow = false;
-		if (newArrow != null){
-			yield return new WaitForSeconds (5);
-			if (photonView.IsMine)
-			PhotonNetwork.Destroy (newArrow);
-		}
 
-	}
 	bool IsGrounded() {
 		//RaycastHit hit;
 		if (baseOfCharacter) {
