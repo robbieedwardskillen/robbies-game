@@ -33,6 +33,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public bool underWater = false;
 	public bool aiming = false;
 	private float lerpVal = 0f;
+	private float lerpVal2 = 1f;
 	private CinemachineFreeLook freeLookCam;
 	private CinemachineVirtualCamera virtualLookCam;
 	private CinemachineTargetGroup targetGroupCam;
@@ -747,16 +748,38 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			
 			if (rifle.gameObject.activeSelf == true){
 				if (aiming == true){ //smooth the layer weight
-						lerpVal += Time.deltaTime * 8f;
-						playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
-					if (controls.Gameplay.Shoot.triggered){
-						if(playerAnimator.GetCurrentAnimatorStateInfo(6).normalizedTime > 0.9f){
-							firingRifle();
+/* 						lerpVal += Time.deltaTime * 8f;
+						playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime)); */
+					//if (controls.Gameplay.Shoot.triggered){
+
+						if(playerAnimator.GetCurrentAnimatorStateInfo(6).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
+							if (shoot > 0.5f){
+								if(playerAnimator.GetLayerWeight(4) <= 0.01){
+									playerAnimator.Play("Blend Tree Rifle Shoot", 6, 0f); 
+								}
+							}
+						} 
+						if (shoot > 0.5f){
+							
+							if(playerAnimator.GetLayerWeight(4) <= 0.01){
+								lerpVal2 = 1f;
+								lerpVal += Time.deltaTime * 8f;
+								playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
+							} else {
+								lerpVal2 -= Time.deltaTime * 8f;
+								playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
+							}
+						} else {
+							lerpVal = 0f;
+							lerpVal2 -= Time.deltaTime * 8f;
+							playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 						}
-					}
+
+					//}
 				} else {
 					lerpVal = 0f;
-					playerAnimator.SetLayerWeight(6, 0);
+					lerpVal2 -= Time.deltaTime * 8f;
+					playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 				}
 			}
 
@@ -1033,6 +1056,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 							playerAnimator.SetLayerWeight(11, 0f);
 						}
 					}
+
 					if (equippedHandgun){
 
 						playerAnimator.SetBool("firing", shoot > 0.5f);
@@ -1059,7 +1083,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						} 
 						if (shoot < 0.5f) {
 							playerAnimator.SetBool("ShootingHandgun", false);
-							if (handgunAmmo < maxHandgunAmmo && !playerAnimator.GetBool("reloaing") &&
+							if (handgunAmmo < maxHandgunAmmo && !playerAnimator.GetBool("reloading") &&
 							!playerAnimator.GetBool("blocking")){
 								//manual reload here
 							}
@@ -1089,7 +1113,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						} */
 						if (shoot < 0.5f) {
 							playerAnimator.SetBool("ShootingRifle", false);
-							if (rifleAmmo < maxRifleAmmo && !playerAnimator.GetBool("reloaing") &&
+							if (rifleAmmo < maxRifleAmmo && !playerAnimator.GetBool("reloading") &&
 							!playerAnimator.GetBool("blocking")){
 								//manual reload here
 							}
@@ -1487,7 +1511,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					}
 				}
 			if (rifleAmmo <= 0){
+				print("test1");
 				if (playerAnimator.GetBool("reloading") == false){
+					print("test2");
 					StartCoroutine(ReloadRifleContinueShooting());
 				}
 			}
@@ -1581,14 +1607,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 
 	IEnumerator ReloadRifleContinueShooting() {
-		yield return new WaitForSeconds(0.1f);
+		
+		yield return new WaitForSeconds(0.1f);//to let other code run first maybe? Idk need this for some reason.
 
-		photonView.RPC("RPCTrigger3", RpcTarget.All, "Rifle Reload");;
+		photonView.RPC("RPCTrigger3", RpcTarget.All, "Rifle Reload");
 
 		while (reloadToShootTime < desiredDuration){
 			reloadToShootTime += Time.deltaTime;
 			float percentageComplete = reloadToShootTime / desiredDuration;
-			playerAnimator.SetLayerWeight(4, Mathf.Lerp(0f, 1f, percentageComplete));
+			playerAnimator.SetLayerWeight(4, Mathf.Lerp(0f, 1f, percentageComplete)); //lerping to reload
 			yield return null;
 		}
 
@@ -1600,14 +1627,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		while (reloadToShootTime < desiredDuration){
 			reloadToShootTime += Time.deltaTime;
 			float percentageComplete = reloadToShootTime / desiredDuration;
-			playerAnimator.SetLayerWeight(4, Mathf.Lerp(1f, 0f, percentageComplete));
+			playerAnimator.SetLayerWeight(4, Mathf.Lerp(1f, 0f, percentageComplete)); //lerping off reload
 			yield return null;
 		}
 		yield return new WaitForSeconds(0.5f);
 		reloadToShootTime = 0f;
-		//playerAnimator.SetLayerWeight(4, 0f);
 
-		//playerAnimator.SetBool("reloading", false);
 		rifleAmmo = 40;
 	}
 
