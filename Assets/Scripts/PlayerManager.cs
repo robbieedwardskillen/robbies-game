@@ -45,6 +45,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private float transitionTime = 0f;
 	private float transitionTime2 = 0f;
 	private float changeWeaponTransitionTime = 0f;
+	private float changeWeaponTransitionTime2 = 1f;
 	private float reloadToShootTime = 0f;
 	private float desiredDuration = 0.3f;
 	private BoxCollider[] boxColliders;
@@ -77,9 +78,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private bool firing = false;
 	//private bool shootingArrow = false;
 	private int grenades = 1;
-	private int rifleAmmo = 40;
+	private int rifleAmmo = 4;
 	private int maxRifleAmmo;
-	public int handgunAmmo = 10;
+	public int handgunAmmo = 4;
 	private int maxHandgunAmmo;
 	private float attackSpeed = 1f;
 	private Transform grenadeArea;
@@ -479,7 +480,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
 
-		equippedWeps[0] = bow.gameObject;
+		equippedWeps[0] = handgun.gameObject;
 		equippedWeps[0].SetActive(true);
 		equippedWeps[1] = rifle.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
@@ -674,9 +675,22 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		{
 			return;
 		}
+
+
+		if (playerAnimator.GetCurrentAnimatorStateInfo(10).normalizedTime < 1f){
+			changingWeps = true;
+		} else {
+			if (playerAnimator.GetLayerWeight(10) > 0f){
+				changeWeaponTransitionTime2 -= Time.deltaTime * 8f;
+				playerAnimator.SetLayerWeight(10, Mathf.Lerp(changeWeaponTransitionTime2, 0, Time.deltaTime));
+			} else {
+				playerAnimator.SetLayerWeight(10, 0f);
+			}
+
+			changingWeps = false;
+		}
 		//check for PvP here
 		//PhotonNetwork.LocalPlayer.CustomProperties["pvp"];
-
 		if (controls.Gameplay.DPadUp.triggered){
 			pvp = 1;
 			hashPvP["pvp"] = pvp;
@@ -754,51 +768,72 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 						if(playerAnimator.GetCurrentAnimatorStateInfo(6).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
 							if (shoot > 0.5f){
-								if(playerAnimator.GetLayerWeight(4) <= 0.01){
+								if(playerAnimator.GetLayerWeight(4) <= 0.01 && playerAnimator.GetLayerWeight(6) >= 0.99f){
 									playerAnimator.Play("Blend Tree Rifle Shoot", 6, 0f); 
 								}
 							}
 						} 
 						if (shoot > 0.5f){
-							
-							if(playerAnimator.GetLayerWeight(4) <= 0.01){
+							if(playerAnimator.GetLayerWeight(4) <= 0.3){//starts transitioning during reload
 								lerpVal2 = 1f;
-								lerpVal += Time.deltaTime * 8f;
+								lerpVal += Time.deltaTime * 5f;
 								playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
 							} else {
-								lerpVal2 -= Time.deltaTime * 8f;
+								lerpVal = 0f;
+								lerpVal2 -= Time.deltaTime * 5f;
 								playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 							}
 						} else {
 							lerpVal = 0f;
-							lerpVal2 -= Time.deltaTime * 8f;
+							lerpVal2 -= Time.deltaTime * 5f;
 							playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 						}
 
 					//}
 				} else {
 					lerpVal = 0f;
-					lerpVal2 -= Time.deltaTime * 8f;
+					lerpVal2 -= Time.deltaTime * 5f;
 					playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 				}
 			}
 
 			if ((handgun.gameObject.activeSelf == true)){
-				if (aiming == true){
-						lerpVal += Time.deltaTime * 8f;
-						playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
-					if (controls.Gameplay.Shoot.triggered){
-						if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime >= 0.9f){
-							photonView.RPC("Flash", RpcTarget.All);
-							playerAnimator.Play("Firing Handgun", -1, 0f);
-							firingHandgun();
+
+
+				if (aiming == true){ 
+
+						if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
+							if (shoot > 0.5f){
+								if(playerAnimator.GetLayerWeight(4) <= 0.01 && playerAnimator.GetLayerWeight(7) >= 0.99f){
+									playerAnimator.Play("Shoot", 7, 0f); 
+								}
+							}
+						} 
+						if (shoot > 0.5f){
+							
+							if(playerAnimator.GetLayerWeight(4) <= 0.5){// starts transitioning during reload
+								lerpVal2 = 1f;
+								lerpVal += Time.deltaTime * 5f;
+								playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
+							} else {
+								lerpVal = 0f;
+								lerpVal2 -= Time.deltaTime * 5f;
+								playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
+							}
+						} else {
+							lerpVal = 0f;
+							lerpVal2 -= Time.deltaTime * 5f;
+							playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 						}
-						
-					}
+
+					//}
 				} else {
 					lerpVal = 0f;
-					playerAnimator.SetLayerWeight(7, 0);
+					lerpVal2 -= Time.deltaTime * 5f;
+					playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 				}
+
+				
 			}
 
 			bool equippedFireSword = (fireSword.gameObject.activeSelf == true);
@@ -896,9 +931,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				if (Health < 3) {
 					playerAnimator.SetBool("injured", true);
 				}
-				if (controls.Gameplay.Action2.triggered && !busy && !changingWeps && !firing) {
+				if (controls.Gameplay.Action2.triggered && !busy && !changingWeps && shoot < 0.5f) {
 					playerAnimator.SetTrigger("changeWep");
-					StartCoroutine(changeWeaponTime());
+					changeWeapon();
 				}
 				if (punch1 || punch2 || punch3 || punch4 || kick || fireball) {
 					punching = true;
@@ -1056,15 +1091,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 							playerAnimator.SetLayerWeight(11, 0f);
 						}
 					}
+					
+					playerAnimator.SetBool("firing", shoot > 0.5f);
 
 					if (equippedHandgun){
-
-						playerAnimator.SetBool("firing", shoot > 0.5f);
-
 						playerAnimator.SetLayerWeight(1, 0f);//arrowswhilewalking layer
-						
-	
-						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1){
+						print(playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime);
+						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1f){
 							playerAnimator.SetBool("reloading", true);
 						} else {
 							playerAnimator.SetBool("reloading", false);
@@ -1091,26 +1124,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						
 					}
 					if (equippedRifle){
-						playerAnimator.SetBool("firing", shoot > 0.5f);
 						playerAnimator.SetLayerWeight(1, 0f);
-						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 0.99f){
-							playerAnimator.SetLayerWeight(4, 1f);
+						print(playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime);
+						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1f){
+							playerAnimator.SetBool("reloading", true);
 						} else {
-							playerAnimator.SetLayerWeight(4, 0f);
+							playerAnimator.SetBool("reloading", false);
 						}
 						if (shoot >= 0.5f && !aiming) {
 							if (playerAnimator.GetLayerWeight(4) < 0.01f){
 								if (rifleAmmo > 0 && !playerAnimator.GetBool("blocking") && !playerAnimator.GetBool("reloading")) {
 									playerAnimator.SetBool("ShootingRifle", true);
-								} 
-								//StartCoroutine(shootingRifle());
+								}
 							}
 							else {
-									playerAnimator.SetBool("ShootingRifle", false);
+								playerAnimator.SetBool("ShootingRifle", false);
 							}
-						}  /* else {
-							playerAnimator.SetBool("ShootingRifle", false);
-						} */
+						} 
 						if (shoot < 0.5f) {
 							playerAnimator.SetBool("ShootingRifle", false);
 							if (rifleAmmo < maxRifleAmmo && !playerAnimator.GetBool("reloading") &&
@@ -1278,15 +1308,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					lastMoveDirection = moveDirection; 
 				}  
 				
+
+
 				if (!aiming && (playerAnimator.GetBool("ShootingHandgun") || playerAnimator.GetBool("ShootingRifle") ||
 				playerAnimator.GetBool("ShootingBow") || dynamicHitting) || playerAnimator.GetBool("firing") && !playerAnimator.GetBool("blocking")){
+
 					if (playerAnimator.GetLayerWeight(4) < 0.01f){//not reloading
 						firing = true;
 					} else {
 						firing = false;
 					}
-
-					
 					freeLookCam.m_YAxis.m_MaxSpeed = 0; //can't rotate vertically
 					freeLookCam.m_XAxis.m_MaxSpeed = 0; //can't rotate horizontally
 					playerAnimator.SetFloat("rotateY", rotate.y); //freelook aim up/down
@@ -1511,9 +1542,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					}
 				}
 			if (rifleAmmo <= 0){
-				print("test1");
 				if (playerAnimator.GetBool("reloading") == false){
-					print("test2");
 					StartCoroutine(ReloadRifleContinueShooting());
 				}
 			}
@@ -1574,12 +1603,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		yield return new WaitForSeconds(1f);
 		playerAnimator.SetLayerWeight(4, 0f);
 		//playerAnimator.SetBool("reloading", false);
-		handgunAmmo = 10;
+		handgunAmmo = 4;
 	}
 
 	IEnumerator ReloadHandgunContinueShooting() {
 		
-		yield return new WaitForSeconds(0.01f);//so hand doesn't go down idk why 0.01 seconds is enough time
+		yield return new WaitForSeconds(0.1f);//so hand doesn't go down idk why 0.1 seconds is enough time
 
 		photonView.RPC("RPCTrigger3", RpcTarget.All, "Handgun Reload");
 
@@ -1603,7 +1632,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		reloadToShootTime = 0f;
 
-		handgunAmmo = 10;
+		handgunAmmo = 4;
 	}
 
 	IEnumerator ReloadRifleContinueShooting() {
@@ -1630,10 +1659,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			playerAnimator.SetLayerWeight(4, Mathf.Lerp(1f, 0f, percentageComplete)); //lerping off reload
 			yield return null;
 		}
-		yield return new WaitForSeconds(0.5f);
+		//yield return new WaitForSeconds(0.5f);
 		reloadToShootTime = 0f;
 
-		rifleAmmo = 40;
+		rifleAmmo = 4;
 	}
 
 	IEnumerator checkForMovement(Vector3 lastRotation){
@@ -1687,20 +1716,18 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		flames.enableEmission = false;
 		embers.enableEmission = false;
 	}
-	IEnumerator changeWeaponTime() {
+	void changeWeapon() {
 		changingWeps = true;
 		while(changeWeaponTransitionTime < 1f){
-			changeWeaponTransitionTime += Time.deltaTime * 8; 
+			changeWeaponTransitionTime += Time.deltaTime * 2; 
 			playerAnimator.SetLayerWeight(10, Mathf.Lerp(0f, 1f, changeWeaponTransitionTime));
 		}
 		
 		playerAnimator.Play("changeWep", 10, 0);
-		yield return new WaitForSeconds(0.4f);
 		if (!playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Shoot") &&
 		!playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("Blend Tree Rifle")){
-			bool alreadyChanged = false;
-			if (equippedWeps[0].activeSelf){
-				alreadyChanged = true;
+
+			if (equippedWeps[0].activeSelf && !equippedWeps[1].activeSelf){
 				equippedWeps[0].SetActive(false);
 				equippedWeps[1].SetActive(true);
 				playerAnimator.SetBool(equippedWeps[1].name, true);
@@ -1712,7 +1739,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					bigSword.transform.gameObject.GetComponent<BoxCollider>().enabled = true;
 				}
 			} 
-			if (equippedWeps[1].activeSelf && !alreadyChanged){
+			else if (equippedWeps[1].activeSelf && !equippedWeps[0].activeSelf){ 
 				equippedWeps[1].SetActive(false);
 				equippedWeps[0].SetActive(true);
 				playerAnimator.SetBool(equippedWeps[1].name, false);
@@ -1726,8 +1753,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 			
 		}
-		playerAnimator.SetLayerWeight(10,0f);
 		changeWeaponTransitionTime = 0f;
+		changeWeaponTransitionTime2 = 1f;
 		changingWeps = false;
 	}
 	void Land(){
@@ -1887,7 +1914,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		} else {
 			playerAnimator.Play("Handgun Reload", 4, 0);
-			handgunAmmo = 10;
+			handgunAmmo = 4;
 		}
 	}
 	void firingRifle() { //for zoomed in
@@ -1915,7 +1942,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			} 
 		} else {
 			playerAnimator.Play("Rifle Reload", 4, 0);
-			rifleAmmo = 40;
+			rifleAmmo = 4;
 		}
 	}
 
@@ -1961,7 +1988,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		} else {
 			playerAnimator.Play("Rifle Reload", 4, 0);
-			rifleAmmo = 40;
+			rifleAmmo = 4;
 		}	
 	}
 
