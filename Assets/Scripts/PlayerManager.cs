@@ -34,6 +34,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public bool aiming = false;
 	private float lerpVal = 0f;
 	private float lerpVal2 = 1f;
+	private Vector3 rayCollision = Vector3.zero;
 	private CinemachineFreeLook freeLookCam;
 	private CinemachineVirtualCamera virtualLookCam;
 	private CinemachineTargetGroup targetGroupCam;
@@ -100,6 +101,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private ParticleSystem.EmissionModule muzzleFlashParticleEmission2;
 	private Transform rightHandContainer;
 	private Transform rightForearm;
+	private Transform rightHand;
 	private Transform handgun;
 	private Transform rifle;
 	private Transform bow;
@@ -114,7 +116,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	//photon making me hard code since they don't accept lists
 	private	GameObject head; private GameObject upperLeftArm; private GameObject lowerLeftArm; private GameObject upperRightArm;
 	private GameObject lowerRightArm; private GameObject hips; private GameObject spineGameObject; private GameObject upperLeftLeg;
-	private GameObject lowerLeftLeg; private GameObject upperRightLeg; private GameObject lowerRightLeg;
+	private GameObject lowerLeftLeg; private GameObject upperRightLeg; private GameObject lowerRightLeg; private GameObject crosshairLookAt;
 
 	private AudioSource audio;
 	public AudioClip soundEffectSwing1;
@@ -349,10 +351,17 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if (c.name == "Bip001 R Forearm" || c.name == "Lower_Arm_R" || c.name == "rig:RForearm"){
 				rightForearm = c;
 			}
+			if (c.name == "rig:RHand") {
+				rightHand = c;
+			}
 			if (c.name == "R_hand_container" || c.name == "rig:right_weapon"){
 				rightHandContainer = c;
+			}
+			if (c.name == "crosshairLookAt") {
+				crosshairLookAt = c.gameObject;
 				return;
 			}
+			
 			if (c.childCount > 0){
 				recursiveFindingHand(c);
 			}
@@ -670,7 +679,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
  
 	void Update () {
-
+		//testing
 		if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
 		{
 			return;
@@ -758,6 +767,24 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				if (controls.Gameplay.Action5.triggered){ //right shoulder button
 					//not sure yet
 				}
+			} else {
+				//for crosshairLookAt
+				Debug.DrawRay(virtualLookCam.transform.position, virtualLookCam.transform.forward, Color.green);
+				var ray = new Ray(virtualLookCam.transform.position, virtualLookCam.transform.forward);
+				RaycastHit camRaycastHit;
+				if (Physics.Raycast(ray, out camRaycastHit)){
+					rayCollision = camRaycastHit.point;
+				}
+
+				//testing
+				if (shoot > 0.5){
+					crosshairLookAt.transform.LookAt(rayCollision);
+					print(crosshairLookAt.transform.rotation);
+				} else {
+					print(crosshairLookAt.transform.rotation);
+				}
+
+
 			}
 			
 			if (rifle.gameObject.activeSelf == true){
@@ -793,7 +820,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if ((handgun.gameObject.activeSelf == true)){
 
 
-				if (aiming == true){ 
+				if (aiming == true){
+
 
 					if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
 						if (shoot > 0.5f){
@@ -805,6 +833,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 						
 					if(playerAnimator.GetLayerWeight(4) <= 0.5){// starts transitioning during reload
+
+
+						
+
 						lerpVal2 = 1f;
 						lerpVal += Time.deltaTime * 5f;
 						playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
@@ -834,16 +866,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 								}
 							}
 						} 
-					/* 	if (shoot > 0.5f){ */
+					 	if (shoot > 0.5f){ 
 							lerpVal2 = 1f;
 							lerpVal += Time.deltaTime * 5f;
 							playerAnimator.SetLayerWeight(8, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
-/* 						
+						
 						} else {
 							lerpVal = 0f;
 							lerpVal2 -= Time.deltaTime * 5f;
 							playerAnimator.SetLayerWeight(8, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
-						} */
+						}
 
 					//}
 				} else {
@@ -1114,7 +1146,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 					if (equippedHandgun){
 						playerAnimator.SetLayerWeight(1, 0f);//arrowswhilewalking layer
-						print(playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime);
 						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1f){
 							playerAnimator.SetBool("reloading", true);
 						} else {
@@ -1143,7 +1174,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					}
 					if (equippedRifle){
 						playerAnimator.SetLayerWeight(1, 0f);
-						print(playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime);
+						
 						if (playerAnimator.GetCurrentAnimatorStateInfo(4).normalizedTime < 1f){
 							playerAnimator.SetBool("reloading", true);
 						} else {
@@ -1276,7 +1307,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
 					RaycastHit hit;
 					if(Physics.Raycast(m_camRotation.transform.position, m_camRotation.transform.forward, out hit, 200.0f)){
-						Debug.DrawRay(m_camRotation.transform.position, m_camRotation.transform.forward * 100.0f, Color.blue);
+
 						followTarget.LookAt(hit.point);//fix later
 					} else {
 						followTarget.transform.rotation = Quaternion.Euler(m_camRotation.transform.eulerAngles.x,
@@ -1501,10 +1532,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	[PunRPC]
 	void ShootHandgun() {
+	
 		if(handgunAmmo > 0){ //does an extra shot because I have to start at the end of an animation
 				handgunAmmo -= 1;
+
+				Transform shootZoneOrCrosshair;
+				if(aiming){
+					shootZoneOrCrosshair = crosshairLookAt.transform;
+				} else {
+					shootZoneOrCrosshair = shootZone;
+				}
+
 				RaycastHit hit;
-				if (Physics.Raycast(handgun.position, shootZone.forward, out hit, range)){
+				if (Physics.Raycast(handgun.position, shootZoneOrCrosshair.forward, out hit, range)){
 					if (hit.rigidbody != null) {
 						hit.rigidbody.AddForce(hit.normal * -15f);
 					}
@@ -1529,7 +1569,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	[PunRPC]
 	void ShootRifle() {
-
+ 
 		if (rifleAmmo > 0){
 				rifleAmmo -= 1;
 				//playerAnimator.SetTrigger("shoot");
