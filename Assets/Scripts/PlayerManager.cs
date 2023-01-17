@@ -480,7 +480,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
 
-		equippedWeps[0] = handgun.gameObject;
+		equippedWeps[0] = bow.gameObject;
 		equippedWeps[0].SetActive(true);
 		equippedWeps[1] = rifle.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
@@ -832,7 +832,36 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					lerpVal2 -= Time.deltaTime * 5f;
 					playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 				}
+				
+			}
+			if ((bow.gameObject.activeSelf == true)){
 
+				if (aiming == true){ 
+
+						if(playerAnimator.GetCurrentAnimatorStateInfo(8).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
+							if (shoot > 0.5f){
+								if(playerAnimator.GetLayerWeight(8) >= 0.99f){
+									playerAnimator.Play("Shooting", 8, 0f); 
+								}
+							}
+						} 
+						if (shoot > 0.5f){
+							lerpVal2 = 1f;
+							lerpVal += Time.deltaTime * 5f;
+							playerAnimator.SetLayerWeight(8, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
+						
+						} else {
+							lerpVal = 0f;
+							lerpVal2 -= Time.deltaTime * 5f;
+							playerAnimator.SetLayerWeight(8, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
+						}
+
+					//}
+				} else {
+					lerpVal = 0f;
+					lerpVal2 -= Time.deltaTime * 5f;
+					playerAnimator.SetLayerWeight(8, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
+				}
 				
 			}
 
@@ -845,7 +874,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			(bow.gameObject.activeSelf == false) &&
 			(handgun.gameObject.activeSelf == false) && 
 			(rifle.gameObject.activeSelf == false) && 
-			(bigSword.gameObject.activeSelf == false)); 
+			(bigSword.gameObject.activeSelf == false)); // need to add rest of weapons
 
 
 			if (equippedBigSword)
@@ -1579,7 +1608,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	void callArrow(AnimationEvent myEvent) {
 		if (photonView.IsMine){
 			if (myEvent.intParameter == 3){
-				if(playerAnimator.GetLayerWeight(1) >= 0.9f){
+				if(playerAnimator.GetLayerWeight(1) >= 0.9f || playerAnimator.GetLayerWeight(8) >= 0.9f){
 					photonView.RPC("ShootArrow", RpcTarget.All);
 				}
 			}
