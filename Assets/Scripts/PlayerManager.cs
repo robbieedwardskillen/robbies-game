@@ -480,7 +480,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
 
-		equippedWeps[0] = bow.gameObject;
+		equippedWeps[0] = handgun.gameObject;
 		equippedWeps[0].SetActive(true);
 		equippedWeps[1] = rifle.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
@@ -766,30 +766,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime)); */
 					//if (controls.Gameplay.Shoot.triggered){
 
-						if(playerAnimator.GetCurrentAnimatorStateInfo(6).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
-							if (shoot > 0.5f){
-								if(playerAnimator.GetLayerWeight(4) <= 0.01 && playerAnimator.GetLayerWeight(6) >= 0.99f){
-									playerAnimator.Play("Blend Tree Rifle Shoot", 6, 0f); 
-								}
-							}
-						} 
+					if(playerAnimator.GetCurrentAnimatorStateInfo(6).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
 						if (shoot > 0.5f){
-							if(playerAnimator.GetLayerWeight(4) <= 0.3){//starts transitioning during reload
-								lerpVal2 = 1f;
-								lerpVal += Time.deltaTime * 5f;
-								playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
-							} else {
-								lerpVal = 0f;
-								lerpVal2 -= Time.deltaTime * 5f;
-								playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
+							if(playerAnimator.GetLayerWeight(4) <= 0.01 && playerAnimator.GetLayerWeight(6) >= 0.99f){
+								playerAnimator.Play("Blend Tree Rifle Shoot", 6, 0f); 
 							}
-						} else {
-							lerpVal = 0f;
-							lerpVal2 -= Time.deltaTime * 5f;
-							playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 						}
+					} 
+					if(playerAnimator.GetLayerWeight(4) <= 0.3){//starts transitioning during reload
+						lerpVal2 = 1f;
+						lerpVal += Time.deltaTime * 5f;
+						playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
+					} else {
+						lerpVal = 0f;
+						lerpVal2 -= Time.deltaTime * 5f;
+						playerAnimator.SetLayerWeight(6, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
+					}
 
-					//}
 				} else {
 					lerpVal = 0f;
 					lerpVal2 -= Time.deltaTime * 5f;
@@ -802,29 +795,25 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 				if (aiming == true){ 
 
-						if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
-							if (shoot > 0.5f){
-								if(playerAnimator.GetLayerWeight(4) <= 0.01 && playerAnimator.GetLayerWeight(7) >= 0.99f){
-									playerAnimator.Play("Shoot", 7, 0f); 
-								}
-							}
-						} 
+					if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
 						if (shoot > 0.5f){
-							
-							if(playerAnimator.GetLayerWeight(4) <= 0.5){// starts transitioning during reload
-								lerpVal2 = 1f;
-								lerpVal += Time.deltaTime * 5f;
-								playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
-							} else {
-								lerpVal = 0f;
-								lerpVal2 -= Time.deltaTime * 5f;
-								playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
+							if(playerAnimator.GetLayerWeight(4) <= 0.01 && playerAnimator.GetLayerWeight(7) >= 0.99f){
+								playerAnimator.Play("Shoot", 7, 0f); 
 							}
-						} else {
-							lerpVal = 0f;
-							lerpVal2 -= Time.deltaTime * 5f;
-							playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
 						}
+					} 
+
+						
+					if(playerAnimator.GetLayerWeight(4) <= 0.5){// starts transitioning during reload
+						lerpVal2 = 1f;
+						lerpVal += Time.deltaTime * 5f;
+						playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
+					} else {
+						lerpVal = 0f;
+						lerpVal2 -= Time.deltaTime * 5f;
+						playerAnimator.SetLayerWeight(7, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
+					}
+
 
 					//}
 				} else {
@@ -845,16 +834,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 								}
 							}
 						} 
-						if (shoot > 0.5f){
+					/* 	if (shoot > 0.5f){ */
 							lerpVal2 = 1f;
 							lerpVal += Time.deltaTime * 5f;
 							playerAnimator.SetLayerWeight(8, Mathf.Lerp(lerpVal, 1, Time.deltaTime));
-						
+/* 						
 						} else {
 							lerpVal = 0f;
 							lerpVal2 -= Time.deltaTime * 5f;
 							playerAnimator.SetLayerWeight(8, Mathf.Lerp(lerpVal2, 0, Time.deltaTime));
-						}
+						} */
 
 					//}
 				} else {
