@@ -480,9 +480,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
 
-		equippedWeps[0] = handgun.gameObject;
+		equippedWeps[0] = bow.gameObject;
 		equippedWeps[0].SetActive(true);
-		equippedWeps[1] = rifle.gameObject;
+		equippedWeps[1] = handgun.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
 		muzzleFlash = handgun.Find("MuzzleFlashEffect");
 		muzzleFlash2 = rifle.Find("MuzzleFlashEffect");
