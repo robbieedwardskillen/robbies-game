@@ -1638,7 +1638,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (photonView.IsMine){
 			if (myEvent.intParameter == 3){
 				if(playerAnimator.GetLayerWeight(1) >= 0.9f || playerAnimator.GetLayerWeight(8) >= 0.9f){
-					photonView.RPC("ShootArrow", RpcTarget.All);
+					if (playerAnimator.GetLayerWeight(8) >= 0.9f && playerAnimator.GetLayerWeight(1) < 0.1f){
+						photonView.RPC("ShootArrow", RpcTarget.All);
+					}
+					if (playerAnimator.GetLayerWeight(8) < 0.1f && playerAnimator.GetLayerWeight(1) > 0.9f){
+						photonView.RPC("ShootArrow", RpcTarget.All);
+					}
+					//photonView.RPC("ShootArrow", RpcTarget.All);
 				}
 			}
 		}
