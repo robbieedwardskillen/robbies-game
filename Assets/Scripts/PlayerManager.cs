@@ -68,6 +68,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private float menu;
 	private Vector3 movement;
 	private Transform spine;
+	private Transform rightFoot;
+	private Transform leftFoot;
 	private GameObject[] equippedWeps = new GameObject[2];
 	public GameObject grenade;
 	public GameObject arrow;
@@ -123,6 +125,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public AudioClip soundEffectSwing2;
 	public AudioClip soundEffectSwing3;
 	public AudioClip soundEffectSwing4;
+	public AudioClip soundEffectFoot1;
+	public AudioClip soundEffectFoot2;
+	public AudioClip soundEffectFoot3;
+	public AudioClip soundEffectFoot4;
+	public AudioClip soundEffectHandgunShot;
+	public AudioClip soundEffectHandgunReload;
+	public AudioClip soundEffectArrow1;
+	public AudioClip soundEffectArrow2;
 	private Camera m_cam;
 	private GameObject camRotateWithZeroY;
 	private GameObject m_camRotation;
@@ -379,6 +389,28 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		}
 	}
+	void recursiveFindingRightFoot(Transform child) {
+		foreach(Transform c in child){
+			if (c.name == "rig:RFootBone1"){
+				rightFoot = c;
+				return;
+			} 
+			if (c.childCount > 0){
+				recursiveFindingRightFoot(c);
+			}
+		}
+	}
+	void recursiveFindingLeftFoot(Transform child) {
+		foreach(Transform c in child){
+			if (c.name == "rig:LFootBone1"){
+				leftFoot = c;
+				return;
+			} 
+			if (c.childCount > 0){
+				recursiveFindingLeftFoot(c);
+			}
+		}
+	}
 	void OnEnable() {
 		if (controls != null){
 			controls.Gameplay.Enable();
@@ -446,6 +478,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		recursiveFindingSpine(transform);
 		recursiveFindingHead(transform);
 		recursiveFindingHand(transform);
+		recursiveFindingLeftFoot(transform);
+		recursiveFindingRightFoot(transform);
 		followTarget = gameObject.transform.Find("Follow Target");
 
 		foreach (Transform child in spine)
@@ -1260,6 +1294,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					!playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("Getting Up")){
 						moveLegs = true;
 						playerAnimator.SetBool("moving", true);
+						rightFootTouchingGround();
+						leftFootTouchingGround();
 					} else {
 						if ((bigSwing && rolling) || (bigSwing && isAerial)){
 							moveLegs = true;
@@ -1526,6 +1562,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			//newArrow = Instantiate (arrow, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
 			newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 75);
 			newArrow.gameObject.tag = "arrow";
+			photonView.RPC("shootArrowSound", RpcTarget.All);
 		}
 
 	}
@@ -1607,7 +1644,37 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		}
 	}
-
+	[PunRPC]
+	void FootSoundGrass() {
+		int randomFootSound = Random.Range(0, 2);
+		if (randomFootSound == 0){
+			if (!audio.isPlaying)
+			audio.PlayOneShot(soundEffectFoot1, 0.5f);
+		} else if (randomFootSound == 1){
+			if (!audio.isPlaying)
+			audio.PlayOneShot(soundEffectFoot2, 0.5f);
+		} 
+	}
+	[PunRPC]
+	void FootSoundHardSurface() {
+		int randomFootSound = Random.Range(0, 2);
+		if (randomFootSound == 0){
+			if (!audio.isPlaying)
+			audio.PlayOneShot(soundEffectFoot3, 0.5f);
+		} else if (randomFootSound == 1){
+			if (!audio.isPlaying)
+			audio.PlayOneShot(soundEffectFoot4, 0.5f);
+		} 
+	}
+	[PunRPC]
+	void shootArrowSound() {
+		int randomArrowSound = Random.Range(0, 2);
+		if (randomArrowSound == 0){
+			audio.PlayOneShot(soundEffectArrow1, 0.5f);
+		} else if (randomArrowSound == 1){
+			audio.PlayOneShot(soundEffectArrow2, 0.5f);
+		} 
+	}
 	//for handgun (bad naming convention but I don't care)
 	void callFlash(AnimationEvent myEvent) {// called from the scene's animator
 		if (photonView.IsMine){
@@ -2063,6 +2130,29 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 		return false;    
 	}
+
+	void rightFootTouchingGround() {
+		if (rightFoot) {
+			if (Physics.CheckSphere(rightFoot.position, 0.05f, 1)) {//default layer is 1
+				//if on grass
+				photonView.RPC("FootSoundGrass", RpcTarget.All);
+				//else
+				//photonView.RPC("FootSoundHardSurface", RpcTarget.All);
+			}
+		}
+	}
+	void leftFootTouchingGround() {
+		if (leftFoot) {
+			if (Physics.CheckSphere(leftFoot.position, 0.05f, 1)) {//default layer is 1
+				//if on grass
+				photonView.RPC("FootSoundGrass", RpcTarget.All);
+				//else
+				//photonView.RPC("FootSoundHardSurface", RpcTarget.All);
+			}
+		}
+	}
+
+
 	public static void DumpToConsole(object obj){
 		var output = JsonUtility.ToJson(obj, true);
 		Debug.Log(output);
