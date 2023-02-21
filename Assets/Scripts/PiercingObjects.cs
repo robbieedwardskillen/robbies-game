@@ -25,17 +25,18 @@ public class PiercingObjects : MonoBehaviourPunCallbacks
 	void ArrowHitSound() {
 		int randomArrowHitSound = Random.Range(0, 2);
 		if (randomArrowHitSound == 0){
-			audio.PlayOneShot(arrowHitSound1, 0.15f);
+			audio.PlayOneShot(arrowHitSound1, 0.05f);
 		} else if (randomArrowHitSound == 1){
-			audio.PlayOneShot(arrowHitSound2, 0.15f);
+			audio.PlayOneShot(arrowHitSound2, 0.05f);
 		} 
 	}
     void OnCollisionEnter(Collision c) {
 
-        if (c.gameObject.tag != "Player"){
+        if (c.gameObject.tag != "Player" || c.gameObject.GetComponent<Rigidbody>() == null){
             ArrowHitSound();
             rb.isKinematic=true;
-            transform.parent.transform.SetParent(c.transform);//arrow 1 is child of arrow(Clone) b/c rotation issues
+            //issues with pun and changing parent
+            //transform.parent.transform.SetParent(c.transform);//arrow 1 is child of arrow(Clone) b/c rotation issues
             StartCoroutine(waitThenDelete());
         }
     }

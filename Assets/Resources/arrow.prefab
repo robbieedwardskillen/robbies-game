@@ -48,7 +48,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 1
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
@@ -240,6 +240,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6504421358134290516, guid: a968038421191aa488279c51bcc80645, type: 3}
+    - {fileID: 8946033650025408940, guid: a968038421191aa488279c51bcc80645, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: a968038421191aa488279c51bcc80645, type: 3}
 --- !u!1 &6568183768442219132 stripped
 GameObject:
@@ -250,6 +251,18 @@ GameObject:
 --- !u!4 &806606166548118193 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2505775839091991509, guid: a968038421191aa488279c51bcc80645,
+    type: 3}
+  m_PrefabInstance: {fileID: 3024142761233799524}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4517011209442981880 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1682178104508198556, guid: a968038421191aa488279c51bcc80645,
+    type: 3}
+  m_PrefabInstance: {fileID: 3024142761233799524}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2118939850614756964 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3787550654749675264, guid: a968038421191aa488279c51bcc80645,
     type: 3}
   m_PrefabInstance: {fileID: 3024142761233799524}
   m_PrefabAsset: {fileID: 0}
@@ -266,7 +279,7 @@ Rigidbody:
   m_AngularDrag: 0.01
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 1
 --- !u!82 &2389864503748494728
@@ -365,6 +378,31 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1269355840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6568183768442219132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5ceb339997c8304e9354d4ce5ddc9da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _emit: 1
+  _emitTime: 0
+  _material: {fileID: 2100000, guid: e013d49975be34033a86a6226b42d85d, type: 2}
+  _lifeTime: 0.15
+  _colors: []
+  _sizes: []
+  _minVertexDistance: 0.1
+  _maxVertexDistance: 2
+  _maxAngle: 1
+  _autoDestruct: 0
+  subdivisions: 1
+  _base: {fileID: 2118939850614756964}
+  _tip: {fileID: 4517011209442981880}
 --- !u!114 &3275832786470727742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -393,5 +431,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SynchronizeVelocity: 1
   m_SynchronizeAngularVelocity: 0
-  m_TeleportEnabled: 0
+  m_TeleportEnabled: 1
   m_TeleportIfDistanceGreaterThan: 3
