@@ -19,6 +19,23 @@ MonoImporter:
   - soundEffectSwing2: {fileID: 8300000, guid: 7aa4d7eaedaae0b40b9ee223d828ec98, type: 3}
   - soundEffectSwing3: {fileID: 8300000, guid: e712959691e83994b90bada876463910, type: 3}
   - soundEffectSwing4: {fileID: 8300000, guid: 56497cc828c206d4c9ab8b46038870d9, type: 3}
+  - soundEffectFoot1: {fileID: 8300000, guid: f48a9608304fff845a13afc6ff02dc5c, type: 3}
+  - soundEffectFoot2: {fileID: 8300000, guid: 9c1627ebdf198f64bafc16248cc8bf5f, type: 3}
+  - soundEffectFoot3: {fileID: 8300000, guid: 9b22453eb97bbbc498e2aba9e1a385fc, type: 3}
+  - soundEffectFoot4: {fileID: 8300000, guid: d56ab487e8666f845b1dc9ef1dc6e37f, type: 3}
+  - soundEffectHandgunShot1: {fileID: 8300000, guid: 78eff3d52d54d3e40a7d37ed0b7f3f8f,
+      type: 3}
+  - soundEffectHandgunShot2: {fileID: 8300000, guid: 32225bc0b294a2841aec15b867b6f4f5,
+      type: 3}
+  - soundEffectHandgunShot3: {fileID: 8300000, guid: 2b113cd9714a6814aa76e97424f02ae0,
+      type: 3}
+  - soundEffectHandgunShot4: {fileID: 8300000, guid: 16ec1a4dcd01f2548ae46bac0160154c,
+      type: 3}
+  - soundEffectHandgunReload: {fileID: 8300000, guid: 45d23a1bf4f9b674cb3c32807389cdc6,
+      type: 3}
+  - soundEffectArrow1: {fileID: 8300000, guid: d92304b1565307c4897336296712a0f2, type: 3}
+  - soundEffectArrow2: {fileID: 8300000, guid: 2ca246e13921a59489704e14db7f7518, type: 3}
+  - PlayerUiPrefab: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

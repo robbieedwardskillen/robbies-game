@@ -7,21 +7,33 @@ using Photon.Realtime;
 public class PiercingObjects : MonoBehaviourPunCallbacks
 {
     Rigidbody rb;
-
+    private AudioSource audio;
+	public AudioClip arrowHitSound1;
+    public AudioClip arrowHitSound2;
 /*     void Start()
     {//start doesn't get called for some reason
         
     } */
     void OnEnable() {
+        audio = gameObject.GetComponent<AudioSource> ();
         rb = gameObject.GetComponent<Rigidbody>();
     }
     void OnDisable() {
 
     }
 
+	void ArrowHitSound() {
+		int randomArrowHitSound = Random.Range(0, 2);
+		if (randomArrowHitSound == 0){
+			audio.PlayOneShot(arrowHitSound1, 0.15f);
+		} else if (randomArrowHitSound == 1){
+			audio.PlayOneShot(arrowHitSound2, 0.15f);
+		} 
+	}
     void OnCollisionEnter(Collision c) {
 
         if (c.gameObject.tag != "Player"){
+            ArrowHitSound();
             rb.isKinematic=true;
             transform.parent.transform.SetParent(c.transform);//arrow 1 is child of arrow(Clone) b/c rotation issues
             StartCoroutine(waitThenDelete());

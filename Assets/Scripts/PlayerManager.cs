@@ -129,7 +129,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public AudioClip soundEffectFoot2;
 	public AudioClip soundEffectFoot3;
 	public AudioClip soundEffectFoot4;
-	public AudioClip soundEffectHandgunShot;
+	public AudioClip soundEffectHandgunShot1;
+	public AudioClip soundEffectHandgunShot2;
+	public AudioClip soundEffectHandgunShot3;
+	public AudioClip soundEffectHandgunShot4;
 	public AudioClip soundEffectHandgunReload;
 	public AudioClip soundEffectArrow1;
 	public AudioClip soundEffectArrow2;
@@ -1582,6 +1585,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 				RaycastHit hit;
 				if (Physics.Raycast(handgun.position, shootZoneOrCrosshair.forward, out hit, range)){
+					photonView.RPC("shootHandgunSound", RpcTarget.All);
 					if (hit.rigidbody != null) {
 						hit.rigidbody.AddForce(hit.normal * -15f);
 					}
@@ -1675,6 +1679,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			audio.PlayOneShot(soundEffectArrow2, 0.5f);
 		} 
 	}
+	[PunRPC]
+	void shootHandgunSound() {
+		int randomHandgunSound = Random.Range(0, 4);
+		if (randomHandgunSound == 0){
+			audio.PlayOneShot(soundEffectHandgunShot1, 0.75f);
+		} else if (randomHandgunSound == 1){
+			audio.PlayOneShot(soundEffectHandgunShot2, 0.75f);
+		} else if (randomHandgunSound == 2){
+			audio.PlayOneShot(soundEffectHandgunShot3, 0.75f);
+		} else if (randomHandgunSound == 3){
+			audio.PlayOneShot(soundEffectHandgunShot4, 0.75f);
+		} 
+	}
+	[PunRPC]
+	void reloadHandgunSound() {
+			audio.PlayOneShot(soundEffectHandgunReload, 0.75f);
+	}
 	//for handgun (bad naming convention but I don't care)
 	void callFlash(AnimationEvent myEvent) {// called from the scene's animator
 		if (photonView.IsMine){
@@ -1728,6 +1749,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	IEnumerator ReloadHandgun() {//not used
 		yield return new WaitForSeconds(0.1f);
+		photonView.RPC("reloadHandgunSound", RpcTarget.All);
 		playerAnimator.SetLayerWeight(4, 1f);
 		photonView.RPC("RPCTrigger3", RpcTarget.All, "Handgun Reload");
 		//playerAnimator.SetBool("reloading", true);
@@ -1740,7 +1762,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	IEnumerator ReloadHandgunContinueShooting() {
 		
 		yield return new WaitForSeconds(0.1f);//so hand doesn't go down idk why 0.1 seconds is enough time
-
+		photonView.RPC("reloadHandgunSound", RpcTarget.All);
 		photonView.RPC("RPCTrigger3", RpcTarget.All, "Handgun Reload");
 
 		while (reloadToShootTime < desiredDuration){
