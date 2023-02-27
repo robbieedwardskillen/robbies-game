@@ -26,6 +26,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private bool takingDamage = false;
 	private bool isAerial = false;
 	private bool rolling = false;
+	private float rollSpeed = 1f;
 	private bool secondHit = false;
     private float range = 200f;
 	public float moveSpeed = 1f;
@@ -69,6 +70,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 movement;
 	private Transform spine;
 	private Transform rightFoot;
+	private Collider[] rightFootHitColliders;
+	private Collider[] leftFootHitColliders;
 	private Transform leftFoot;
 	private GameObject[] equippedWeps = new GameObject[2];
 	public GameObject grenade;
@@ -136,6 +139,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public AudioClip soundEffectHandgunReload;
 	public AudioClip soundEffectArrow1;
 	public AudioClip soundEffectArrow2;
+	public AudioClip soundEffectJump;
+	public AudioClip soundEffectRoll;
 	private Camera m_cam;
 	private GameObject camRotateWithZeroY;
 	private GameObject m_camRotation;
@@ -1064,6 +1069,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				if (!rolling && !changingWeps){
 					//start attacks
 					if (controls.Gameplay.Action4.triggered && !isAerial) {
+						audio.PlayOneShot (soundEffectRoll, 0.5f);
 						playerAnimator.SetTrigger("roll");
 					} 
 					
@@ -1268,8 +1274,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					} 
 
 					if (controls.Gameplay.Jump.triggered && !isAerial && !playerAnimator.GetBool("blocking") && !underWater) {
+
 						//moveLegs = false;
-						//audio.PlayOneShot (playerJump, 1.2f);
+						audio.PlayOneShot (soundEffectJump, 0.5f);
 						gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(0, 200f, 0));
 					}		
 
@@ -1505,22 +1512,21 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				} else {
 					rotation = Quaternion.identity;
 				}
+				if (rolling){
+					rollSpeed = 0.5f;
+				} else {
+					rollSpeed = 1f;
+				}
 				if (!gameTransition.transitioning && alive){
-					if (rolling) {
-						if (playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 0.5f) {
-							transform.position += movement * (moveSpeed * 1f) * Time.deltaTime;
-						} else {
-							transform.position += movement * (moveSpeed * 0.4f) * Time.deltaTime;
-						}
-					} else {
+
 						if (!playerAnimator.GetBool("blocking") && !bigSwing && !knockDown && !gettingUp && !fireball) {
-							transform.position += movement * moveSpeed * Time.deltaTime;
+							transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
 						}
 						if (bigSwing && isAerial) {
-							transform.position += movement * moveSpeed * Time.deltaTime;
+							transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
 						}
 
-					}
+					
 				}
 
 				if (!aiming && !firing){
@@ -2155,8 +2161,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	void rightFootTouchingGround() {
 		if (rightFoot) {
 			if (Physics.CheckSphere(rightFoot.position, 0.05f, 1)) {//default layer is 1
-				//if on grass
-				photonView.RPC("FootSoundGrass", RpcTarget.All);
+				rightFootHitColliders = Physics.OverlapSphere(rightFoot.position, 0.05f);
+				if (rightFootHitColliders.Length != 0) {
+					if (rightFootHitColliders[0].name == "ground"){
+						photonView.RPC("FootSoundGrass", RpcTarget.All);
+					} else {
+						photonView.RPC("FootSoundHardSurface", RpcTarget.All);
+					}
+					
+				}
+
 				//else
 				//photonView.RPC("FootSoundHardSurface", RpcTarget.All);
 			}
@@ -2165,8 +2179,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	void leftFootTouchingGround() {
 		if (leftFoot) {
 			if (Physics.CheckSphere(leftFoot.position, 0.05f, 1)) {//default layer is 1
-				//if on grass
-				photonView.RPC("FootSoundGrass", RpcTarget.All);
+				leftFootHitColliders = Physics.OverlapSphere(leftFoot.position, 0.05f);
+				if (leftFootHitColliders.Length != 0) {
+					if (leftFootHitColliders[0].name == "ground"){
+						photonView.RPC("FootSoundGrass", RpcTarget.All);
+					} else {
+						photonView.RPC("FootSoundHardSurface", RpcTarget.All);
+					}
+					
+				}
+
 				//else
 				//photonView.RPC("FootSoundHardSurface", RpcTarget.All);
 			}
