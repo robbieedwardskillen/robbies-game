@@ -67,6 +67,7 @@ namespace com.zibra.liquid.Manipulators
         [ExecuteInEditMode]
         public void Awake()
         {
+            
             // If Emitter is in old format we need to parse old parameters and come up with equivalent new ones
             if (ObjectVersion == 1)
             {
@@ -118,6 +119,10 @@ namespace com.zibra.liquid.Manipulators
 
         private void Update()
         {
+            this.ManipType = ManipulatorType.Emitter;
+            //this.ManipType = ManipulatorType.None;
+            Debug.Log("test");
+            DumpToConsole(this.ManipType);
             Vector3 rotatedInitialVelocity = GetRotatedInitialVelocity();
             AdditionalData.y = rotatedInitialVelocity.x;
             AdditionalData.z = rotatedInitialVelocity.y;
@@ -142,7 +147,10 @@ namespace com.zibra.liquid.Manipulators
         {
             return transform.lossyScale;
         }
-
+        public static void DumpToConsole(object obj){
+            var output = JsonUtility.ToJson(obj, true);
+            Debug.Log(output);
+        }
         // clang-format doesn't parse code with new keyword properly
         // clang-format off
 

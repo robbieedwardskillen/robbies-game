@@ -46,7 +46,7 @@ namespace com.zibra.liquid.Editor.Solver
         protected new void OnEnable()
         {
             base.OnEnable();
-
+            
             EmitterInstances = new ZibraLiquidEmitter[targets.Length];
 
             for (int i = 0; i < targets.Length; i++)
