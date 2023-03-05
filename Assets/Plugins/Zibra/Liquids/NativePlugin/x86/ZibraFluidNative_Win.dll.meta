@@ -6,7 +6,7 @@ PluginImporter:
   iconMap: {}
   executionOrder: {}
   defineConstraints: []
-  isPreloaded: 0
+  isPreloaded: 1
   isOverridable: 0
   isExplicitlyReferenced: 0
   validateReferences: 1
@@ -16,12 +16,19 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        Exclude Editor: 0
+        Exclude Android: 1
+        Exclude Editor: 1
         Exclude Linux64: 0
         Exclude OSXUniversal: 0
         Exclude Win: 0
         Exclude Win64: 1
-        Exclude iOS: 1
+        Exclude WindowsStoreApps: 1
+  - first:
+      Android: Android
+    second:
+      enabled: 0
+      settings:
+        CPU: ARMv7
   - first:
       Any: 
     second:
@@ -30,9 +37,9 @@ PluginImporter:
   - first:
       Editor: Editor
     second:
-      enabled: 1
+      enabled: 0
       settings:
-        CPU: x86
+        CPU: AnyCPU
         DefaultValueInitialized: true
         OS: Windows
   - first:
@@ -40,7 +47,7 @@ PluginImporter:
     second:
       enabled: 1
       settings:
-        CPU: AnyCPU
+        CPU: None
   - first:
       Standalone: OSXUniversal
     second:
@@ -60,14 +67,15 @@ PluginImporter:
       settings:
         CPU: None
   - first:
-      iPhone: iOS
+      Windows Store Apps: WindowsStoreApps
     second:
       enabled: 0
       settings:
-        AddToEmbeddedBinaries: false
         CPU: AnyCPU
-        CompileFlags: 
-        FrameworkDependencies: 
+        DontProcess: false
+        PlaceholderPath: 
+        SDK: AnySDK
+        ScriptingBackend: AnyScriptingBackend
   userData: 
   assetBundleName: 
   assetBundleVariant: 

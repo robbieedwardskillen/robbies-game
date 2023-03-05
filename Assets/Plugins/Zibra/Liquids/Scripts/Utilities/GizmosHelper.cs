@@ -1,17 +1,13 @@
 #if UNITY_EDITOR
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
 namespace com.zibra.liquid.Utilities
 {
-    public static class GizmosHelper
+    internal static class GizmosHelper
     {
-        public static void DrawWireCapsule(Vector3 pos, Quaternion rot, float radius, float height,
-                                           Color color = default(Color))
+        public static void DrawWireCapsule(Vector3 pos, Quaternion rot, float radius, float height)
         {
-            if (color != default(Color))
-                Handles.color = color;
             Matrix4x4 angleMatrix = Matrix4x4.TRS(pos, rot, Handles.matrix.lossyScale);
             using (new Handles.DrawingScope(angleMatrix))
             {
@@ -33,11 +29,8 @@ namespace com.zibra.liquid.Utilities
             }
         }
 
-        public static void DrawWireCylinder(Vector3 pos, Quaternion rot, float radius, float height,
-                                            Color color = default(Color))
+        public static void DrawWireCylinder(Vector3 pos, Quaternion rot, float radius, float height)
         {
-            if (color != default(Color))
-                Handles.color = color;
             Matrix4x4 angleMatrix = Matrix4x4.TRS(pos, rot, Handles.matrix.lossyScale);
             using (new Handles.DrawingScope(angleMatrix))
             {
@@ -51,16 +44,15 @@ namespace com.zibra.liquid.Utilities
             }
         }
 
-        public static void DrawWireTorus(Vector3 pos, Quaternion rot, float radiusSmall, float radiusLarge,
-                                         Color color = default(Color))
+        public static void DrawWireTorus(Vector3 pos, Quaternion rot, float radiusSmall, float radiusLarge)
         {
-            if (color != default(Color))
-                Handles.color = color;
             Matrix4x4 angleMatrix = Matrix4x4.TRS(pos, rot, Handles.matrix.lossyScale);
             using (new Handles.DrawingScope(angleMatrix))
             {
+                const float step = 40.0f;
+
                 // small circles
-                for (float ang = 0.0f; ang < 360.0f; ang += 15.0f)
+                for (float ang = 0.0f; ang < 360.0f; ang += step)
                 {
                     float radians = Mathf.Deg2Rad * ang;
                     Vector3 direction = Vector3.left * Mathf.Sin(radians) + Vector3.forward * Mathf.Cos(radians);
@@ -69,7 +61,7 @@ namespace com.zibra.liquid.Utilities
                 }
 
                 // large circles
-                for (float ang = 0.0f; ang < 360.0f; ang += 15.0f)
+                for (float ang = 0.0f; ang < 360.0f; ang += step)
                 {
                     float radians = Mathf.Deg2Rad * ang;
                     float radius = radiusLarge + radiusSmall * Mathf.Sin(radians);
@@ -79,10 +71,9 @@ namespace com.zibra.liquid.Utilities
             }
         }
 
-        public static void DrawArrow(Vector3 origin, Vector3 vector, Color color, float arrowHeadLength = 0.25f,
+        public static void DrawArrow(Vector3 origin, Vector3 vector, float arrowHeadLength = 0.25f,
                                      float arrowHeadAngle = 20.0f)
         {
-            Gizmos.color = color;
             Gizmos.DrawRay(origin, vector);
             arrowHeadLength *= Vector3.Magnitude(vector);
 
@@ -95,39 +86,39 @@ namespace com.zibra.liquid.Utilities
             Gizmos.DrawRay(origin + vector, left * arrowHeadLength);
         }
 
-        static float Phi = 0.5f * (Mathf.Sqrt(5.0f) + 1.0f);
+        private static float Phi = 0.5f * (Mathf.Sqrt(5.0f) + 1.0f);
 
         // i-th point of n uniformly distibuted fibonacci points on a sphere
-        static public Vector3 FibonacciSpherePoint(int i, int n)
+        public static Vector3 FibonacciSpherePoint(int i, int n)
         {
             Vector2 pt = new Vector2(2.0f * Mathf.PI * ((i / Phi) % 1.0f), Mathf.Acos(1.0f - (2.0f * i + 1.0f) / n));
             return new Vector3(Mathf.Cos(pt.x) * Mathf.Sin(pt.y), Mathf.Sin(pt.x) * Mathf.Sin(pt.y), Mathf.Cos(pt.y));
         }
 
-        public static void DrawArrowsSphereRadial(Vector3 origin, float length, int n, Color color)
+        public static void DrawArrowsSphereRadial(Vector3 origin, float length, int n)
         {
             for (int i = 0; i < n; i++)
             {
                 Vector3 point = FibonacciSpherePoint(i, n);
-                DrawArrow(origin + point + 0.5f * length * point, -length * point, color);
+                DrawArrow(origin + point + 0.5f * length * point, -length * point);
             }
         }
-        public static void DrawArrowsSphereTangent(Vector3 origin, Vector3 axis, int n, Color color)
+        public static void DrawArrowsSphereTangent(Vector3 origin, Vector3 axis, int n)
         {
             for (int i = 0; i < n; i++)
             {
                 Vector3 point = FibonacciSpherePoint(i, n);
                 Vector3 direction = Vector3.Cross(point, axis);
-                DrawArrow(origin + point - 0.5f * direction, direction, color);
+                DrawArrow(origin + point - 0.5f * direction, direction);
             }
         }
 
-        public static void DrawArrowsSphereDirectional(Vector3 origin, Vector3 direction, int n, Color color)
+        public static void DrawArrowsSphereDirectional(Vector3 origin, Vector3 direction, int n)
         {
             for (int i = 0; i < n; i++)
             {
                 Vector3 point = FibonacciSpherePoint(i, n);
-                DrawArrow(origin + point - 0.5f * direction, direction, color);
+                DrawArrow(origin + point - 0.5f * direction, direction);
             }
         }
     }

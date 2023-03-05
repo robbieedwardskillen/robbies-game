@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public bool connected = false;
     private FindPlayerPrefab findPlayerPrefab1;//bad coding but i don't care
     private FindPlayerPrefab findPlayerPrefab2;
+
     #endregion
 
     #region Photon Callbacks

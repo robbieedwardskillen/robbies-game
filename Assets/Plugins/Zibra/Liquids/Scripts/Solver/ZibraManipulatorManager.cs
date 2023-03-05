@@ -2,148 +2,397 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using com.zibra.liquid.Solver;
+using com.zibra.liquid.SDFObjects;
+using com.zibra.liquid.Utilities;
 
 namespace com.zibra.liquid.Manipulators
 {
-    public class ZibraManipulatorManager : MonoBehaviour
+    internal class ZibraManipulatorManager : MonoBehaviour
     {
         [HideInInspector]
         [StructLayout(LayoutKind.Sequential)]
-        public struct ManipulatorParam
+        internal struct ManipulatorParam
         {
-            public Matrix4x4 Transform;
-            public Matrix4x4 PreviousTransform; // the previous frame transform of the object, needed for accurate
-                                                // collision detection
-            public Matrix4x4 ToObjectSpace;
-            public Vector3 Position;
-            public Int32 ConstDataBegin;
-            public Vector3 Scale;
-            Single ManipulatorParamPadding;
-            public Quaternion Rotation;
-            public Vector3 BBoxMin;
-            public Int32 Type;
-            public Vector3 BBoxMax;
             public Int32 Enabled;
-            public Vector4 AdditionalData;
+            public Int32 SDFObjectID;
+            public Int32 ParticleSpecies;
+            public Int32 IntParameter;
+
+            public Vector4 AdditionalData0;
+            public Vector4 AdditionalData1;
         }
 
         [HideInInspector]
         [StructLayout(LayoutKind.Sequential)]
-        public struct ManipulatorIndices
+        internal struct SDFObjectParams
         {
-            public int EmitterIndex;
-            public int EmitterIndexEnd;
+            public Vector3 Position;
+            public Single NormalSmooth;
 
-            public int VoidIndex;
-            public int VoidIndexEnd;
+            public Vector3 Velocity;
+            public Single SurfaceValue;
 
-            public int ForceFieldIndex;
-            public int ForceFieldIndexEnd;
+            public Vector3 Scale;
+            public Single DistanceScale;
 
-            public int AnalyticColliderIndex;
-            public int AnalyticColliderIndexEnd;
+            public Vector3 AnguralVelocity;
+            public Int32 Type;
 
-            public int VoxelColliderIndex;
-            public int VoxelColliderIndexEnd;
+            public Quaternion Rotation;
 
-            public int DetectorIndex;
-            public int DetectorIndexEnd;
+            public Vector3 BBoxSize;
+            public Single BBoxVolume;
 
-            public int PortalIndex;
-            public int PortalIndexEnd;
-            Vector2 ManipulatorIndicesPadding;
+            public Int32 EmbeddingTextureBlocks;
+            public Int32 SDFTextureBlocks;
+            public Int32 ObjectID;
+            public Single TotalGroupVolume;
+
+            public Vector3 UnusedPadding;
+            public Int32 ManipulatorID;
+        };
+
+        [HideInInspector]
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct ManipulatorIndices
+        {
+            public Int32 EmitterIndexBegin;
+            public Int32 EmitterIndexEnd;
+            public Int32 VoidIndexBegin;
+            public Int32 VoidIndexEnd;
+
+            public Int32 ForceFieldIndexBegin;
+            public Int32 ForceFieldIndexEnd;
+            public Int32 AnalyticColliderIndexBegin;
+            public Int32 AnalyticColliderIndexEnd;
+
+            public Int32 NeuralColliderIndexBegin;
+            public Int32 NeuralColliderIndexEnd;
+            public Int32 GroupColliderIndexBegin;
+            public Int32 GroupColliderIndexEnd;
+
+            public Int32 DetectorIndexBegin;
+            public Int32 DetectorIndexEnd;
+            public Int32 SpeciesModifierIndexBegin;
+            public Int32 SpeciesModifierIndexEnd;
+
+            public Int32 PortalIndexBegin;
+            public Int32 PortalIndexEnd;
+            public Vector2Int IndexPadding;
         }
 
-        int[] TypeIndex = new int[(int)Manipulator.ManipulatorType.TypeNum + 1];
+        private int[] TypeIndex = new int[(int)Manipulator.ManipulatorType.TypeNum + 1];
 
-        public ManipulatorIndices indices = new ManipulatorIndices();
+        public ManipulatorIndices Indices = new ManipulatorIndices();
 
         // All data together
         [HideInInspector]
         public int Elements = 0;
         [HideInInspector]
         public List<ManipulatorParam> ManipulatorParams = new List<ManipulatorParam>();
-
         [HideInInspector]
-        public float[] ConstAdditionalData = new float[0];
+        public List<SDFObjectParams> SDFObjectList = new List<SDFObjectParams>();
+        [HideInInspector]
+        public Color32[] Embeddings;
+        [HideInInspector]
+        public byte[] SDFGrid;
         [HideInInspector]
         public List<int> ConstDataID = new List<int>();
 
-        private Vector3 VectorClamp(Vector3 x, Vector3 min, Vector3 max)
+        [HideInInspector]
+        public int TextureCount = 0;
+        [HideInInspector]
+        public int SDFTextureSize = 0;
+        [HideInInspector]
+        public int EmbeddingTextureSize = 0;
+
+        [HideInInspector]
+        public int SDFTextureBlocks = 0;
+        [HideInInspector]
+        public int EmbeddingTextureBlocks = 0;
+
+        [HideInInspector]
+        public int SDFTextureDimension = 0;
+        [HideInInspector]
+        public int EmbeddingTextureDimension = 0;
+
+#if ZIBRA_LIQUID_PAID_VERSION
+        [HideInInspector]
+        public Dictionary<ZibraHash128, NeuralSDF> NeuralSDFs = new Dictionary<ZibraHash128, NeuralSDF>();
+        [HideInInspector]
+        public Dictionary<ZibraHash128, int> TextureHashMap = new Dictionary<ZibraHash128, int>();
+#endif
+
+        private List<Manipulator> Manipulators;
+
+        private Vector3 Abs(Vector3 x)
         {
-            return Vector3.Max(Vector3.Min(x, max), min);
+            return new Vector3(Mathf.Abs(x.x), Mathf.Abs(x.y), Mathf.Abs(x.z));
         }
 
-        private List<Manipulator> manipulators;
+        protected SDFObjectParams GetSDF(SDFObject obj, Manipulator manipulator)
+        {
+            SDFObjectParams sdf = new SDFObjectParams();
+
+            if (obj == null)
+            {
+                throw new Exception("Missing SDF on manipulator");
+            }
+
+            sdf.Rotation = manipulator.transform.rotation;
+            sdf.Scale = manipulator.transform.lossyScale;
+            sdf.Position = manipulator.transform.position;
+            sdf.BBoxSize = 2.0f * sdf.Scale;
+
+            sdf.NormalSmooth = 0.01f;
+            sdf.Velocity = Vector3.zero;
+            sdf.SurfaceValue = 0.0f;
+            SDFObject main = manipulator.GetComponent<SDFObject>();
+            if (main != null)
+            {
+                sdf.SurfaceValue += main.SurfaceDistance;
+            }
+            sdf.SurfaceValue += obj.SurfaceDistance;
+            sdf.DistanceScale = 1.0f;
+            sdf.AnguralVelocity = Vector3.zero;
+            sdf.Type = 0;
+            sdf.TotalGroupVolume = 0.0f;
+            sdf.BBoxSize = 0.5f * manipulator.transform.lossyScale;
+
+#if ZIBRA_LIQUID_PAID_VERSION
+            if (manipulator is ZibraLiquidEmitter || manipulator is ZibraLiquidVoid)
+#else
+            if (manipulator is ZibraLiquidEmitter)
+#endif
+            {
+                // use Box as default
+                sdf.Type = 1;
+            }
+
+            if (obj is AnalyticSDF)
+            {
+                AnalyticSDF analyticSDF = obj as AnalyticSDF;
+                sdf.Type = (int)analyticSDF.ChosenSDFType;
+                sdf.DistanceScale = analyticSDF.InvertSDF ? -1.0f : 1.0f;
+                sdf.BBoxSize = analyticSDF.GetBBoxSize();
+            }
+
+#if ZIBRA_LIQUID_PAID_VERSION
+            if (obj is NeuralSDF)
+            {
+                NeuralSDF neuralSDF = obj as NeuralSDF;
+                Matrix4x4 transf = obj.transform.localToWorldMatrix * neuralSDF.ObjectRepresentation.ObjectTransform;
+
+                sdf.Rotation = transf.rotation;
+                sdf.Scale = Abs(transf.lossyScale);
+                sdf.Position = transf.MultiplyPoint(Vector3.zero);
+                sdf.Type = -1;
+                sdf.ObjectID = TextureHashMap[neuralSDF.ObjectRepresentation.GetHash()];
+                sdf.EmbeddingTextureBlocks = EmbeddingTextureBlocks;
+                sdf.SDFTextureBlocks = SDFTextureBlocks;
+                sdf.DistanceScale = neuralSDF.InvertSDF ? -1.0f : 1.0f;
+                sdf.BBoxSize = sdf.Scale;
+            }
+#endif
+
+            sdf.BBoxVolume = sdf.BBoxSize.x * sdf.BBoxSize.y * sdf.BBoxSize.z;
+            return sdf;
+        }
+
+#if ZIBRA_LIQUID_PAID_VERSION
+        protected void AddTexture(NeuralSDF neuralSDF)
+        {
+            ZibraHash128 curHash = neuralSDF.ObjectRepresentation.GetHash();
+
+            if (TextureHashMap.ContainsKey(curHash))
+                return;
+
+            SDFTextureSize +=
+                neuralSDF.ObjectRepresentation.GridResolution / NeuralSDFRepresentation.BLOCK_SDF_APPROX_DIMENSION;
+            EmbeddingTextureSize += NeuralSDFRepresentation.EMBEDDING_SIZE *
+                                    neuralSDF.ObjectRepresentation.EmbeddingResolution /
+                                    NeuralSDFRepresentation.BLOCK_EMBEDDING_GRID_DIMENSION;
+            NeuralSDFs[curHash] = neuralSDF;
+
+            int sdfID = TextureCount;
+            TextureHashMap[curHash] = sdfID;
+
+            TextureCount++;
+        }
+
+        protected void AddTextureData(NeuralSDF neuralSDF)
+        {
+            ZibraHash128 curHash = neuralSDF.ObjectRepresentation.GetHash();
+            int sdfID = TextureHashMap[curHash];
+
+            // Embedding texture
+            for (int t = 0; t < NeuralSDFRepresentation.EMBEDDING_SIZE; t++)
+            {
+                int block = sdfID * NeuralSDFRepresentation.EMBEDDING_SIZE + t;
+                Vector3Int blockPos = NeuralSDFRepresentation.BLOCK_EMBEDDING_GRID_DIMENSION *
+                                      new Vector3Int(block % EmbeddingTextureBlocks,
+                                                     (block / EmbeddingTextureBlocks) % EmbeddingTextureBlocks,
+                                                     block / (EmbeddingTextureBlocks * EmbeddingTextureBlocks));
+                int Size = neuralSDF.ObjectRepresentation.EmbeddingResolution;
+
+                for (int i = 0; i < Size; i++)
+                {
+                    for (int j = 0; j < Size; j++)
+                    {
+                        for (int k = 0; k < Size; k++)
+                        {
+                            Vector3Int pos = blockPos + new Vector3Int(i, j, k);
+                            int id = pos.x + EmbeddingTextureDimension * (pos.y + EmbeddingTextureDimension * pos.z);
+                            if (id >= EmbeddingTextureSize)
+                            {
+                                Debug.LogError(pos);
+                            }
+                            Embeddings[id] = neuralSDF.ObjectRepresentation.GetEmbedding(i, j, k, t);
+                        }
+                    }
+                }
+            }
+
+            // SDF approximation texture
+            {
+                int block = sdfID;
+                Vector3Int blockPos =
+                    NeuralSDFRepresentation.BLOCK_SDF_APPROX_DIMENSION *
+                    new Vector3Int(block % SDFTextureBlocks, (block / SDFTextureBlocks) % SDFTextureBlocks,
+                                   block / (SDFTextureBlocks * SDFTextureBlocks));
+                int Size = neuralSDF.ObjectRepresentation.GridResolution;
+                for (int i = 0; i < Size; i++)
+                {
+                    for (int j = 0; j < Size; j++)
+                    {
+                        for (int k = 0; k < Size; k++)
+                        {
+                            Vector3Int pos = blockPos + new Vector3Int(i, j, k);
+                            int id = pos.x + SDFTextureDimension * (pos.y + SDFTextureDimension * pos.z);
+                            for (int t = 0; t < 2; t++)
+                                SDFGrid[2 * id + t] = neuralSDF.ObjectRepresentation.GetSDGrid(i, j, k, t);
+                        }
+                    }
+                }
+            }
+        }
+
+        protected void CalculateTextureData()
+        {
+            SDFTextureBlocks = (int)Mathf.Ceil(Mathf.Pow(SDFTextureSize, (1.0f / 3.0f)));
+            EmbeddingTextureBlocks = (int)Mathf.Ceil(Mathf.Pow(EmbeddingTextureSize, (1.0f / 3.0f)));
+
+            SDFTextureDimension = NeuralSDFRepresentation.BLOCK_SDF_APPROX_DIMENSION * SDFTextureBlocks;
+            EmbeddingTextureDimension = NeuralSDFRepresentation.BLOCK_EMBEDDING_GRID_DIMENSION * EmbeddingTextureBlocks;
+
+            SDFTextureSize = SDFTextureDimension * SDFTextureDimension * SDFTextureDimension;
+            EmbeddingTextureSize = EmbeddingTextureDimension * EmbeddingTextureDimension * EmbeddingTextureDimension;
+
+            Array.Resize<Color32>(ref Embeddings, EmbeddingTextureSize);
+            Array.Resize<byte>(ref SDFGrid, 2 * SDFTextureSize);
+
+            foreach (var sdf in NeuralSDFs.Values)
+            {
+                AddTextureData(sdf);
+            }
+        }
+
+#endif
 
         /// <summary>
         /// Update all arrays and lists with manipulator object data
         /// Should be executed every simulation frame
         /// </summary>
-        public void UpdateDynamic(Vector3 containerPos, Vector3 containerSize, float deltaTime = 0.0f)
+        ///
+        public void UpdateDynamic(ZibraLiquid parent, float deltaTime = 0.0f)
         {
             int ID = 0;
             ManipulatorParams.Clear();
+            SDFObjectList.Clear();
             // fill arrays
 
-            foreach (var manipulator in manipulators)
+            foreach (var manipulator in Manipulators)
             {
                 if (manipulator == null)
                     continue;
 
                 ManipulatorParam manip = new ManipulatorParam();
 
-                manip.Transform = manipulator.GetTransform();
-                manip.ToObjectSpace = manipulator.transform.worldToLocalMatrix;
-                manip.Type = (int)manipulator.ManipType;
-                manip.Rotation = manipulator.GetRotation();
-                manip.Scale = manipulator.GetScale();
-                manip.Position = manipulator.GetPosition();
                 manip.Enabled = (manipulator.isActiveAndEnabled && manipulator.gameObject.activeInHierarchy) ? 1 : 0;
-                manip.AdditionalData = manipulator.AdditionalData;
-                manip.ConstDataBegin = Mathf.Max(ConstDataID[ID], 0);
-                manip.PreviousTransform = manipulator.PreviousTransform;
+                manip.AdditionalData0 = manipulator.AdditionalData0;
+                manip.AdditionalData1 = manipulator.AdditionalData1;
 
-#if ZIBRA_LIQUID_PAID_VERSION
-                if (manipulator is SDFObjects.VoxelCollider)
+                SDFObjectParams sdf = GetSDF(manipulator.GetComponent<SDFObject>(), manipulator);
+
+#if ZIBRA_LIQUID_PRO_VERSION
+                // TODO replace with SDF group
+                if (manipulator.GetComponent<SkinnedMeshSDF>() != null)
                 {
-                    SDFObjects.VoxelCollider collider = manipulator as SDFObjects.VoxelCollider;
-                    manip.BBoxMax = collider.BoundingBoxMax;
-                    manip.BBoxMin = collider.BoundingBoxMin;
+                    float TotalVolume = 0.0f;
+                    Vector3 averageScale = Vector3.zero;
+                    Vector3 averagePosition = Vector3.zero;
+                    SkinnedMeshSDF skinnedMeshSDF = manipulator.GetComponent<SkinnedMeshSDF>();
+
+                    sdf.Type = -2;
+                    sdf.ObjectID = SDFObjectList.Count;
+                    sdf.SDFTextureBlocks = skinnedMeshSDF.BoneSDFList.Count;
+
+                    foreach (var bone in skinnedMeshSDF.BoneSDFList)
+                    {
+                        SDFObjectParams boneSDF = GetSDF(bone, manipulator);
+                        TotalVolume += boneSDF.BBoxVolume;
+                        averageScale += boneSDF.Scale;
+                        averagePosition += boneSDF.Position;
+                        boneSDF.ManipulatorID = ID;
+                        SDFObjectList.Add(boneSDF);
+                    }
+
+                    sdf.Position = averagePosition / skinnedMeshSDF.BoneSDFList.Count;
+                    sdf.Scale = averageScale / skinnedMeshSDF.BoneSDFList.Count;
+                    sdf.TotalGroupVolume = TotalVolume;
+                }
+
+                if (manipulator is ZibraLiquidEmitter)
+                    manipulator.CurrentInteractionMode = Manipulator.InteractionMode.OnlySelectedParticleSpecies;
+
+                switch (manipulator.CurrentInteractionMode)
+                {
+                case Manipulator.InteractionMode.AllParticleSpecies:
+                    manip.ParticleSpecies = 0;
+                    break;
+                case Manipulator.InteractionMode.OnlySelectedParticleSpecies:
+                    manip.ParticleSpecies = 1 + manipulator.ParticleSpecies;
+                    break;
+                case Manipulator.InteractionMode.ExceptSelectedParticleSpecies:
+                    manip.ParticleSpecies = -(1 + manipulator.ParticleSpecies);
+                    break;
                 }
 #endif
+
                 if (manipulator is ZibraLiquidEmitter)
                 {
                     ZibraLiquidEmitter emitter = manipulator as ZibraLiquidEmitter;
 
-                    if (emitter.PositionClampBehavior == ZibraLiquidEmitter.ClampBehaviorType.Clamp)
-                    {
-                        Vector3[] positions = {
-                            new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-0.5f, -0.5f, 0.5f),
-                            new Vector3(-0.5f, 0.5f, -0.5f),  new Vector3(-0.5f, 0.5f, 0.5f),
-                            new Vector3(0.5f, -0.5f, -0.5f),  new Vector3(0.5f, -0.5f, 0.5f),
-                            new Vector3(0.5f, 0.5f, -0.5f),   new Vector3(0.5f, 0.5f, 0.5f),
-                        };
-                        Bounds bounds = GeometryUtility.CalculateBounds(positions, manip.Transform);
+                    float particlesPerSec = emitter.VolumePerSimTime / parent.NodeSize / parent.NodeSize /
+                                            parent.NodeSize * parent.SolverParameters.ParticleDensity *
+                                            parent.SimulationTimeScale;
 
-                        Vector3 containerMin = containerPos - containerSize * 0.45f;
-                        Vector3 containerMax = containerPos + containerSize * 0.45f;
+                    manip.AdditionalData0.x = Mathf.Floor(particlesPerSec * deltaTime);
 
-                        Vector3 offsetsMin = Vector3.Max(containerMin - bounds.min, new Vector3(0, 0, 0));
-                        Vector3 offsetsMax = Vector3.Max(bounds.max - containerMax, new Vector3(0, 0, 0));
-
-                        manip.Transform = Matrix4x4.Translate(offsetsMin - offsetsMax) * manip.Transform;
-                    }
-
-                    manip.AdditionalData.x = Mathf.Floor(emitter.ParticlesPerSec * deltaTime);
+#if ZIBRA_LIQUID_PRO_VERSION
+                    manip.ParticleSpecies = manipulator.ParticleSpecies;
+#endif
                 }
 
+                manip.SDFObjectID = SDFObjectList.Count;
+                sdf.ManipulatorID = ID;
+                SDFObjectList.Add(sdf);
                 ManipulatorParams.Add(manip);
                 ID++;
             }
 
-            // ManipulatorParams.ToArray();
-            Elements = manipulators.Count;
+            Elements = Manipulators.Count;
         }
 
         private static float INT2Float(int a)
@@ -161,48 +410,93 @@ namespace com.zibra.liquid.Manipulators
         }
 
 #if ZIBRA_LIQUID_PAID_VERSION
+        private Vector3 Simulation2Local(Vector3 pos, ZibraLiquid parent)
+        {
+            return new Vector3(
+                parent.ContainerSize.x * pos.x / parent.GridSize.x - parent.ContainerSize.x * 0.5f,
+                parent.ContainerSize.y * pos.y / parent.GridSize.y - parent.ContainerSize.y * 0.5f,
+                parent.ContainerSize.z * pos.z / parent.GridSize.z - parent.ContainerSize.z * 0.5f
+            );
+        }
+
+        private Vector3 Simulation2World(Vector3 pos, ZibraLiquid parent)
+        {
+            return Simulation2Local(pos, parent) + parent.transform.position;
+        }
+
+        private Vector3 EncodedSimulationSpaceToWorldSpace(Vector3 encodedPos, ZibraLiquid parent, bool inverted = false)
+        {
+            Vector3 simulationPosition = Vector3.Scale(encodedPos / ((float)Int32.MaxValue), parent.GridSize);
+
+            if (inverted)
+            {
+                simulationPosition = parent.GridSize - simulationPosition;
+            }
+
+            return Simulation2World(simulationPosition, parent);
+        }
+
         /// <summary>
         /// Update manipulator statistics
         /// </summary>
-        public void UpdateStatistics(Int32[] data, List<Manipulator> curManipulators,
+        public void UpdateStatistics(ZibraLiquid parent, Int32[] data, List<Manipulator> curManipulators,
                                      DataStructures.ZibraLiquidSolverParameters solverParameters,
-                                     List<SDFObjects.SDFCollider> sdfObjects)
+                                     List<ZibraLiquidCollider> sdfObjects)
         {
             int id = 0;
-            foreach (var manipulator in manipulators)
+            foreach (var manipulator in Manipulators)
             {
                 if (manipulator == null)
                     continue;
 
-                switch (manipulator.ManipType)
+                Vector3 Force = Mathf.Exp(4.0f * solverParameters.ForceInteractionStrength) *
+                                new Vector3(INT2Float(data[GetStatIndex(id, 0)]), INT2Float(data[GetStatIndex(id, 1)]),
+                                            INT2Float(data[GetStatIndex(id, 2)]));
+                Vector3 Torque = Mathf.Exp(4.0f * solverParameters.ForceInteractionStrength) *
+                                 new Vector3(INT2Float(data[GetStatIndex(id, 3)]), INT2Float(data[GetStatIndex(id, 4)]),
+                                             INT2Float(data[GetStatIndex(id, 5)]));
+
+                switch (manipulator.GetManipulatorType())
                 {
                 default:
                     break;
                 case Manipulator.ManipulatorType.Emitter:
                     ZibraLiquidEmitter emitter = manipulator as ZibraLiquidEmitter;
-                    emitter.createdParticlesPerFrame = data[GetStatIndex(id, 0)];
-                    emitter.createdParticlesTotal += emitter.createdParticlesPerFrame;
+                    emitter.CreatedParticlesPerFrame = data[GetStatIndex(id, 0)];
+                    emitter.CreatedParticlesTotal += emitter.CreatedParticlesPerFrame;
                     break;
                 case Manipulator.ManipulatorType.Void:
                     ZibraLiquidVoid zibravoid = manipulator as ZibraLiquidVoid;
-                    zibravoid.deletedParticleCountPerFrame = data[GetStatIndex(id, 0)];
-                    zibravoid.deletedParticleCountTotal += zibravoid.deletedParticleCountPerFrame;
+                    zibravoid.DeletedParticleCountPerFrame = data[GetStatIndex(id, 0)];
+                    zibravoid.DeletedParticleCountTotal += zibravoid.DeletedParticleCountPerFrame;
                     break;
                 case Manipulator.ManipulatorType.Detector:
                     ZibraLiquidDetector zibradetector = manipulator as ZibraLiquidDetector;
-                    zibradetector.particlesInside = data[GetStatIndex(id, 0)];
+                    zibradetector.ParticlesInside = data[GetStatIndex(id, 0)];
+
+                    if (zibradetector.ParticlesInside > 0)
+                    {
+                        // Decode bounding box position and convert them to world space.
+                        zibradetector.BoundingBoxMin = EncodedSimulationSpaceToWorldSpace(
+                            new Vector3(data[GetStatIndex(id, 1)], data[GetStatIndex(id, 2)], data[GetStatIndex(id, 3)]),
+                            parent,
+                            true // BoundingBoxMin is inverted to simulate atomic min in the compute shader.
+                        );
+                        zibradetector.BoundingBoxMax = EncodedSimulationSpaceToWorldSpace(
+                            new Vector3(data[GetStatIndex(id, 4)], data[GetStatIndex(id, 5)], data[GetStatIndex(id, 6)]),
+                            parent
+                        );
+                    }
+                    else
+                    {
+                        zibradetector.BoundingBoxMin = new Vector3(0.0f, 0.0f, 0.0f);
+                        zibradetector.BoundingBoxMax = new Vector3(0.0f, 0.0f, 0.0f);
+                    }
+
                     break;
-                case Manipulator.ManipulatorType.VoxelCollider:
+                case Manipulator.ManipulatorType.NeuralCollider:
                 case Manipulator.ManipulatorType.AnalyticCollider:
-                    SDFObjects.SDFCollider collider = manipulator as SDFObjects.SDFCollider;
-                    Vector3 Force =
-                        Mathf.Exp(4.0f * solverParameters.ForceInteractionStrength) *
-                        new Vector3(INT2Float(data[GetStatIndex(id, 0)]), INT2Float(data[GetStatIndex(id, 1)]),
-                                    INT2Float(data[GetStatIndex(id, 2)]));
-                    Vector3 Torque =
-                        Mathf.Exp(4.0f * solverParameters.ForceInteractionStrength) *
-                        new Vector3(INT2Float(data[GetStatIndex(id, 3)]), INT2Float(data[GetStatIndex(id, 4)]),
-                                    INT2Float(data[GetStatIndex(id, 5)]));
+                    ZibraLiquidCollider collider = manipulator as ZibraLiquidCollider;
                     collider.ApplyForceTorque(Force, Torque);
                     break;
                 }
@@ -219,39 +513,89 @@ namespace com.zibra.liquid.Manipulators
         /// Update constant object data and generate and sort the current manipulator list
         /// Should be executed once
         /// </summary>
-        public void UpdateConst(List<Manipulator> curManipulators, List<SDFObjects.SDFCollider> sdfObjects)
+        public void UpdateConst(List<Manipulator> curManipulators, List<ZibraLiquidCollider> colliders)
         {
-            manipulators = new List<Manipulator>(curManipulators);
-
-            // add all colliders to the manipulator list
-            foreach (var collider in sdfObjects)
-            {
-                if (collider == null)
-                    continue;
+            Manipulators = new List<Manipulator>();
 
 #if ZIBRA_LIQUID_PAID_VERSION
-                if (collider is SDFObjects.VoxelCollider)
-                {
-                    collider.ManipType = Manipulator.ManipulatorType.VoxelCollider;
-                }
-                else
+            NeuralSDFs = new Dictionary<ZibraHash128, NeuralSDF>();
+            TextureHashMap = new Dictionary<ZibraHash128, int>();
 #endif
+
+            // add all colliders to the manipulator list
+            foreach (var manipulator in curManipulators)
+            {
+                if (manipulator == null)
+                    continue;
+
+                var sdf = manipulator.GetComponent<SDFObject>();
+                if (sdf == null)
                 {
-                    collider.ManipType = Manipulator.ManipulatorType.AnalyticCollider;
+                    Debug.LogWarning("Manipulator " + manipulator.gameObject.name + " missing sdf and is disabled.");
+                    continue;
                 }
-                manipulators.Add(collider);
+
+#if ZIBRA_LIQUID_PAID_VERSION
+#if ZIBRA_LIQUID_PRO_VERSION
+                if (sdf is NeuralSDF)
+                {
+                    NeuralSDF neuralSDF = sdf as NeuralSDF;
+                    if (!neuralSDF.ObjectRepresentation.HasRepresentationV3)
+                    {
+                        Debug.LogWarning("NeuralSDF in " + manipulator.gameObject.name +
+                                         " was not generated. Manipulator is disabled.");
+                        continue;
+                    }
+                }
+#else
+                if (sdf is NeuralSDF)
+                {
+                    Debug.LogWarning("NeuralSDF was used in manipulator in " + manipulator.gameObject.name +
+                                     " which is not supported in this version. Manipulator is disabled.");
+                    continue;
+                }
+#endif
+#endif
+
+                Manipulators.Add(manipulator);
+            }
+
+            // add all colliders to the manipulator list
+            foreach (var manipulator in colliders)
+            {
+                if (manipulator == null)
+                    continue;
+
+                var sdf = manipulator.GetComponent<SDFObject>();
+                if (sdf == null)
+                {
+                    Debug.LogWarning("Collider " + manipulator.gameObject.name + " missing sdf and is disabled.");
+                    continue;
+                }
+
+#if ZIBRA_LIQUID_PAID_VERSION
+                NeuralSDF neuralSDF = manipulator.GetComponent<NeuralSDF>();
+                if (neuralSDF != null && !neuralSDF.ObjectRepresentation.HasRepresentationV3)
+                {
+                    Debug.LogWarning("NeuralSDF in " + manipulator.gameObject.name +
+                                     " was not generated. Collider is disabled.");
+                    continue;
+                }
+#endif
+
+                Manipulators.Add(manipulator);
             }
 
             // first sort the manipulators
-            manipulators.Sort(new ManipulatorCompare());
+            Manipulators.Sort(new ManipulatorCompare());
 
             // compute prefix sum
             for (int i = 0; i < (int)Manipulator.ManipulatorType.TypeNum; i++)
             {
                 int id = 0;
-                foreach (var manipulator in manipulators)
+                foreach (var manipulator in Manipulators)
                 {
-                    if ((int)manipulator.ManipType >= i)
+                    if ((int)manipulator.GetManipulatorType() >= i)
                     {
                         TypeIndex[i] = id;
                         break;
@@ -259,47 +603,69 @@ namespace com.zibra.liquid.Manipulators
                     id++;
                 }
 
-                if (id == manipulators.Count)
+                if (id == Manipulators.Count)
                 {
-                    TypeIndex[i] = manipulators.Count;
+                    TypeIndex[i] = Manipulators.Count;
                 }
             }
 
             // set last as the total number of manipulators
-            TypeIndex[(int)Manipulator.ManipulatorType.TypeNum] = manipulators.Count;
+            TypeIndex[(int)Manipulator.ManipulatorType.TypeNum] = Manipulators.Count;
 
-            indices.EmitterIndex = TypeIndex[(int)Manipulator.ManipulatorType.Emitter];
-            indices.EmitterIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.Emitter + 1];
-            indices.VoidIndex = TypeIndex[(int)Manipulator.ManipulatorType.Void];
-            indices.VoidIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.Void + 1];
-            indices.ForceFieldIndex = TypeIndex[(int)Manipulator.ManipulatorType.ForceField];
-            indices.ForceFieldIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.ForceField + 1];
-            indices.AnalyticColliderIndex = TypeIndex[(int)Manipulator.ManipulatorType.AnalyticCollider];
-            indices.AnalyticColliderIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.AnalyticCollider + 1];
-            indices.VoxelColliderIndex = TypeIndex[(int)Manipulator.ManipulatorType.VoxelCollider];
-            indices.VoxelColliderIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.VoxelCollider + 1];
-            indices.DetectorIndex = TypeIndex[(int)Manipulator.ManipulatorType.Detector];
-            indices.DetectorIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.Detector + 1];
-            indices.PortalIndex = TypeIndex[(int)Manipulator.ManipulatorType.Portal];
-            indices.PortalIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.Portal + 1];
+            Indices.EmitterIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.Emitter];
+            Indices.EmitterIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.Emitter + 1];
+            Indices.VoidIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.Void];
+            Indices.VoidIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.Void + 1];
+            Indices.ForceFieldIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.ForceField];
+            Indices.ForceFieldIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.ForceField + 1];
+            Indices.AnalyticColliderIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.AnalyticCollider];
+            Indices.AnalyticColliderIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.AnalyticCollider + 1];
+            Indices.NeuralColliderIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.NeuralCollider];
+            Indices.NeuralColliderIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.NeuralCollider + 1];
+            Indices.GroupColliderIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.GroupCollider];
+            Indices.GroupColliderIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.GroupCollider + 1];
+            Indices.DetectorIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.Detector];
+            Indices.DetectorIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.Detector + 1];
+            Indices.SpeciesModifierIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.SpeciesModifier];
+            Indices.SpeciesModifierIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.SpeciesModifier + 1];
+            Indices.PortalIndexBegin = TypeIndex[(int)Manipulator.ManipulatorType.Portal];
+            Indices.PortalIndexEnd = TypeIndex[(int)Manipulator.ManipulatorType.Portal + 1];
 
             if (ConstDataID.Count != 0)
             {
-                Array.Resize<float>(ref ConstAdditionalData, 0);
                 ConstDataID.Clear();
             }
 
-            foreach (var manipulator in manipulators)
+#if ZIBRA_LIQUID_PAID_VERSION
+            SDFTextureSize = 0;
+            EmbeddingTextureSize = 0;
+            TextureCount = 0;
+            foreach (var manipulator in Manipulators)
             {
                 if (manipulator == null)
                     continue;
-                manipulator.InitializeConstData();
-                int ID = ConstAdditionalData.Length;
-                ConstDataID.Add(ID);
-                Array.Resize<float>(ref ConstAdditionalData, ID + manipulator.ConstAdditionalData.Length);
-                Array.Copy(manipulator.ConstAdditionalData, 0, ConstAdditionalData, ID,
-                           manipulator.ConstAdditionalData.Length);
+
+                if (manipulator.GetComponent<NeuralSDF>() != null)
+                {
+                    AddTexture(manipulator.GetComponent<NeuralSDF>());
+                }
+
+#if ZIBRA_LIQUID_PRO_VERSION
+                if (manipulator.GetComponent<SkinnedMeshSDF>() != null)
+                {
+                    SkinnedMeshSDF skinnedMeshSDF = manipulator.GetComponent<SkinnedMeshSDF>();
+
+                    foreach (var bone in skinnedMeshSDF.BoneSDFList)
+                    {
+                        if (bone is NeuralSDF neuralBone)
+                            AddTexture(neuralBone);
+                    }
+                }
+#endif
             }
+
+            CalculateTextureData();
+#endif
         }
     }
 }

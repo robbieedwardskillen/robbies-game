@@ -1,73 +1,168 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Serialization;
+using com.zibra.liquid.Solver;
+using com.zibra.liquid.SDFObjects;
 
 #if UNITY_EDITOR
+using UnityEditor;
 using UnityEngine.SceneManagement;
 #endif
 
 namespace com.zibra.liquid.Manipulators
 {
+    /// <summary>
+    ///     Emitter for liquid particles.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Every liquid must have either an emitter,
+    ///         or have <see cref="Solver::ZibraLiquid::InitialStateType">InitialStateType</see>
+    ///         set to Baked Liquid State.
+    ///     </para>
+    ///     <para>
+    ///         Please note that all those parameters are completely separate:
+    ///         * Size of emitter (Volume of emitter shape)
+    ///         * Emitter speed (Volume of liquid emitted per second)
+    ///         * Liquid's initial velocity
+    ///
+    ///         Increasing emitter size will not make it emit more liquid, or vice versa.
+    ///         Increasing emitter speed will not increase initial speed of the liquid, or vice versa.
+    ///     </para>
+    /// </remarks>
     [AddComponentMenu("Zibra/Zibra Liquid Emitter")]
+    [DisallowMultipleComponent]
     public class ZibraLiquidEmitter : Manipulator
     {
+#region Public Interface
 #if ZIBRA_LIQUID_PAID_VERSION
-        [NonSerialized]
-        public long createdParticlesTotal = 0;
-        [NonSerialized]
-        public int createdParticlesPerFrame = 0;
+        /// <summary>
+        ///     (Unavailable in Free version) Number of particles emitted total.
+        /// </summary>
+        public long CreatedParticlesTotal { get; internal set; } = 0;
+        /// <summary>
+        ///     (Unavailable in Free version) Number of particles emitted in the last simulation frame.
+        /// </summary>
+        public int CreatedParticlesPerFrame { get; internal set; } = 0;
 #endif
 
+        /// <summary>
+        ///     Emitter speed (Volume of liquid emitted per unit of time).
+        /// </summary>
+        /// <remarks>
+        ///     Measured in emitted volume per simulation time unit.
+        /// </remarks>
+        [Tooltip("Emitter speed (Volume of liquid emitted per unit of time)")] [Min(
+            0.0f)] public float VolumePerSimTime = 0.125f;
+
+        /// <summary>
+        ///     Initial velocity of newly emitted liquid.
+        /// </summary>
+        [Tooltip("Initial velocity of newly emitted liquid")]
+        public Vector3 InitialVelocity = new Vector3(0, 0, 0);
+
+        /// <summary>
+        ///     Returns initial velocity taking into account emitter rotation.
+        /// </summary>
+        public Vector3 GetRotatedInitialVelocity()
+        {
+            return transform.rotation * InitialVelocity;
+        }
+
+        public override ManipulatorType GetManipulatorType()
+        {
+            return ManipulatorType.Emitter;
+        }
+
+#if UNITY_EDITOR
+        public override Color GetGizmosColor()
+        {
+            return new Color(0.2f, 0.2f, 0.8f);
+        }
+#endif
+#endregion
+#region Deprecated
+        /// @cond SHOW_DEPRECATED
+
+#if ZIBRA_LIQUID_PAID_VERSION
+        /// @deprecated
+        /// Only used for backwards compatibility
+        [HideInInspector]
+        [NonSerialized]
+        [Obsolete("createdParticlesTotal is deprecated. Use CreatedParticlesTotal instead.", true)]
+        public int createdParticlesTotal;
+
+        [HideInInspector]
+        [NonSerialized]
+        [Obsolete("createdParticlesPerFrame is deprecated. Use CreatedParticlesPerFrame instead.", true)]
+        public int createdParticlesPerFrame;
+#endif
+
+        /// @deprecated
+        /// Only used for backwards compatibility
+        [Obsolete("ClampBehaviorType is deprecated.", true)]
         public enum ClampBehaviorType
         {
             DontClamp,
             Clamp
         }
 
-        [Tooltip("Emitted particles per second")]
-        [Min(0.0f)]
-        public float ParticlesPerSec = 6000.0f;
+        /// @deprecated
+        /// Only used for backwards compatibility
+        [NonSerialized]
+        [Obsolete("ParticlesPerSec is deprecated. Use VolumePerSec instead.", true)]
+        public float ParticlesPerSec;
 
+        /// @deprecated
+        /// Only used for backwards compatibility
+        [SerializeField]
+        [FormerlySerializedAs("ParticlesPerSec")]
+        private float ParticlesPerSecOld;
+
+        /// @deprecated
+        /// Only used for backwards compatibility
+        [NonSerialized]
+        [Obsolete("PositionClampBehavior is deprecated. Clamp position of emitter manually if you need to.", true)]
+        public ClampBehaviorType PositionClampBehavior;
+
+        /// @deprecated
+        /// Only used for backwards compatibility
         [NonSerialized]
         [Obsolete("VelocityMagnitude is deprecated. Use InitialVelocity instead.", true)]
         public float VelocityMagnitude;
 
+        /// @deprecated
+        /// Only used for backwards compatibility
         [SerializeField]
         [FormerlySerializedAs("VelocityMagnitude")]
         private float VelocityMagnitudeOld;
 
+        /// @deprecated
+        /// Only used for backwards compatibility
         [NonSerialized]
         [Obsolete("CustomEmitterTransform is deprecated. Modify emitter's transform directly instead.", true)]
         public Transform CustomEmitterTransform;
 
+        /// @deprecated
+        /// Only used for backwards compatibility
         [SerializeField]
         [FormerlySerializedAs("CustomEmitterTransform")]
         private Transform CustomEmitterTransformOld;
 
-        [Tooltip("Initial velocity of newly created particles")]
-        // Rotated with object
-        // Used velocity will be equal to GetRotatedInitialVelocity
-        public Vector3 InitialVelocity = new Vector3(0, 0, 0);
-
-        [Tooltip("Controls what whether effective position of emitter will clamp to container bounds.")]
-        public ClampBehaviorType PositionClampBehavior = ClampBehaviorType.Clamp;
+/// @endcond
+#endregion
+#region Implementation details
 
         [HideInInspector]
         [SerializeField]
         private int ObjectVersion = 1;
 
-#if UNITY_EDITOR
-        void OnSceneOpened(Scene scene, UnityEditor.SceneManagement.OpenSceneMode mode)
-        {
-            Debug.Log("Zibra Liquid Emitter format was updated. Please resave scene.");
-            UnityEditor.EditorUtility.SetDirty(gameObject);
-        }
-#endif
-
         [ExecuteInEditMode]
-        public void Awake()
+        private void Awake()
         {
-            
+#if UNITY_EDITOR
+            bool updated = false;
+#endif
             // If Emitter is in old format we need to parse old parameters and come up with equivalent new ones
             if (ObjectVersion == 1)
             {
@@ -83,83 +178,97 @@ namespace com.zibra.liquid.Manipulators
 
                 ObjectVersion = 2;
 #if UNITY_EDITOR
-                // Can't mark object dirty in Awake, since scene is not fully loaded yet
-                UnityEditor.SceneManagement.EditorSceneManager.sceneOpened += OnSceneOpened;
+                updated = true;
 #endif
             }
-        }
+            // If Emitter is in old format we need to parse old parameters and come up with equivalent new ones
+            if (ObjectVersion == 2)
+            {
+                UnityEngine.Object[] liquids = FindObjectsOfType(typeof(ZibraLiquid));
+
+                foreach (ZibraLiquid liquid in liquids)
+                {
+                    if (liquid.HasManipulator(this))
+                    {
+                        float nodeSize = liquid.NodeSize;
+                        VolumePerSimTime = ParticlesPerSecOld * nodeSize * nodeSize * nodeSize /
+                                           liquid.SolverParameters.ParticleDensity / liquid.SimulationTimeScale;
+                        break;
+                    }
+                }
+
+                ObjectVersion = 3;
+#if UNITY_EDITOR
+                updated = true;
+#endif
+            }
+
+            // If Emitter is in old format we need to parse old parameters and come up with equivalent new ones
+            if (ObjectVersion == 3)
+            {
+                if (GetComponent<SDFObject>() == null)
+                {
+                    AnalyticSDF sdf = gameObject.AddComponent<AnalyticSDF>();
+                    sdf.ChosenSDFType = AnalyticSDF.SDFType.Box;
+#if UNITY_EDITOR
+                    updated = true;
+#endif
+                }
+
+                ObjectVersion = 4;
+            }
 
 #if UNITY_EDITOR
-        void OnDrawGizmosSelected()
-        {
-            if (InitialVelocity.sqrMagnitude > Vector3.kEpsilon)
+            if (updated)
             {
-                Utilities.GizmosHelper.DrawArrow(transform.position, GetRotatedInitialVelocity(), Color.blue, 0.5f);
+                // Can't mark object dirty in Awake, since scene is not fully loaded yet
+                UnityEditor.SceneManagement.EditorSceneManager.sceneOpened += OnSceneOpened;
             }
-            
-            Gizmos.color = Color.blue;
-            Gizmos.matrix = GetTransform();
-            Gizmos.DrawWireCube(new Vector3(0, 0, 0), new Vector3(1, 1, 1));
-        }
-
-        void OnDrawGizmos()
-        {
-            OnDrawGizmosSelected();
-        }
 #endif
-        ZibraLiquidEmitter()
-        {
-            ManipType = ManipulatorType.Emitter;
-        }
-
-        public Vector3 GetRotatedInitialVelocity()
-        {
-            return transform.rotation * InitialVelocity;
         }
 
         private void Update()
         {
-            this.ManipType = ManipulatorType.Emitter;
-            //this.ManipType = ManipulatorType.None;
-            Debug.Log("test");
-            DumpToConsole(this.ManipType);
             Vector3 rotatedInitialVelocity = GetRotatedInitialVelocity();
-            AdditionalData.y = rotatedInitialVelocity.x;
-            AdditionalData.z = rotatedInitialVelocity.y;
-            AdditionalData.w = rotatedInitialVelocity.z;
+            AdditionalData0.y = rotatedInitialVelocity.x;
+            AdditionalData0.z = rotatedInitialVelocity.y;
+            AdditionalData0.w = rotatedInitialVelocity.z;
         }
-
-        override public Matrix4x4 GetTransform()
-        {
-            return transform.localToWorldMatrix;
-        }
-
-        override public Quaternion GetRotation()
-        {
-            return transform.rotation;
-        }
-
-        override public Vector3 GetPosition()
-        {
-            return transform.position;
-        }
-        override public Vector3 GetScale()
-        {
-            return transform.lossyScale;
-        }
-        public static void DumpToConsole(object obj){
-            var output = JsonUtility.ToJson(obj, true);
-            Debug.Log(output);
-        }
-        // clang-format doesn't parse code with new keyword properly
-        // clang-format off
 
 #if UNITY_EDITOR
-        public new void OnDestroy()
+        private void OnDrawGizmosSelected()
         {
-            base.OnDestroy();
+            if (!enabled)
+            {
+                return;
+            }
+
+            Gizmos.color = Handles.color = GetGizmosColor();
+
+            if (InitialVelocity.sqrMagnitude > Vector3.kEpsilon)
+            {
+                Utilities.GizmosHelper.DrawArrow(transform.position, GetRotatedInitialVelocity(), 0.5f);
+            }
+        }
+
+        private void OnDrawGizmos()
+        {
+            OnDrawGizmosSelected();
+        }
+
+        private void OnSceneOpened(Scene scene, UnityEditor.SceneManagement.OpenSceneMode mode)
+        {
+            Debug.Log("Zibra Liquid Emitter format was updated. Please resave scene.");
+            UnityEditor.EditorUtility.SetDirty(gameObject);
+            UnityEditor.SceneManagement.EditorSceneManager.sceneOpened -= OnSceneOpened;
+        }
+
+        private void Reset()
+        {
+            ObjectVersion = 4;
             UnityEditor.SceneManagement.EditorSceneManager.sceneOpened -= OnSceneOpened;
         }
 #endif
+#endregion
     }
 }

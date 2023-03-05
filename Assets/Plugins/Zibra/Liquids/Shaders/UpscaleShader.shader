@@ -8,12 +8,17 @@ Shader "ZibraLiquids/UpscaleShader"
             Blend One OneMinusSrcAlpha
             Cull Off
             ZWrite Off
+            ZTest Always
 
-            CGPROGRAM
+            HLSLPROGRAM
+            #pragma multi_compile_local __ HDRP
             #pragma instancing_options procedural:setup
             #pragma vertex VSMain
             #pragma fragment PSMain
-            #pragma target 3.0
+            #pragma target 3.5
+            #include "UnityCG.cginc"
+            #include "UnityStandardBRDF.cginc"
+            #include "UnityImageBasedLighting.cginc"
 
             struct VSIn
             {
@@ -29,15 +34,13 @@ Shader "ZibraLiquids/UpscaleShader"
             struct PSOut
             {
                 float4 color : COLOR;
-                float depth : DEPTH;
             };
             
             // Camera params
             float2 TextureScale;
             
             // Input resources
-            sampler2D ShadedWater;
-            sampler2D WaterDepth;
+            sampler2D ShadedLiquid;
 
             float2 GetFlippedUV(float2 uv)
             {
@@ -45,6 +48,10 @@ Shader "ZibraLiquids/UpscaleShader"
                     return float2(uv.x, 1 - uv.y);
                 return uv;
             }
+
+#ifdef HDRP
+            float3 LightColor;
+#endif
 
             VSOut VSMain(VSIn input)
             {
@@ -72,16 +79,15 @@ Shader "ZibraLiquids/UpscaleShader"
             {
                 PSOut output;
 
-                output.color = tex2D(ShadedWater, input.uv * TextureScale);
-                // iPhone 7 GPU crash workaround
-                if (output.color.a > 0.0f)
+                output.color = tex2D(ShadedLiquid, input.uv * TextureScale);
+				if (output.color.a == 0.0f)
                 {
-                    output.depth = tex2D(WaterDepth, input.uv * TextureScale).x;
+                    discard;
                 }
 
                 return output;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }
