@@ -639,8 +639,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 	}
 	void Start() {
-/* 		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+
+		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
+		print(playerId);
+/* 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
 		hashPvP.Add("pvp", (int)pvp); */
 		//setting team
 		//needs to check again after another player enters
