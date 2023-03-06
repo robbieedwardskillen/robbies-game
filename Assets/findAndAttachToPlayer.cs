@@ -15,6 +15,6 @@ public class findAndAttachToPlayer : MonoBehaviour
     void Update()
     {
         this.transform.position = new Vector3 (players[0].transform.position.x,
-        players[0].transform.position.y, players[0].transform.position.z + 3);
+        players[0].transform.position.y, players[0].transform.position.z);
     }
 }

@@ -7,3 +7,6 @@ Rolling sound: Suburbanwizard Sound Effect from <a href="https://pixabay.com/sou
 Jumping sound: Zott820 Sound Effect from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=87311">Pixabay</a>
 menu sounds: Universfield Sound Effects from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=132111">Pixabay</a>
 	     pinevoc <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=44021">Pixabay</a>
+splash sounds: blaukreuz Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=6261">Pixabay</a>
+	       Jofae Sound Effect from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=81763">Pixabay</a>
+	       qubodup Sound Effect from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=100271">Pixabay</a>
