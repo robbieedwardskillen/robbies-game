@@ -6,7 +6,7 @@ using UnityEngine.InputSystem.Utilities;
 using Cinemachine;
 using Photon.Pun;
 using Photon.Realtime;
- 
+
 public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	public string team;
@@ -116,6 +116,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform knife; */
 	private Transform bigSword;
 	private Transform fireSword;
+
+	private GameObject healWave;
+	private GameObject attackWave;
+
 	private MeleeWeaponTrail mwt;
 	private MeleeWeaponTrail mwt2;
 	//photon making me hard code since they don't accept lists
@@ -151,7 +155,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 lastRotation;
 	private Vector3 previousPos;
 	private Vector3 velocity;
-	
+
 	private bool connected = false;
 	bool moveLegs = false;
 	bool blockTurning = false;
@@ -437,9 +441,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (photonView.IsMine){
 			PlayerManager.LocalPlayerInstance = this.gameObject;
 		}
+
 		// #Critical
 		// we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
 		DontDestroyOnLoad(this.gameObject);
+
+		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
+		print(playerId);
+		healWave = GameObject.Find("HealWave" + playerId);
+		attackWave = GameObject.Find("AttackWave" + playerId);
+		print(attackWave);
+
+
+
 		controls = new PlayerControls();
 		controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Move.performed += ctx => move = Vector2.zero;
@@ -640,8 +654,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	void Start() {
 
-		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-		print(playerId);
+
 /* 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
 		hashPvP.Add("pvp", (int)pvp); */
 		//setting team
