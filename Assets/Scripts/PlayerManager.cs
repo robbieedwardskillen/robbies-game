@@ -6,6 +6,7 @@ using UnityEngine.InputSystem.Utilities;
 using Cinemachine;
 using Photon.Pun;
 using Photon.Realtime;
+using com.zibra.liquid.Manipulators;
 
 public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
@@ -117,8 +118,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform bigSword;
 	private Transform fireSword;
 
-	private GameObject healWave;
-	private GameObject attackWave;
+	private ZibraLiquidEmitter attackWave;
+	private ZibraLiquidEmitter healWave;
+	private bool healEmitting = false;
+	private bool attackEmitting = false;
+	private GameObject waterEraser;
 
 	private MeleeWeaponTrail mwt;
 	private MeleeWeaponTrail mwt2;
@@ -447,13 +451,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		DontDestroyOnLoad(this.gameObject);
 
 		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-		print(playerId);
-		healWave = GameObject.Find("HealWave" + playerId);
-		attackWave = GameObject.Find("AttackWave" + playerId);
-		print(attackWave);
-
-
-
+		healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
+		attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
+		waterEraser = GameObject.Find("Void");
+		StartCoroutine(eraseWater());
+		
 		controls = new PlayerControls();
 		controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Move.performed += ctx => move = Vector2.zero;
@@ -652,8 +654,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			player.SetCustomProperties(hashTeam);
 		}
 	}
+	IEnumerator eraseWater() {
+		waterEraser.transform.localScale = new Vector3(1000f,1000f,1000f);
+		yield return new WaitForSeconds(0.1f);
+		waterEraser.transform.localScale = new Vector3(0f,0f,0f);
+	}
 	void Start() {
-
 
 /* 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
 		hashPvP.Add("pvp", (int)pvp); */
@@ -685,6 +691,24 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		
 	}
+	IEnumerator healWaveTime() {
+        if (healWave != null){
+            healEmitting = true;
+            healWave.enabled = true;
+            yield return new WaitForSeconds(0.25f);
+            healEmitting = false;
+            healWave.enabled = false;
+        }
+    }
+    IEnumerator attackWaveTime() {
+        if (attackWave != null){
+            attackEmitting = true;
+        	attackWave.enabled = true;
+            yield return new WaitForSeconds(0.5f);
+            attackEmitting = false;
+            attackWave.enabled = false;
+        }
+    }
 	IEnumerator waitForSecondBigHit1(){
  		yield return new WaitForSeconds(0.25f);
 		photonView.RPC("RPCTrigger2", RpcTarget.All, "bigSwing3");
@@ -741,6 +765,24 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		{
 			return;
 		}
+		if (healWave != null){
+            if (healEmitting == false)
+            healWave.enabled = false;
+        } 
+		if (attackWave != null){
+            if (attackEmitting == false)
+            attackWave.enabled = false;
+        }
+	
+        if ((controls.Gameplay.DPadUp.triggered || Input.GetKey("g")) && healEmitting == false){
+			//global cooldown
+			//if used more than 10 times do an erase or after 3 seconds and not refreshed
+            StartCoroutine(healWaveTime());
+        }
+        if ((controls.Gameplay.DPadDown.triggered || Input.GetKey("h")) && attackEmitting == false){
+			//10 second cooldown
+            StartCoroutine(attackWaveTime());
+        }
 
 
 		if (playerAnimator.GetCurrentAnimatorStateInfo(10).normalizedTime < 1f){
