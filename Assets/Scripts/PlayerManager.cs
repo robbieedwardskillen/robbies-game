@@ -118,6 +118,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform bigSword;
 	private Transform fireSword;
 
+	private bool canCast = true;
+
 	private ZibraLiquidEmitter attackWave;
 	private ZibraLiquidEmitter healWave;
 	private bool eraserTimerOn = false;
@@ -695,8 +697,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		
 	}
+	IEnumerator GCD(int layer) {
+		canCast = false;
+		playerAnimator.SetLayerWeight(layer, 1f);
+		yield return new WaitForSeconds(1);
+		canCast = true;
+		playerAnimator.SetLayerWeight(layer, 0f);
+	}
 	IEnumerator healWaveTime() {
+		
         if (healWave != null){
+			StartCoroutine(GCD(12));
+			playerAnimator.Play("CastingWhileMoving1.Cast", 12, 0f);
+			yield return new WaitForSeconds(0.1f);
 			audio.PlayOneShot (healWaveSound, 0.5f);
 			eraserTimer = 0f;
 			eraserTimerOn = true;
@@ -710,6 +723,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
     }
     IEnumerator attackWaveTime() {
         if (attackWave != null){
+			StartCoroutine(GCD(13));
+			playerAnimator.Play("CastingWhileMoving2.Cast", 13, 0f);
+			yield return new WaitForSeconds(0.1f);
 			audio.PlayOneShot (attackWaveSound, 0.5f);
 			eraserTimer = 0f;
 			eraserTimerOn = true;
@@ -792,12 +808,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			StartCoroutine(eraseWater());
 			eraserTimerOn = false;
 		}
-        if ((controls.Gameplay.DPadUp.triggered || Input.GetKey("g")) && healEmitting == false){
+        if ((controls.Gameplay.DPadUp.triggered || Input.GetKey("g")) && healEmitting == false && canCast){
 			//global cooldown
 			//if used more than 10 times do an erase or after 3 seconds and not refreshed
             StartCoroutine(healWaveTime());
         }
-        if ((controls.Gameplay.DPadDown.triggered || Input.GetKey("h")) && attackEmitting == false){
+        if ((controls.Gameplay.DPadDown.triggered || Input.GetKey("h")) && attackEmitting == false && canCast){
 			//10 second cooldown
             StartCoroutine(attackWaveTime());
         }
@@ -1147,7 +1163,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						audio.PlayOneShot (soundEffectRoll, 0.5f);
 						playerAnimator.SetTrigger("roll");
 					} 
-					
+
 					if (!isAerial) {
 						if (equippedBigSword && !blocking){
 							if (controls.Gameplay.Action1.triggered && !bigSwing){
