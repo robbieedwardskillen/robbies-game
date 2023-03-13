@@ -6142,6 +6142,8 @@ MonoBehaviour:
   soundEffectArrow2: {fileID: 8300000, guid: 2ca246e13921a59489704e14db7f7518, type: 3}
   soundEffectJump: {fileID: 8300000, guid: e39634812e5b46146a37a766d6ce664e, type: 3}
   soundEffectRoll: {fileID: 8300000, guid: caa61c1cba47c194d8d25d43ba7557ba, type: 3}
+  healWaveSound: {fileID: 8300000, guid: 582c4cad1294efb4abc7c2a74bfb6a67, type: 3}
+  attackWaveSound: {fileID: 8300000, guid: beb45b13e66fe94418a17cdc52dd0ac7, type: 3}
   PlayerUiPrefab: {fileID: 8915229389397728779, guid: 40ba13ba9c9b86644a17609b862811a7,
     type: 3}
 --- !u!95 &4819016225374287761

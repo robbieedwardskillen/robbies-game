@@ -21,7 +21,7 @@ public class findAndAttachToPlayer : MonoBehaviour
 
         if (this.gameObject.name == "HealWave" + "1"){
             this.transform.position = new Vector3 (players[0].transform.position.x,
-            players[0].transform.position.y, players[0].transform.position.z);
+            players[0].transform.position.y + 1f, players[0].transform.position.z);
         }
         if (this.gameObject.name == "AttackWave" + "1"){
             this.transform.position = players[0].transform.position + players[0].transform.forward * 2f;

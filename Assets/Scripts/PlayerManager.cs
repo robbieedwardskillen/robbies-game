@@ -120,6 +120,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	private ZibraLiquidEmitter attackWave;
 	private ZibraLiquidEmitter healWave;
+	private bool eraserTimerOn = false;
+	private float eraserTimer = 0f;
 	private bool healEmitting = false;
 	private bool attackEmitting = false;
 	private GameObject waterEraser;
@@ -149,6 +151,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public AudioClip soundEffectArrow2;
 	public AudioClip soundEffectJump;
 	public AudioClip soundEffectRoll;
+	public AudioClip healWaveSound;
+	public AudioClip attackWaveSound;
 	private Camera m_cam;
 	private GameObject camRotateWithZeroY;
 	private GameObject m_camRotation;
@@ -693,20 +697,28 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 	IEnumerator healWaveTime() {
         if (healWave != null){
+			audio.PlayOneShot (healWaveSound, 0.5f);
+			eraserTimer = 0f;
+			eraserTimerOn = true;
             healEmitting = true;
             healWave.enabled = true;
             yield return new WaitForSeconds(0.25f);
             healEmitting = false;
             healWave.enabled = false;
+
         }
     }
     IEnumerator attackWaveTime() {
         if (attackWave != null){
+			audio.PlayOneShot (attackWaveSound, 0.5f);
+			eraserTimer = 0f;
+			eraserTimerOn = true;
             attackEmitting = true;
         	attackWave.enabled = true;
             yield return new WaitForSeconds(0.5f);
             attackEmitting = false;
             attackWave.enabled = false;
+
         }
     }
 	IEnumerator waitForSecondBigHit1(){
@@ -773,7 +785,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
             if (attackEmitting == false)
             attackWave.enabled = false;
         }
-	
+		if (eraserTimerOn){
+			eraserTimer += Time.deltaTime;
+		}
+		if (eraserTimer >= 5f){
+			StartCoroutine(eraseWater());
+			eraserTimerOn = false;
+		}
         if ((controls.Gameplay.DPadUp.triggered || Input.GetKey("g")) && healEmitting == false){
 			//global cooldown
 			//if used more than 10 times do an erase or after 3 seconds and not refreshed
