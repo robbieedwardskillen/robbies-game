@@ -709,7 +709,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
         if (healWave != null){
 			StartCoroutine(GCD(12));
 			playerAnimator.Play("CastingWhileMoving1.Cast", 12, 0f);
-			yield return new WaitForSeconds(0.1f);
+			yield return new WaitForSeconds(0.3f);
 			audio.PlayOneShot (healWaveSound, 0.5f);
 			eraserTimer = 0f;
 			eraserTimerOn = true;
@@ -725,7 +725,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
         if (attackWave != null){
 			StartCoroutine(GCD(13));
 			playerAnimator.Play("CastingWhileMoving2.Cast", 13, 0f);
-			yield return new WaitForSeconds(0.1f);
+			yield return new WaitForSeconds(0.4f);
 			audio.PlayOneShot (attackWaveSound, 0.5f);
 			eraserTimer = 0f;
 			eraserTimerOn = true;
@@ -807,6 +807,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (eraserTimer >= 5f){
 			StartCoroutine(eraseWater());
 			eraserTimerOn = false;
+			eraserTimer = 0f;
 		}
         if ((controls.Gameplay.DPadUp.triggered || Input.GetKey("g")) && healEmitting == false && canCast){
 			//global cooldown

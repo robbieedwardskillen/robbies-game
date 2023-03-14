@@ -1635,7 +1635,7 @@ namespace com.zibra.liquid.Solver
         public void OnValidate()
         {
             transform.rotation = Quaternion.identity;
-            transform.localScale = Vector3.one;
+            //transform.localScale = Vector3.one;
 
             switch (CurrentRenderingMode)
             {
