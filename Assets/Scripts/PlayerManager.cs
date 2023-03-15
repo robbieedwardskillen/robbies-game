@@ -119,13 +119,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform fireSword;
 
 	private bool canCast = true;
-
+	private ZibraLiquidForceField waterBallForceField;
+	private ZibraLiquidEmitter waterBall;
 	private ZibraLiquidEmitter attackWave;
 	private ZibraLiquidEmitter healWave;
 	private bool eraserTimerOn = false;
 	private float eraserTimer = 0f;
 	private bool healEmitting = false;
 	private bool attackEmitting = false;
+	private bool waterBallEmitting = false;
 	private GameObject waterEraser;
 
 	private MeleeWeaponTrail mwt;
@@ -459,6 +461,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
 		healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
 		attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
+		waterBall = GameObject.Find("WaterBall" + playerId).GetComponent<ZibraLiquidEmitter>();
+		waterBallForceField = GameObject.Find("WaterBallForceField" + playerId).GetComponent<ZibraLiquidForceField>();
 		waterEraser = GameObject.Find("Void");
 		StartCoroutine(eraseWater());
 		
@@ -737,6 +741,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
         }
     }
+	IEnumerator waterBallTime() {
+        if (waterBall != null){
+			StartCoroutine(GCD(13));
+			playerAnimator.Play("CastingWhileMoving2.Cast", 13, 0f);
+			yield return new WaitForSeconds(0.4f);
+			audio.PlayOneShot (healWaveSound, 0.5f);
+			eraserTimer = 0f;
+			eraserTimerOn = true;
+            waterBallEmitting = true;
+        	waterBall.enabled = true;
+			waterBallForceField.enabled = true;
+            yield return new WaitForSeconds(0.75f);
+            waterBallEmitting = false;
+            waterBall.enabled = false;
+			waterBallForceField.enabled = false;
+        }
+    }
 	IEnumerator waitForSecondBigHit1(){
  		yield return new WaitForSeconds(0.25f);
 		photonView.RPC("RPCTrigger2", RpcTarget.All, "bigSwing3");
@@ -801,6 +822,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
             if (attackEmitting == false)
             attackWave.enabled = false;
         }
+		if (waterBall != null){
+            if (waterBallEmitting == false){
+				waterBall.enabled = false;
+				waterBallForceField.enabled = false;
+			} 
+        }
 		if (eraserTimerOn){
 			eraserTimer += Time.deltaTime;
 		}
@@ -818,7 +845,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			//10 second cooldown
             StartCoroutine(attackWaveTime());
         }
-
+		if ((controls.Gameplay.DPadLeft.triggered || Input.GetKey("t")) && waterBallEmitting == false && canCast){
+			//10 second cooldown
+            StartCoroutine(waterBallTime());
+        }
 
 		if (playerAnimator.GetCurrentAnimatorStateInfo(10).normalizedTime < 1f){
 			changingWeps = true;

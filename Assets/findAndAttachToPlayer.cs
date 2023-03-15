@@ -23,6 +23,7 @@ public class findAndAttachToPlayer : MonoBehaviour
             this.transform.position = new Vector3 (players[0].transform.position.x,
             players[0].transform.position.y + 1f, players[0].transform.position.z);
         }
+
         if (this.gameObject.name == "AttackWave" + "1"){
             this.transform.position = players[0].transform.position + players[0].transform.forward * 2f;
             this.transform.rotation = players[0].transform.rotation;
@@ -33,5 +34,10 @@ public class findAndAttachToPlayer : MonoBehaviour
             players[0].transform.position.y, players[0].transform.position.z);
         }
         
+        if (this.gameObject.name == "WaterBall" + "1" || this.gameObject.name == "WaterBallForceField" + "1"){
+            this.transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y + 2.5f,
+            players[0].transform.position.z) + players[0].transform.forward * 6f;
+            this.transform.rotation = players[0].transform.rotation;
+        }
     }
 }
