@@ -6,7 +6,7 @@ public class radialMenu : MonoBehaviour
 {
     public GameObject elementPrefab;
 
-    public float radius = 120f;
+    public float radius = 75f;
 
     public List<Texture> images;
 
@@ -15,12 +15,13 @@ public class radialMenu : MonoBehaviour
     void Start()
     {
         elements = new List<radialMenuElement>();
+        Open();
     }
 
     void addElement(string name, Texture img){
         GameObject element = Instantiate(elementPrefab, transform);
         radialMenuElement rme = element.GetComponent<radialMenuElement>();
-        
+        rme.SetName(name);
         rme.SetImage(img);
         elements.Add(rme);
     }
@@ -30,6 +31,7 @@ public class radialMenu : MonoBehaviour
             addElement("Card" + i.ToString(), images[i]);
         }
         Rearrange();
+        //change to 8 individual cards
     }
     void Rearrange(){
         float radiansOfSeparation = (Mathf.PI * 2) / elements.Count;
