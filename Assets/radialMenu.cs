@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 public class radialMenu : MonoBehaviour
 {
     public GameObject elementPrefab;
@@ -9,6 +10,7 @@ public class radialMenu : MonoBehaviour
     public float radius = 75f;
 
     public List<Texture> images;
+    public List<Sprite> images2;
 
     List<radialMenuElement> elements;
     // Start is called before the first frame update
@@ -16,19 +18,22 @@ public class radialMenu : MonoBehaviour
     {
         elements = new List<radialMenuElement>();
         Open();
+        transform.Find("mask").gameObject.transform.Find("CardImage").GetComponent<Image>().enabled = false;
     }
 
-    void addElement(string name, Texture img){
+    void addElement(string name, Texture img, Sprite img2){
         GameObject element = Instantiate(elementPrefab, transform);
         radialMenuElement rme = element.GetComponent<radialMenuElement>();
         rme.SetName(name);
         rme.SetImage(img);
+        rme.SetImage2(img2);
         elements.Add(rme);
     }
     public void Open(){
         for (int i=0; i<6; i++){
-            if (images[i] != null)
-            addElement("Card" + i.ToString(), images[i]);
+            if (images[i] != null && images2[i] != null)
+            addElement("Card" + i.ToString(), images[i], images2[i]);
+            
         }
         Rearrange();
         //change to 8 individual cards

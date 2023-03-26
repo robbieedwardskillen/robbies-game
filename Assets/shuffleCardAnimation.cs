@@ -10,6 +10,6 @@ public class shuffleCardAnimation : MonoBehaviour
         
     }
     void Update() {
-        GetComponent<RectTransform>().anchoredPosition = new Vector3(55f, 55f, 0f);
+        //GetComponent<RectTransform>().anchoredPosition = new Vector3(55f, 55f, 0f);
     }
 }

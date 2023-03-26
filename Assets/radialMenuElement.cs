@@ -8,6 +8,7 @@ public class radialMenuElement : MonoBehaviour, IPointerClickHandler, IPointerEn
 {
     public TextMeshProUGUI elementName;
     public RawImage image;
+    public Image image2;
     private RectTransform rect;
     private void Start() {
         rect = GetComponent<RectTransform>();
@@ -22,11 +23,20 @@ public class radialMenuElement : MonoBehaviour, IPointerClickHandler, IPointerEn
     public Texture GetImage (){
         return image.texture;
     }
+    public void SetImage2 (Sprite spr){
+        image2.sprite = spr;
+    }
+    public Sprite GetImage2 (){
+        return image2.sprite;
+    }
     public void OnPointerClick(PointerEventData eventData){
 
     }
     public void OnPointerEnter(PointerEventData eventData){
+        transform.parent.gameObject.transform.Find("mask").gameObject.transform.Find("CardImage").GetComponent<Image>().enabled = true;
+        transform.parent.gameObject.transform.Find("mask").gameObject.transform.Find("CardImage").GetComponent<Image>().sprite = image2.sprite;
         GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f ,0f);
+        
     }
     public void OnPointerExit(PointerEventData eventData){
         GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 0f);
