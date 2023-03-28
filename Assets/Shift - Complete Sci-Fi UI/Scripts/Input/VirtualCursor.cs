@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
-
+using TMPro;
 namespace Michsky.UI.Shift
 {
     public class VirtualCursor : PointerInputModule
@@ -50,20 +50,25 @@ namespace Michsky.UI.Shift
             this.ProcessMove(pointer);
 
             if (Input.GetButtonDown("Submit"))
-            {
+            {   
                 pointer.pressPosition = cursorPos;
                 pointer.clickTime = Time.unscaledTime;
                 pointer.pointerPressRaycast = raycastResult;
 
                 if (this.m_RaycastResultCache.Count > 0)
-                {
+                {  
+                    //-Robbie added so it doesn't deselect needs to only be in input page
+                    if (raycastResult.gameObject.GetComponent<TextMeshPro>() != null)
                     pointer.selectedObject = raycastResult.gameObject;
                     pointer.pointerPress = ExecuteEvents.ExecuteHierarchy(raycastResult.gameObject, pointer, ExecuteEvents.submitHandler);
                     pointer.rawPointerPress = raycastResult.gameObject;
                 }
 
                 else
+                {
                     pointer.rawPointerPress = null;
+                }
+                    
             }
 
             else

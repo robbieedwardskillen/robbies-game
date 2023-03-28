@@ -8,11 +8,12 @@ using Photon.Realtime;
 
 using System.Collections;
 
+using TMPro;
 
     /// <summary>
     /// Player name input field. Let the user input his name, will appear above the player in the game.
 /// </summary>
-[RequireComponent(typeof(InputField))]
+//[RequireComponent(typeof(InputField))]
 public class PlayerNameInputField : MonoBehaviour
 {
     #region Private Constants
@@ -35,7 +36,8 @@ public class PlayerNameInputField : MonoBehaviour
 
 
         string defaultName = string.Empty;
-        InputField _inputField = this.GetComponent<InputField>();
+        TextMeshProUGUI _inputField = this.GetComponent<TextMeshProUGUI>();
+        //InputField _inputField = this.GetComponent<InputField>();
         if (_inputField!=null)
         {
             if (PlayerPrefs.HasKey(playerNamePrefKey))
