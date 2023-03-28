@@ -11,7 +11,8 @@ public class radialMenu : MonoBehaviour
 
     public List<Texture> images;
     public List<Sprite> images2;
-
+    public Texture placeholderImage1;
+    public Sprite placeholderImage2;
     List<radialMenuElement> elements;
     // Start is called before the first frame update
     void Start()
@@ -30,10 +31,15 @@ public class radialMenu : MonoBehaviour
         elements.Add(rme);
     }
     public void Open(){
-        for (int i=0; i<6; i++){
-            if (images[i] != null && images2[i] != null)
-            addElement("Card" + i.ToString(), images[i], images2[i]);
-            
+        for (int i=0; i<8; i++){
+            int actualNumber = i + 1;
+            if (images[i] == null || images2[i] == null){
+                addElement("Card" + actualNumber.ToString(), placeholderImage1, placeholderImage2);
+            }
+            else {
+                addElement("Card" + actualNumber.ToString(), images[i], images2[i]);
+            }
+
         }
         Rearrange();
         //change to 8 individual cards

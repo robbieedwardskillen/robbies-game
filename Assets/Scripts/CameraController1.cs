@@ -64,7 +64,7 @@ public class CameraController1 : MonoBehaviourPunCallbacks {
 		scene = SceneManager.GetActiveScene();
 	}
 	void Start() {
-		volume.profile.TryGetSettings(out depthOfField);
+		//volume.profile.TryGetSettings(out depthOfField);
 		if (controls != null){
 			controls.Gameplay.Enable();
 		}
@@ -115,8 +115,9 @@ public class CameraController1 : MonoBehaviourPunCallbacks {
 
 		if (PhotonNetwork.IsConnected){
 			if (/* !aiming */ false){
-				//blur effects
-				depthOfField.active = true;
+				//blur effects 
+				//depth of field interferes with water effects
+				//depthOfField.active = true;
 				raycast = new Ray(transform.position, transform.forward * 100);
 				isHit = false;
 				if (Physics.Raycast(raycast, out hit, 100f)){
@@ -131,7 +132,7 @@ public class CameraController1 : MonoBehaviourPunCallbacks {
 				SetFocus();
 					
 			} else {
-					depthOfField.active = false;
+					//depthOfField.active = false;
 			}
 		}
 
