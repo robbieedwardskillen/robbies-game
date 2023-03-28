@@ -74,7 +74,7 @@ public class PlayerUI : MonoBehaviour
     #region Public Methods
 
     public void SetTarget(PlayerManager _target)
-    {
+    { 
         if (_target == null)
         {   
             //Debug.LogError("<Color=Red><a>Missing</a></Color> PlayMakerManager target for PlayerUI.SetTarget.", this);
@@ -87,7 +87,6 @@ public class PlayerUI : MonoBehaviour
         targetRenderer = this.target.GetComponent<Renderer>();
 
         characterControllerHeight = target.Height; 
-        
 
         if (playerNameText != null)
         {

@@ -36,7 +36,7 @@ public class PlayerNameInputField : MonoBehaviour
 
 
         string defaultName = string.Empty;
-        TextMeshProUGUI _inputField = this.GetComponent<TextMeshProUGUI>();
+        TMP_InputField _inputField = this.GetComponent<TMP_InputField>();
         //InputField _inputField = this.GetComponent<InputField>();
         if (_inputField!=null)
         {
@@ -45,10 +45,10 @@ public class PlayerNameInputField : MonoBehaviour
                 defaultName = PlayerPrefs.GetString(playerNamePrefKey);
                 _inputField.text = defaultName;
             }
+            PhotonNetwork.NickName =  defaultName;
         }
 
-
-        PhotonNetwork.NickName =  defaultName;
+        
     }
 
 
@@ -64,15 +64,18 @@ public class PlayerNameInputField : MonoBehaviour
     /// <param name="value">The name of the Player</param>
     public void SetPlayerName(string value)
     {
+        value = this.GetComponent<TMP_InputField>().text;
         // #Important
+        //if (string.IsNullOrEmpty(value))
         if (string.IsNullOrEmpty(value))
         {
             Debug.LogError("Player Name is null or empty");
             return;
         }
+        //PhotonNetwork.NickName = value;
         PhotonNetwork.NickName = value;
-
-
+        print("1" + PhotonNetwork.NickName);
+        //PlayerPrefs.SetString(playerNamePrefKey,value);
         PlayerPrefs.SetString(playerNamePrefKey,value);
     }
 
