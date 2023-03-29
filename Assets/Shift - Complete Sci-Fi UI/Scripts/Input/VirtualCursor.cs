@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using TMPro;
+
 namespace Michsky.UI.Shift
 {
     public class VirtualCursor : PointerInputModule
     {
+        private GameObject keyboard;
+
         [Header("Objects")]
         public RectTransform border;
         public GameObject cursorObject;
@@ -27,6 +31,7 @@ namespace Michsky.UI.Shift
             cursorObj = this.GetComponent<RectTransform>();
             pointer = new PointerEventData(vEventSystem);
             cursorAnim = cursorObject.GetComponent<Animator>();
+            keyboard = GameObject.Find("/Canvas/OnScreenKeyboard");
         }
 
         void Update()
@@ -41,7 +46,7 @@ namespace Michsky.UI.Shift
         }
 
         public override void Process()
-        {
+        { 
             Vector2 screenPos = Camera.main.WorldToScreenPoint(cursorObj.transform.position);
             pointer.position = screenPos;
             eventSystem.RaycastAll(pointer, this.m_RaycastResultCache);
@@ -58,8 +63,36 @@ namespace Michsky.UI.Shift
                 if (this.m_RaycastResultCache.Count > 0)
                 {  
                     //-Robbie added so it doesn't deselect needs to only be in input page
-                    if (raycastResult.gameObject.GetComponent<TextMeshPro>() != null)
-                    pointer.selectedObject = raycastResult.gameObject;
+                    if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.GetComponent<TextMeshProUGUI>() != null) {
+                        pointer.selectedObject = raycastResult.gameObject;
+
+                        if (raycastResult.gameObject.GetComponent<TextMeshProUGUI>().text != "LOGIN") {
+                            keyboard.SetActive(true);
+
+                            if (keyboard.activeSelf == true)
+                                GameObject.Find("/Canvas/OnScreenKeyboard/kb_eng_bg").SetActive(true);
+                        }
+
+                    } else {
+                        if (raycastResult.gameObject.GetComponent<Button>() == null){
+                            if (raycastResult.gameObject.name != "kb_symb" && raycastResult.gameObject.name != "kb_rus_sml" && raycastResult.gameObject.name != "kb_rus_bg"
+                                 && raycastResult.gameObject.name != "kb_eng_sml" && raycastResult.gameObject.name != "kb_eng_bg") {
+                                    GameObject.Find("/Canvas/OnScreenKeyboard/kb_symb").SetActive(false);
+                                    GameObject.Find("/Canvas/OnScreenKeyboard/kb_rus_sml").SetActive(false);
+                                    GameObject.Find("/Canvas/OnScreenKeyboard/kb_rus_bg").SetActive(false);
+                                    GameObject.Find("/Canvas/OnScreenKeyboard/kb_eng_sml").SetActive(false);
+                                    GameObject.Find("/Canvas/OnScreenKeyboard/kb_eng_bg").SetActive(false);
+                                }
+                        } else if (raycastResult.gameObject.name == "Button (44) Enter") {
+                                GameObject.Find("/Canvas/OnScreenKeyboard/kb_symb").SetActive(false);
+                                GameObject.Find("/Canvas/OnScreenKeyboard/kb_rus_sml").SetActive(false);
+                                GameObject.Find("/Canvas/OnScreenKeyboard/kb_rus_bg").SetActive(false);
+                                GameObject.Find("/Canvas/OnScreenKeyboard/kb_eng_sml").SetActive(false);
+                                GameObject.Find("/Canvas/OnScreenKeyboard/kb_eng_bg").SetActive(false);
+                        }
+                            
+                    }
+                    
                     pointer.pointerPress = ExecuteEvents.ExecuteHierarchy(raycastResult.gameObject, pointer, ExecuteEvents.submitHandler);
                     pointer.rawPointerPress = raycastResult.gameObject;
                 }

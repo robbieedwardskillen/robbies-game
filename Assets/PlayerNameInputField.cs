@@ -74,7 +74,6 @@ public class PlayerNameInputField : MonoBehaviour
         }
         //PhotonNetwork.NickName = value;
         PhotonNetwork.NickName = value;
-        print("1" + PhotonNetwork.NickName);
         //PlayerPrefs.SetString(playerNamePrefKey,value);
         PlayerPrefs.SetString(playerNamePrefKey,value);
     }
