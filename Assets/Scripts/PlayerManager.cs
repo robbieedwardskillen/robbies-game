@@ -1715,8 +1715,9 @@ print("from player start" + photonView.Owner);
 				}
 
 				RaycastHit hit;
+				shootHandgunSound();
 				if (Physics.Raycast(handgun.position, shootZoneOrCrosshair.forward, out hit, range)){
-					shootHandgunSound();
+					
 					if (hit.rigidbody != null) {
 						hit.rigidbody.AddForce(hit.normal * -15f);
 					}
@@ -1745,6 +1746,8 @@ print("from player start" + photonView.Owner);
 		if (rifleAmmo > 0){
 				rifleAmmo -= 1;
 				//playerAnimator.SetTrigger("shoot");
+
+				//add rifle sound here
 				RaycastHit hit;
 				if (IsGrounded()){//since gun is 90 degrees the wrong way
 					if (Physics.Raycast(rifle.position, fireArea.forward, out hit, range)){
