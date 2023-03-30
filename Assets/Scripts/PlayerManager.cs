@@ -701,17 +701,18 @@ print("from player start" + photonView.Owner);
 
 		
 	}
-	IEnumerator GCD(int layer) {
+	IEnumerator GCD(int layer, float time) {
+		//not really global can vary
 		canCast = false;
 		playerAnimator.SetLayerWeight(layer, 1f);
-		yield return new WaitForSeconds(1);
+		yield return new WaitForSeconds(time);
 		canCast = true;
 		playerAnimator.SetLayerWeight(layer, 0f);
 	}
 	IEnumerator healWaveTime() {
 		
         if (healWave != null){
-			StartCoroutine(GCD(12));
+			StartCoroutine(GCD(12, 1f));
 			playerAnimator.Play("CastingWhileMoving1.Cast", 12, 0f);
 			yield return new WaitForSeconds(0.3f);
 			audio.PlayOneShot (healWaveSound, 0.5f);
@@ -727,7 +728,7 @@ print("from player start" + photonView.Owner);
     }
     IEnumerator attackWaveTime() {
         if (attackWave != null){
-			StartCoroutine(GCD(13));
+			StartCoroutine(GCD(13, 1f));
 			playerAnimator.Play("CastingWhileMoving2.Cast", 13, 0f);
 			yield return new WaitForSeconds(0.4f);
 			audio.PlayOneShot (attackWaveSound, 0.5f);
@@ -743,9 +744,10 @@ print("from player start" + photonView.Owner);
     }
 	IEnumerator waterBallTime() {
         if (waterBall != null){
-			StartCoroutine(GCD(13));
-			playerAnimator.Play("CastingWhileMoving2.Cast", 13, 0f);
+			StartCoroutine(GCD(14, 2f));
+			playerAnimator.Play("CastingWhileMoving3.Cast", 14, 0f);
 			yield return new WaitForSeconds(0.4f);
+			audio.pitch = 0.2f;
 			audio.PlayOneShot (healWaveSound, 0.5f);
 			eraserTimer = 0f;
 			eraserTimerOn = true;
@@ -753,6 +755,7 @@ print("from player start" + photonView.Owner);
         	waterBall.enabled = true;
 			waterBallForceField.enabled = true;
             yield return new WaitForSeconds(0.75f);
+			audio.pitch = 1f;
             waterBallEmitting = false;
             waterBall.enabled = false;
 			waterBallForceField.enabled = false;
