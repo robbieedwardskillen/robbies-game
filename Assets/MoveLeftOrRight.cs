@@ -13,6 +13,7 @@ public class MoveLeftOrRight : MonoBehaviour
     private Vector2 move;
 	private Vector2 rotate;
     private float posX = 0;
+	private float acceleration = 0f;
     private Vector3 rt;
     // Start is called before the first frame update
     void Start()
@@ -60,12 +61,19 @@ public class MoveLeftOrRight : MonoBehaviour
     {
         
         if (action5 == 1){
-            posX += 1f;
+			if (acceleration < 20f)
+				acceleration += 0.2f;
+            posX += 2f + acceleration;
             GetComponent<RectTransform>().anchoredPosition = new Vector3(posX, rt.y, rt.z);
         } 
         if (action4 == 1){
-            posX -= 1f;
+			if (acceleration < 20f)
+				acceleration += 0.2f;
+            posX -= 2f + acceleration;
             GetComponent<RectTransform>().anchoredPosition = new Vector3(posX, rt.y, rt.z);
         }
+		if (action5 != 1 && action4 != 1){
+			acceleration = 0f;
+		}
     }
 }
