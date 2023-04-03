@@ -60,13 +60,13 @@ public class MoveLeftOrRight : MonoBehaviour
     void Update()
     {
         
-        if (action5 == 1){
+        if (action4 == 1){
 			if (acceleration < 20f)
 				acceleration += 0.2f;
             posX += 2f + acceleration;
             GetComponent<RectTransform>().anchoredPosition = new Vector3(posX, rt.y, rt.z);
         } 
-        if (action4 == 1){
+        if (action5 == 1){
 			if (acceleration < 20f)
 				acceleration += 0.2f;
             posX -= 2f + acceleration;

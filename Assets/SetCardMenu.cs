@@ -11,7 +11,6 @@ public class SetCardMenu : MonoBehaviour
     {
         rm = GameObject.Find("Canvas/RadialMenu").GetComponent<radialMenu>();
         for (int i = 0; i < rm.elements.Count; i++){
-            print("testng" + i);
             GameObject card = Instantiate(cardPrefab) as GameObject;
             card.GetComponent<ChapterButton>().backgroundImage = rm.elements[i].image.sprite;
             card.transform.parent = this.gameObject.transform;

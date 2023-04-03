@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using TMPro;
 
 namespace Michsky.UI.Shift
@@ -8,7 +11,7 @@ namespace Michsky.UI.Shift
     public class VirtualCursor : PointerInputModule
     {
         private GameObject keyboard;
-
+        private List<RaycastResult> rr;
         [Header("Objects")]
         public RectTransform border;
         public GameObject cursorObject;
@@ -28,6 +31,7 @@ namespace Michsky.UI.Shift
 
         public new void Start()
         {
+            rr = new List<RaycastResult>();
             cursorObj = this.GetComponent<RectTransform>();
             pointer = new PointerEventData(vEventSystem);
             cursorAnim = cursorObject.GetComponent<Animator>();
@@ -59,11 +63,11 @@ namespace Michsky.UI.Shift
                 pointer.pressPosition = cursorPos;
                 pointer.clickTime = Time.unscaledTime;
                 pointer.pointerPressRaycast = raycastResult;
-
+                
                 if (this.m_RaycastResultCache.Count > 0)
-                {  
+                {  print(raycastResult.gameObject);
                     //-Robbie added so it doesn't deselect needs to only be in input page
-                    if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.GetComponent<TextMeshProUGUI>() != null) {
+/*                     if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.GetComponent<TextMeshProUGUI>() != null) {
                         pointer.selectedObject = raycastResult.gameObject;
 
                         if (raycastResult.gameObject.GetComponent<TextMeshProUGUI>().text != "LOGIN") {
@@ -91,7 +95,7 @@ namespace Michsky.UI.Shift
                                 GameObject.Find("/Canvas/OnScreenKeyboard/kb_eng_bg").SetActive(false);
                         }
                             
-                    }
+                    } */
                     
                     pointer.pointerPress = ExecuteEvents.ExecuteHierarchy(raycastResult.gameObject, pointer, ExecuteEvents.submitHandler);
                     pointer.rawPointerPress = raycastResult.gameObject;

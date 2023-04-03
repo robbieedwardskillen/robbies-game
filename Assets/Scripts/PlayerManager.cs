@@ -588,7 +588,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		m_camRotation = GameObject.Find("Rotation");
 		gameTransition = GameObject.Find("Main Camera").GetComponent<Transition>();
 
-		print("awake" + photonView.Owner);
 	}
 	void setTeams() {
 		if (playerCount == 1){
@@ -669,7 +668,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		waterEraser.transform.localScale = new Vector3(0f,0f,0f);
 	}
 	void Start() {
-print("from player start" + photonView.Owner);
 /* 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
 		hashPvP.Add("pvp", (int)pvp); */
 		//setting team
