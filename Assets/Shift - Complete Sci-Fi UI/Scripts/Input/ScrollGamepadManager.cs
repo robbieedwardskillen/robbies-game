@@ -11,6 +11,7 @@ namespace Michsky.UI.Shift
 
         [Header("Input")]
         public string inputAxis = "Xbox Right Stick Vertical";
+        //changed to just Horizontal in project
         public bool invertAxis = false;
 
         void Start()
