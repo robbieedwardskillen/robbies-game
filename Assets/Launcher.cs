@@ -37,6 +37,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         PhotonNetwork.SendRate = 40;
         PhotonNetwork.SerializationRate = 20;
         PhotonNetwork.AutomaticallySyncScene = true;
+        m_cam = GameObject.Find("Main Camera");
         gameTransition = GameObject.Find("Main Camera").GetComponent<Transition>();
     }
 
@@ -48,7 +49,7 @@ public class Launcher : MonoBehaviourPunCallbacks
 
         //not related to networking
         camRotateWithZeroY = GameObject.Find("CamRotateWithZeroY");
-        m_cam = GameObject.Find("Main Camera");
+        
         cinemachineCam1 = GameObject.Find("CinemachineCam1");
         cinemachineCam2 = GameObject.Find("CinemachineCam2");
         loading = GameObject.Find("Loading");

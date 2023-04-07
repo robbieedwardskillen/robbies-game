@@ -6,12 +6,13 @@ public class SetCardMenu : MonoBehaviour
 {
     private radialMenu rm;
     public GameObject cardPrefab;
+    private GameObject card;
     // Start is called before the first frame update
     void Start()
     {
         rm = GameObject.Find("Canvas/RadialMenu").GetComponent<radialMenu>();
         for (int i = 0; i < rm.elements.Count; i++){
-            GameObject card = Instantiate(cardPrefab) as GameObject;
+            card = Instantiate(cardPrefab) as GameObject;
             card.GetComponent<ChapterButton>().backgroundImage = rm.elements[i].image.sprite;
             card.transform.parent = this.gameObject.transform;
         }
@@ -21,6 +22,6 @@ public class SetCardMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }

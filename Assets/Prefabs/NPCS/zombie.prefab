@@ -15881,7 +15881,7 @@ GameObject:
   - component: {fileID: 4391313652949551673}
   - component: {fileID: 4391313652949551678}
   m_Layer: 0
-  m_Name: drug adict
+  m_Name: zombie
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

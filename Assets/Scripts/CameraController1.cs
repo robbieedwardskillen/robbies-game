@@ -143,7 +143,7 @@ public class CameraController1 : MonoBehaviourPunCallbacks {
 	}
 	void FixedUpdate()
 	{
-		if (loadingScreen != null){
+		if (loadingScreen != null && gameTransition != null){
 			if (gameTransition.transitioning){
 				loadingScreen.SetActive(true);
 			} else {

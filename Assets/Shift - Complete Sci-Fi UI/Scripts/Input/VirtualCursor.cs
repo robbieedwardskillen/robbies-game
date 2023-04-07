@@ -69,7 +69,7 @@ namespace Michsky.UI.Shift
                 if (this.m_RaycastResultCache.Count > 0)
                 {  print(raycastResult.gameObject);
                     //-Robbie added so it doesn't deselect needs to only be in input page
-                    if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.GetComponent<TextMeshProUGUI>() != null) {
+                   /*  if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.GetComponent<TextMeshProUGUI>() != null) {
                         pointer.selectedObject = raycastResult.gameObject;
 
                         if (raycastResult.gameObject.GetComponent<TextMeshProUGUI>().text != "LOGIN") {
@@ -93,7 +93,7 @@ namespace Michsky.UI.Shift
                         }
                             
                     }
-                    
+                     */
                     pointer.pointerPress = ExecuteEvents.ExecuteHierarchy(raycastResult.gameObject, pointer, ExecuteEvents.submitHandler);
                     pointer.rawPointerPress = raycastResult.gameObject;
                 }
