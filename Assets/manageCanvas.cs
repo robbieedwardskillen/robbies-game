@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class manageCanvas : MonoBehaviour
+public class ManageCanvas : MonoBehaviour
 {
     
     private PlayerControls controls;
@@ -21,6 +21,7 @@ public class manageCanvas : MonoBehaviour
     private GameObject canvas;
 
     private bool switchCam = false;
+	
 
     void Start()
     {	
@@ -62,25 +63,21 @@ public class manageCanvas : MonoBehaviour
 		if (controls != null){
 			controls.Gameplay.Enable();
 		}
+		SwitchCam(switchCam);
     }
 
 
     void Update()
     {
         if (controls.Gameplay.Menu.triggered){
-            mainCam.SetActive(switchCam);
-            mainCam.GetComponent<AudioListener>().enabled = switchCam;
-            canvasCam.SetActive(!switchCam);
-            canvasCam.GetComponent<AudioListener>().enabled = !switchCam;
-            if (switchCam){
-                canvas.GetComponent<Canvas>().worldCamera = canvasCam.GetComponent<Camera>();
-            } else {
-
-                canvas.GetComponent<Canvas>().worldCamera = mainCam.GetComponent<Camera>();
-            }
-            
-            
-            switchCam = !switchCam;
+			SwitchCam(switchCam);
 		}
     }
+	public void SwitchCam(bool cam) { //true for no menu false for menu
+		mainCam.GetComponent<AudioListener>().enabled = switchCam;
+		mainCam.SetActive(switchCam);
+		canvasCam.GetComponent<AudioListener>().enabled = !switchCam;
+		canvasCam.SetActive(!switchCam);
+		switchCam = !switchCam;
+	}
 }

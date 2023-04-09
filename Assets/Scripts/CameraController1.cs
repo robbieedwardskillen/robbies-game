@@ -49,7 +49,7 @@ public class CameraController1 : MonoBehaviourPunCallbacks {
 		controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Rotate.canceled += ctx => rotate = Vector2.zero;
 		loadingScreen = GameObject.Find("Loading");
-		m_cam = Camera.main;
+		m_cam = GameObject.Find("Main Camera").GetComponent<Camera>();
 		offset = new Vector3(0f, 1.1f, 2.3f);
 		gameTransition = m_cam.GetComponent<Transition>();
 		velocity = Vector3.zero;

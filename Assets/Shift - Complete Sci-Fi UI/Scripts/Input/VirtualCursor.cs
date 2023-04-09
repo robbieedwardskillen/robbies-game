@@ -50,13 +50,28 @@ namespace Michsky.UI.Shift
 
             cursorObj.anchoredPosition = cursorPos;
         }
-
+        public static Vector2 WorldToScreenPoint(Camera cam, Vector3 worldPoint)
+        {
+            if ((Object) cam == (Object) null)
+                return new Vector2(worldPoint.x, worldPoint.y);
+            return (Vector2) cam.WorldToScreenPoint(worldPoint);
+        }
         public override void Process()
-        { 
-            Vector2 screenPos = Camera.main.WorldToScreenPoint(cursorObj.transform.position);
+        {   
+            Vector2 screenPos = Vector2.zero;
+            if (true == true){
+                screenPos = Camera.main.WorldToScreenPoint(cursorObj.transform.position);
+            } else {
+                screenPos = WorldToScreenPoint(null, cursorObj.transform.position);
+            }
+
             pointer.position = screenPos;
             eventSystem.RaycastAll(pointer, this.m_RaycastResultCache);
             RaycastResult raycastResult = FindFirstRaycast(this.m_RaycastResultCache);
+            //test
+
+            
+            //end test
             pointer.pointerCurrentRaycast = raycastResult;
             this.ProcessMove(pointer);
 
@@ -65,11 +80,16 @@ namespace Michsky.UI.Shift
                 pointer.pressPosition = cursorPos;
                 pointer.clickTime = Time.unscaledTime;
                 pointer.pointerPressRaycast = raycastResult;
-                
+                print(raycastResult);
+/*                 var output = JsonUtility.ToJson(raycastResult, true);
+                foreach (var i in this.m_RaycastResultCache){
+                    Debug.Log(i);
+                } */
+		    
                 if (this.m_RaycastResultCache.Count > 0)
-                {  print(raycastResult.gameObject);
+                {  
                     //-Robbie added so it doesn't deselect needs to only be in input page
-                   /*  if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.GetComponent<TextMeshProUGUI>() != null) {
+                    if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.name == "Text") {
                         pointer.selectedObject = raycastResult.gameObject;
 
                         if (raycastResult.gameObject.GetComponent<TextMeshProUGUI>().text != "LOGIN") {
@@ -93,7 +113,7 @@ namespace Michsky.UI.Shift
                         }
                             
                     }
-                     */
+
                     pointer.pointerPress = ExecuteEvents.ExecuteHierarchy(raycastResult.gameObject, pointer, ExecuteEvents.submitHandler);
                     pointer.rawPointerPress = raycastResult.gameObject;
                 }

@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+
 public class Launcher : MonoBehaviourPunCallbacks
 {
     public GameObject playerPrefab;
@@ -20,6 +22,9 @@ public class Launcher : MonoBehaviourPunCallbacks
     private GameObject cinemachineCam2;
     private GameObject loading;
     private GameObject rotation;
+    private GameObject canvasManager;
+    private GameObject canvasCam;
+    private GameObject canvas;
     #endregion
     
 
@@ -34,11 +39,15 @@ public class Launcher : MonoBehaviourPunCallbacks
     private GameObject progressLabel;
 
     void Awake() {
+        
         PhotonNetwork.SendRate = 40;
         PhotonNetwork.SerializationRate = 20;
         PhotonNetwork.AutomaticallySyncScene = true;
         m_cam = GameObject.Find("Main Camera");
+        canvasCam = GameObject.Find("Canvas Camera");
+        canvas = GameObject.Find("Canvas");
         gameTransition = GameObject.Find("Main Camera").GetComponent<Transition>();
+        canvasManager = GameObject.Find("Canvas Manager");
     }
 
     void Start()
@@ -54,19 +63,28 @@ public class Launcher : MonoBehaviourPunCallbacks
         cinemachineCam2 = GameObject.Find("CinemachineCam2");
         loading = GameObject.Find("Loading");
         rotation = GameObject.Find("Rotation");
+        if (SceneManager.GetActiveScene ().name == "Launcher"){
             DontDestroyOnLoad(camRotateWithZeroY);
             DontDestroyOnLoad(m_cam);
+            DontDestroyOnLoad(canvasCam);
+            DontDestroyOnLoad(canvas);
             DontDestroyOnLoad(rotation);
             DontDestroyOnLoad(cinemachineCam1);
             DontDestroyOnLoad(cinemachineCam2);
+            DontDestroyOnLoad(canvasManager);
+        }
+
+
             //DontDestroyOnLoad(loading);
         //end
     }
     public void Connect() {
+        if (GameObject.Find("Canvas/Main Panels/Home/Content/Play Story") != null){
+            GameObject.Find("Canvas/Main Panels/Home/Content/Play Story").GetComponent<Button>().interactable = false;
+        }  
+        //not related to networking
         progressLabel.SetActive(true);
         controlPanel.SetActive(false);
-
-        //not related to networking
         //end
 
         if (PhotonNetwork.IsConnected)
@@ -82,6 +100,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnConnectedToMaster()
     {
+        canvasManager.GetComponent<ManageCanvas>().SwitchCam(true);
         Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
         if (isConnecting){
             PhotonNetwork.JoinRandomRoom();
@@ -105,6 +124,8 @@ public class Launcher : MonoBehaviourPunCallbacks
         //testing
 /*         progressLabel.SetActive(false);
         controlPanel.SetActive(false); */
+        
+        
 
         Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
