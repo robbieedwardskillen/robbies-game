@@ -694,8 +694,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		AllColliders (gameObject.transform, false);
 
-		crossHair = GameObject.Find("Canvas").transform.Find("reticle");
-		GameObject.Find("Canvas").transform.Find("Control Panel").transform.gameObject.SetActive(false);
+		crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
+		GameObject.Find("Canvas In Game").transform.Find("Control Panel").transform.gameObject.SetActive(false);
 
 		
 	}
@@ -1468,7 +1468,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 						if (crossHair != null){
 							crossHair.gameObject.SetActive(true);
 						} else {
-							crossHair = GameObject.Find("Canvas").transform.Find("reticle");
+							crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
 						}
 						
 					}
@@ -1486,7 +1486,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					if (crossHair != null){
 						crossHair.gameObject.SetActive(false);
 					} else {
-						crossHair = GameObject.Find("Canvas").transform.Find("reticle");
+						crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
 					}
 				}
 				

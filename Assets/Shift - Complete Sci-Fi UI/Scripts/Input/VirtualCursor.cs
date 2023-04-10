@@ -30,8 +30,11 @@ namespace Michsky.UI.Shift
         Vector2 cursorPos;
         RectTransform cursorObj;
 
+        private ManageCanvas manageCanvas;
+
         public new void Start()
         {
+            manageCanvas = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
             rr = new List<RaycastResult>();
             cursorObj = this.GetComponent<RectTransform>();
             pointer = new PointerEventData(vEventSystem);
@@ -59,7 +62,7 @@ namespace Michsky.UI.Shift
         public override void Process()
         {   
             Vector2 screenPos = Vector2.zero;
-            if (true == true){
+            if (manageCanvas.inGame){
                 screenPos = Camera.main.WorldToScreenPoint(cursorObj.transform.position);
             } else {
                 screenPos = WorldToScreenPoint(null, cursorObj.transform.position);
@@ -80,7 +83,6 @@ namespace Michsky.UI.Shift
                 pointer.pressPosition = cursorPos;
                 pointer.clickTime = Time.unscaledTime;
                 pointer.pointerPressRaycast = raycastResult;
-                print(raycastResult);
 /*                 var output = JsonUtility.ToJson(raycastResult, true);
                 foreach (var i in this.m_RaycastResultCache){
                     Debug.Log(i);

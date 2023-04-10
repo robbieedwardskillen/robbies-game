@@ -35,11 +35,11 @@ public class radialMenuElement : MonoBehaviour, IPointerClickHandler, IPointerEn
     public void OnPointerEnter(PointerEventData eventData){
         transform.parent.gameObject.transform.Find("mask").gameObject.transform.Find("CardImage").GetComponent<Image>().enabled = true;
         transform.parent.gameObject.transform.Find("mask").gameObject.transform.Find("CardImage").GetComponent<Image>().sprite = image2.sprite;
-        GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f ,0f);
+        GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
         
     }
     public void OnPointerExit(PointerEventData eventData){
-        GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 0f);
+        GetComponent<RectTransform>().localScale = new Vector3(0.8f, 0.8f, 0f);
     }
 
 }

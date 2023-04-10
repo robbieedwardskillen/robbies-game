@@ -18,16 +18,20 @@ public class ManageCanvas : MonoBehaviour
 
     private GameObject mainCam;
     private GameObject canvasCam;
-    private GameObject canvas;
+	private GameObject canvasGameObject;
+	private GameObject canvasInGameGameObject;
+    private Canvas canvas;
 
-    private bool switchCam = false;
+    public bool inGame = false;
 	
 
     void Start()
     {	
         mainCam = GameObject.Find("Main Camera");
+		canvasGameObject = GameObject.Find("Canvas");
+		canvasInGameGameObject = GameObject.Find("Canvas In Game");
         canvasCam = GameObject.Find("Canvas Camera");
-        canvas = GameObject.Find("Canvas");
+        canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
 		controls = new PlayerControls();
         controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Move.performed += ctx => move = Vector2.zero;
@@ -63,21 +67,36 @@ public class ManageCanvas : MonoBehaviour
 		if (controls != null){
 			controls.Gameplay.Enable();
 		}
-		SwitchCam(switchCam);
+		//SwitchCam(inGame);
     }
 
 
     void Update()
     {
-        if (controls.Gameplay.Menu.triggered){
-			SwitchCam(switchCam);
+		if (false == true){ //set to only work after joining game
+			if (controls.Gameplay.Menu.triggered){
+				SwitchCam(inGame);
+			}
 		}
+
     }
-	public void SwitchCam(bool cam) { //true for no menu false for menu
-		mainCam.GetComponent<AudioListener>().enabled = switchCam;
-		mainCam.SetActive(switchCam);
-		canvasCam.GetComponent<AudioListener>().enabled = !switchCam;
-		canvasCam.SetActive(!switchCam);
-		switchCam = !switchCam;
+	public void SwitchCam(bool inTheGame) { //true for no menu false for menu (except at start cause this doesn't get called then)
+		if (inTheGame == false){
+			//canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+			canvasGameObject.SetActive(true);
+			canvasInGameGameObject.SetActive(false);
+		}
+		else {
+			//canvas.renderMode = RenderMode.ScreenSpaceCamera;
+			canvasGameObject.SetActive(false);
+			canvasInGameGameObject.SetActive(true);
+
+		}
+		
+		mainCam.GetComponent<AudioListener>().enabled = inGame;
+		mainCam.SetActive(inGame);
+		canvasCam.GetComponent<AudioListener>().enabled = !inGame;
+		canvasCam.SetActive(!inGame);
+		inGame = !inGame;
 	}
 }

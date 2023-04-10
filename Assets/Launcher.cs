@@ -25,6 +25,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     private GameObject canvasManager;
     private GameObject canvasCam;
     private GameObject canvas;
+    private GameObject canvasInGame;
     #endregion
     
 
@@ -37,6 +38,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     [Tooltip("The UI Label to inform the user that the connection is in progress")]
     [SerializeField]
     private GameObject progressLabel;
+    private ManageCanvas manageCanvas;
 
     void Awake() {
         
@@ -46,8 +48,10 @@ public class Launcher : MonoBehaviourPunCallbacks
         m_cam = GameObject.Find("Main Camera");
         canvasCam = GameObject.Find("Canvas Camera");
         canvas = GameObject.Find("Canvas");
+        canvasInGame = GameObject.Find("Canvas In Game");
         gameTransition = GameObject.Find("Main Camera").GetComponent<Transition>();
         canvasManager = GameObject.Find("Canvas Manager");
+        manageCanvas = canvasManager.GetComponent<ManageCanvas>();
     }
 
     void Start()
@@ -68,10 +72,12 @@ public class Launcher : MonoBehaviourPunCallbacks
             DontDestroyOnLoad(m_cam);
             DontDestroyOnLoad(canvasCam);
             DontDestroyOnLoad(canvas);
+            DontDestroyOnLoad(canvasInGame);
             DontDestroyOnLoad(rotation);
             DontDestroyOnLoad(cinemachineCam1);
             DontDestroyOnLoad(cinemachineCam2);
             DontDestroyOnLoad(canvasManager);
+            m_cam.SetActive(false);
         }
 
 
@@ -81,7 +87,10 @@ public class Launcher : MonoBehaviourPunCallbacks
     public void Connect() {
         if (GameObject.Find("Canvas/Main Panels/Home/Content/Play Story") != null){
             GameObject.Find("Canvas/Main Panels/Home/Content/Play Story").GetComponent<Button>().interactable = false;
-        }  
+        }
+        
+        manageCanvas.SwitchCam(true);
+        
         //not related to networking
         progressLabel.SetActive(true);
         controlPanel.SetActive(false);
