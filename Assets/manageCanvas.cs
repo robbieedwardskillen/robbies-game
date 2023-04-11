@@ -67,18 +67,19 @@ public class ManageCanvas : MonoBehaviour
 		if (controls != null){
 			controls.Gameplay.Enable();
 		}
-		//SwitchCam(inGame);
+
     }
 
 
     void Update()
     {
-		if (false == true){ //set to only work after joining game
+		if (GameObject.Find("Launcher").GetComponent<Launcher>().connected){ //set to only work after joining game
 			if (controls.Gameplay.Menu.triggered){
+				print(inGame);
 				SwitchCam(inGame);
+				inGame = !inGame;
 			}
 		}
-
     }
 	public void SwitchCam(bool inTheGame) { //true for no menu false for menu (except at start cause this doesn't get called then)
 		if (inTheGame == false){
@@ -90,13 +91,12 @@ public class ManageCanvas : MonoBehaviour
 			//canvas.renderMode = RenderMode.ScreenSpaceCamera;
 			canvasGameObject.SetActive(false);
 			canvasInGameGameObject.SetActive(true);
-
 		}
 		
-		mainCam.GetComponent<AudioListener>().enabled = inGame;
-		mainCam.SetActive(inGame);
-		canvasCam.GetComponent<AudioListener>().enabled = !inGame;
-		canvasCam.SetActive(!inGame);
-		inGame = !inGame;
+		mainCam.GetComponent<AudioListener>().enabled = inTheGame;
+		mainCam.SetActive(inTheGame);
+		canvasCam.GetComponent<AudioListener>().enabled = !inTheGame;
+		canvasCam.SetActive(!inTheGame);
+		
 	}
 }

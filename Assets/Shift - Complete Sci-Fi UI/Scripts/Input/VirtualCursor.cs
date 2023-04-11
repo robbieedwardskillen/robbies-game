@@ -42,7 +42,13 @@ namespace Michsky.UI.Shift
             keyboard = GameObject.Find("/Canvas/OnScreenKeyboard");
             keyboardEnglishBig = GameObject.Find("/Canvas/OnScreenKeyboard/kb_eng_bg");
         }
-
+        public static Vector2 WorldToScreenPoint(Camera cam, Vector3 worldPoint)
+        {
+            if ((Object) cam == (Object) null)
+                return new Vector2(worldPoint.x, worldPoint.y);
+            return (Vector2) cam.WorldToScreenPoint(worldPoint);
+        }
+        
         void Update()
         {
             cursorPos.x += Input.GetAxis(horizontalAxis) * speed * 1000 * Time.deltaTime;
@@ -52,22 +58,17 @@ namespace Michsky.UI.Shift
             cursorPos.y = Mathf.Clamp(cursorPos.y, -+border.rect.height / 2, border.rect.height / 2);
 
             cursorObj.anchoredPosition = cursorPos;
+            this.Process();
         }
-        public static Vector2 WorldToScreenPoint(Camera cam, Vector3 worldPoint)
-        {
-            if ((Object) cam == (Object) null)
-                return new Vector2(worldPoint.x, worldPoint.y);
-            return (Vector2) cam.WorldToScreenPoint(worldPoint);
-        }
-        public override void Process()
-        {   
-            Vector2 screenPos = Vector2.zero;
-            if (manageCanvas.inGame){
-                screenPos = Camera.main.WorldToScreenPoint(cursorObj.transform.position);
-            } else {
-                screenPos = WorldToScreenPoint(null, cursorObj.transform.position);
-            }
 
+        public override void Process()
+        {  
+            Vector2 screenPos = Vector2.zero;
+/*             if (manageCanvas.inGame){
+                screenPos = Camera.main.WorldToScreenPoint(cursorObj.transform.position);
+            } else { */
+                screenPos = WorldToScreenPoint(null, cursorObj.transform.position);
+            //}
             pointer.position = screenPos;
             eventSystem.RaycastAll(pointer, this.m_RaycastResultCache);
             RaycastResult raycastResult = FindFirstRaycast(this.m_RaycastResultCache);

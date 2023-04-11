@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using UnityEngine.SceneManagement;
 namespace Michsky.UI.Shift
 {
     public class SplashScreenManager : MonoBehaviour
@@ -13,14 +13,37 @@ namespace Michsky.UI.Shift
         private TimedEvent ssTimedEvent;
 
         [Header("Settings")]
-        public bool disableSplashScreen;
-        public bool enablePressAnyKeyScreen;
-        public bool enableLoginScreen;
+        private bool disableSplashScreen = false;
+        private bool enablePressAnyKeyScreen = true;
+        private bool enableLoginScreen = true;
 
         MainPanelManager mpm;
 
+
+        void Start() {
+            
+            if (SceneManager.GetActiveScene ().name == "Launcher"){
+                disableSplashScreen = false;
+                enablePressAnyKeyScreen = true;
+                enableLoginScreen = true;
+            } else {
+                disableSplashScreen = true;
+                enablePressAnyKeyScreen = false;
+                enableLoginScreen = false;
+            }
+        }
+
         void OnEnable()
         {
+            if (SceneManager.GetActiveScene ().name == "Launcher"){
+                disableSplashScreen = false;
+                enablePressAnyKeyScreen = true;
+                enableLoginScreen = true;
+            } else {
+                disableSplashScreen = true;
+                enablePressAnyKeyScreen = false;
+                enableLoginScreen = false;
+            }
             if (splashScreenAnimator == null) { splashScreenAnimator = splashScreen.GetComponent<Animator>(); }
             if (ssTimedEvent == null) { ssTimedEvent = splashScreen.GetComponent<TimedEvent>(); }
             if (mainPanelsAnimator == null) { mainPanelsAnimator = mainPanels.GetComponent<Animator>(); }

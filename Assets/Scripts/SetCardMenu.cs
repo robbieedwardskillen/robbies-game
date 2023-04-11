@@ -10,7 +10,7 @@ public class SetCardMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rm = GameObject.Find("Canvas/RadialMenu").GetComponent<radialMenu>();
+        rm = GameObject.Find("Canvas In Game/RadialMenu").GetComponent<radialMenu>();
         for (int i = 0; i < rm.elements.Count; i++){
             card = Instantiate(cardPrefab) as GameObject;
             card.GetComponent<ChapterButton>().backgroundImage = rm.elements[i].image.sprite;

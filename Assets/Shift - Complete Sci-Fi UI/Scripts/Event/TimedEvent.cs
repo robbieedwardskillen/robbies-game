@@ -8,7 +8,7 @@ namespace Michsky.UI.Shift
     public class TimedEvent : MonoBehaviour
     {
         [Header("Timing (seconds)")]
-        public float timer = 4;
+        public float timer = 1;
         public bool enableAtStart;
 
         [Header("Timer Event")]

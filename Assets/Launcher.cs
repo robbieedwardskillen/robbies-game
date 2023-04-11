@@ -68,6 +68,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         loading = GameObject.Find("Loading");
         rotation = GameObject.Find("Rotation");
         if (SceneManager.GetActiveScene ().name == "Launcher"){
+            DontDestroyOnLoad(this.gameObject);
             DontDestroyOnLoad(camRotateWithZeroY);
             DontDestroyOnLoad(m_cam);
             DontDestroyOnLoad(canvasCam);
@@ -77,7 +78,7 @@ public class Launcher : MonoBehaviourPunCallbacks
             DontDestroyOnLoad(cinemachineCam1);
             DontDestroyOnLoad(cinemachineCam2);
             DontDestroyOnLoad(canvasManager);
-            m_cam.SetActive(false);
+            m_cam.GetComponent<AudioListener>().enabled = false;
         }
 
 
@@ -88,8 +89,6 @@ public class Launcher : MonoBehaviourPunCallbacks
         if (GameObject.Find("Canvas/Main Panels/Home/Content/Play Story") != null){
             GameObject.Find("Canvas/Main Panels/Home/Content/Play Story").GetComponent<Button>().interactable = false;
         }
-        
-        manageCanvas.SwitchCam(true);
         
         //not related to networking
         progressLabel.SetActive(true);
@@ -109,7 +108,6 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnConnectedToMaster()
     {
-        canvasManager.GetComponent<ManageCanvas>().SwitchCam(true);
         Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
         if (isConnecting){
             PhotonNetwork.JoinRandomRoom();
@@ -130,6 +128,8 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
+        manageCanvas.SwitchCam(true);
+        m_cam.GetComponent<AudioListener>().enabled = true;
         //testing
 /*         progressLabel.SetActive(false);
         controlPanel.SetActive(false); */
@@ -138,15 +138,15 @@ public class Launcher : MonoBehaviourPunCallbacks
 
         Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-            {
-                Debug.Log("We load the 'Room for 1' ");
-                // #Critical
-                // Load the Room Level.
-                PhotonNetwork.LoadLevel("Room for 1");
-                
-            }
-            //PhotonNetwork.InstantiateSceneObject(placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
-            //connected = true;
+        {
+            Debug.Log("We load the 'Room for 1' ");
+            // #Critical
+            // Load the Room Level.
+            PhotonNetwork.LoadLevel("Room for 1");
+            
+        }
+        //PhotonNetwork.InstantiateSceneObject(placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
+        connected = true;
     }
  
     public override void OnJoinRandomFailed(short returnCode, string message)
