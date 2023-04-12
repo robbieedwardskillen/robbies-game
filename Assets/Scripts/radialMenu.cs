@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-public class radialMenu : MonoBehaviour
+public class RadialMenu : MonoBehaviour
 {
     public GameObject elementPrefab;
 

@@ -168,6 +168,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 previousPos;
 	private Vector3 velocity;
 
+	private ManageCanvas canvasManager;
+
 	private bool connected = false;
 	bool moveLegs = false;
 	bool blockTurning = false;
@@ -452,6 +454,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		// used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
 		if (photonView.IsMine){
 			PlayerManager.LocalPlayerInstance = this.gameObject;
+			canvasManager = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
+			canvasManager.MyPlayerInstantiated = true;
+			print("test");
 		}
 		
 		// #Critical
