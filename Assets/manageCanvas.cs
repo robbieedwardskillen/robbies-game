@@ -27,7 +27,7 @@ public class ManageCanvas : MonoBehaviour
     private Canvas canvas;
 	private RadialMenu radialMenu;
     public bool inGame = false;
-	private bool myPlayerInstantiated = false;
+	public bool myPlayerInstantiated = false;
 	private bool canChange = true;
     void Start()
     {	

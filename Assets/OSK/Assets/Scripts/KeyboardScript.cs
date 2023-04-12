@@ -12,7 +12,7 @@ public class KeyboardScript : MonoBehaviour
 
     public void alphabetFunction(string alphabet)
     {
-
+        
         inputField.GetComponent<TMP_InputField>().text = inputField.GetComponent<TMP_InputField>().text + alphabet;
         //TextField.text=TextField.text + alphabet;
 

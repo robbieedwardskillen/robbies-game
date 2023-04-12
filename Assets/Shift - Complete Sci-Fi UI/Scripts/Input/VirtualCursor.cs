@@ -58,7 +58,8 @@ namespace Michsky.UI.Shift
             cursorPos.y = Mathf.Clamp(cursorPos.y, -+border.rect.height / 2, border.rect.height / 2);
 
             cursorObj.anchoredPosition = cursorPos;
-            this.Process();
+            if (manageCanvas.myPlayerInstantiated)
+                this.Process();
         }
 
         public override void Process()
