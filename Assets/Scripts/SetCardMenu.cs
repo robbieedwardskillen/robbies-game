@@ -12,10 +12,12 @@ public class SetCardMenu : MonoBehaviour
     {
         rm = GameObject.Find("Canvas In Game/RadialMenu").GetComponent<RadialMenu>();
         for (int i = 0; i < rm.elements.Count; i++){
-            card = Instantiate(cardPrefab) as GameObject;
-            card.GetComponent<ChapterButton>().backgroundImage = rm.elements[i].image.sprite;
-            card.transform.parent = this.gameObject.transform;
-            card.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f ,1f);
+            if (rm.elements[i].GetImage().name != "No card"){
+                card = Instantiate(cardPrefab) as GameObject;
+                card.GetComponent<ChapterButton>().backgroundImage = rm.elements[i].image.sprite;
+                card.transform.parent = this.gameObject.transform;
+                card.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f ,1f);
+            }
         }
         
     }

@@ -2072,7 +2072,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76695198d39c477488ca0842f020023d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  changeValue: 0.02
+  changeValue: 0.01
   inputAxis: Horizontal
   invertAxis: 1
 --- !u!1 &52246958
@@ -6482,6 +6482,16 @@ PrefabInstance:
       propertyPath: border
       value: 
       objectReference: {fileID: 1947938859}
+    - target: {fileID: 114216748251187648, guid: 9f297931961aba74fac4f0bed94b6611,
+        type: 3}
+      propertyPath: verticalAxis
+      value: Right Joystick Y
+      objectReference: {fileID: 0}
+    - target: {fileID: 114216748251187648, guid: 9f297931961aba74fac4f0bed94b6611,
+        type: 3}
+      propertyPath: horizontalAxis
+      value: Right Joystick X
+      objectReference: {fileID: 0}
     - target: {fileID: 224915991729880978, guid: 9f297931961aba74fac4f0bed94b6611,
         type: 3}
       propertyPath: m_Pivot.x

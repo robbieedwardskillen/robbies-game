@@ -19,8 +19,8 @@ namespace Michsky.UI.Shift
 
         [Header("Input")]
         public EventSystem vEventSystem;
-        public string horizontalAxis = "Horizontal";
-        public string verticalAxis = "Vertical";
+        public string horizontalAxis = "Right Joystick X";
+        public string verticalAxis = "Right Joystick Y";
 
         [Header("Settings")]
         [Range(0.1f, 5)] public float speed = 1;
