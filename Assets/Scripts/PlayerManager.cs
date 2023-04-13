@@ -65,7 +65,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector2 smoothInputVelocity;
 	private float jump;
 	private float action1;private float action2;private float action3;private float action4;private float action5;
-	private float aim; private float shoot; private float blockDodge;
+	private float aim; private float sprint; private float shoot; private float blockDodge;
 	private float dpadUp; private float dpadDown; private float dpadLeft; private float dpadRight;
 	private float menu;
 	private Vector3 movement;
@@ -125,9 +125,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private ZibraLiquidEmitter healWave;
 	private bool eraserTimerOn = false;
 	private float eraserTimer = 0f;
-	private bool healEmitting = false;
-	private bool attackEmitting = false;
-	private bool waterBallEmitting = false;
+	private bool waterEmitting = false;
+
 	private GameObject waterEraser;
 
 	private MeleeWeaponTrail mwt;
@@ -476,17 +475,17 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		controls.Gameplay.Move.performed += ctx => move = Vector2.zero;
 		controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Rotate.canceled += ctx => rotate = Vector2.zero;
-		controls.Gameplay.Jump.performed += ctx => jump = ctx.ReadValue<float>();
+		controls.Gameplay.Jump.performed += ctx => jump = ctx.ReadValue<float>();//a/x button
 		controls.Gameplay.Jump.canceled += ctx => jump = 0;
-		controls.Gameplay.Action1.performed += ctx => action1 = ctx.ReadValue<float>();
+		controls.Gameplay.Action1.performed += ctx => action1 = ctx.ReadValue<float>();//x/square button
 		controls.Gameplay.Action1.canceled += ctx => action1 = 0;
-		controls.Gameplay.Action2.performed += ctx => action2 = ctx.ReadValue<float>();
+		controls.Gameplay.Action2.performed += ctx => action2 = ctx.ReadValue<float>();//y/triangle button
 		controls.Gameplay.Action2.canceled += ctx => action2 = 0;
-		controls.Gameplay.Action3.performed += ctx => action3 = ctx.ReadValue<float>();
+		controls.Gameplay.Action3.performed += ctx => action3 = ctx.ReadValue<float>();//b/o button
 		controls.Gameplay.Action3.canceled += ctx => action3 = 0;
-		controls.Gameplay.Action4.performed += ctx => action4 = ctx.ReadValue<float>();
+		controls.Gameplay.Action4.performed += ctx => action4 = ctx.ReadValue<float>();//left shoulder
 		controls.Gameplay.Action4.canceled += ctx => action4 = 0;
-		controls.Gameplay.Action5.performed += ctx => action5 = ctx.ReadValue<float>();
+		controls.Gameplay.Action5.performed += ctx => action5 = ctx.ReadValue<float>();//right shoulder
 		controls.Gameplay.Action5.canceled += ctx => action5 = 0;
 		controls.Gameplay.DPadUp.performed += ctx => dpadUp = ctx.ReadValue<float>();
 		controls.Gameplay.DPadUp.canceled += ctx => dpadUp = 0;
@@ -496,11 +495,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		controls.Gameplay.DPadLeft.canceled += ctx => dpadLeft = 0;
 		controls.Gameplay.DPadRight.performed += ctx => dpadRight = ctx.ReadValue<float>();
 		controls.Gameplay.DPadRight.canceled += ctx => dpadRight = 0;
-		controls.Gameplay.Aim.performed += ctx => aim = ctx.ReadValue<float>();
+		controls.Gameplay.Aim.performed += ctx => aim = ctx.ReadValue<float>();//right clicky
 		controls.Gameplay.Aim.canceled += ctx => aim = 0;
-		controls.Gameplay.Shoot.performed += ctx => shoot = ctx.ReadValue<float>();
+		controls.Gameplay.Sprint.performed += ctx => sprint = ctx.ReadValue<float>();//right clicky
+		controls.Gameplay.Sprint.canceled += ctx => sprint = 0;
+		controls.Gameplay.Shoot.performed += ctx => shoot = ctx.ReadValue<float>();//right trigger
 		controls.Gameplay.Shoot.canceled += ctx => shoot = 0;
-		controls.Gameplay.BlockDodge.performed += ctx => blockDodge = ctx.ReadValue<float>();
+		controls.Gameplay.BlockDodge.performed += ctx => blockDodge = ctx.ReadValue<float>();//left trigger
 		controls.Gameplay.BlockDodge.canceled += ctx => blockDodge = 0;
 		if (controls != null){
 			controls.Gameplay.Enable();
@@ -721,49 +722,56 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			audio.PlayOneShot (healWaveSound, 0.5f);
 			eraserTimer = 0f;
 			eraserTimerOn = true;
-            healEmitting = true;
+            waterEmitting = true;
             healWave.enabled = true;
             yield return new WaitForSeconds(0.25f);
-            healEmitting = false;
+            waterEmitting = false;
             healWave.enabled = false;
 
         }
     }
-    IEnumerator attackWaveTime() {
-        if (attackWave != null){
-			StartCoroutine(GCD(13, 1f));
-			playerAnimator.Play("CastingWhileMoving2.Cast", 13, 0f);
-			yield return new WaitForSeconds(0.4f);
-			audio.PlayOneShot (attackWaveSound, 0.5f);
-			eraserTimer = 0f;
-			eraserTimerOn = true;
-            attackEmitting = true;
-        	attackWave.enabled = true;
-            yield return new WaitForSeconds(0.5f);
-            attackEmitting = false;
-            attackWave.enabled = false;
 
-        }
-    }
-	IEnumerator waterBallTime() {
-        if (waterBall != null){
-			StartCoroutine(GCD(14, 2f));
-			playerAnimator.Play("CastingWhileMoving3.Cast", 14, 0f);
-			yield return new WaitForSeconds(0.4f);
-			audio.pitch = 0.2f;
-			audio.PlayOneShot (healWaveSound, 0.5f);
-			eraserTimer = 0f;
-			eraserTimerOn = true;
-            waterBallEmitting = true;
-        	waterBall.enabled = true;
-			waterBallForceField.enabled = true;
-            yield return new WaitForSeconds(0.75f);
-			audio.pitch = 1f;
-            waterBallEmitting = false;
-            waterBall.enabled = false;
-			waterBallForceField.enabled = false;
-        }
-    }
+	IEnumerator CastSpell(float gcd, string layerAndAnimName, int layerNumber, float firstPause,  float audioPitch1, float audioPitch2, 
+		AudioClip castSound, float volume, ZibraLiquidForceField ff, ZibraLiquidEmitter waterSpell, GameObject spell, float secondPause){
+
+		if (spell != null || waterSpell != null){
+			
+
+			StartCoroutine(GCD(layerNumber, gcd));
+			playerAnimator.Play(layerAndAnimName, layerNumber, 0f);
+			yield return new WaitForSeconds(firstPause);
+
+			if (audioPitch1 != 0)
+				audio.pitch = audioPitch1;
+
+			audio.PlayOneShot (castSound, volume);
+
+			if (waterSpell != null){
+
+				eraserTimer = 0f;
+				eraserTimerOn = true;
+				waterEmitting = true;
+				waterSpell.enabled = true;
+
+				if (ff != null)
+					ff.enabled = true;
+
+				yield return new WaitForSeconds(secondPause);
+
+				if (audioPitch2 != 0)
+					audio.pitch = audioPitch2;
+				
+				waterEmitting = false;
+				waterSpell.enabled = false;
+
+				if (ff != null)
+					ff.enabled = false;
+
+			}
+
+		}
+
+	}
 	IEnumerator waitForSecondBigHit1(){
  		yield return new WaitForSeconds(0.25f);
 		photonView.RPC("RPCTrigger2", RpcTarget.All, "bigSwing3");
@@ -821,15 +829,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			return;
 		}
 		if (healWave != null){
-            if (healEmitting == false)
+            if (waterEmitting == false)
             healWave.enabled = false;
         } 
 		if (attackWave != null){
-            if (attackEmitting == false)
+            if (waterEmitting == false)
             attackWave.enabled = false;
         }
 		if (waterBall != null){
-            if (waterBallEmitting == false){
+            if (waterEmitting == false){
 				waterBall.enabled = false;
 				waterBallForceField.enabled = false;
 			} 
@@ -842,18 +850,20 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			eraserTimerOn = false;
 			eraserTimer = 0f;
 		}
-        if ((controls.Gameplay.DPadUp.triggered || Input.GetKey("g")) && healEmitting == false && canCast){
+        if ((controls.Gameplay.DPadUp.triggered && canvasManager.ability == 0 || Input.GetKey("g")) && waterEmitting == false && canCast){
 			//global cooldown
 			//if used more than 10 times do an erase or after 3 seconds and not refreshed
-            StartCoroutine(healWaveTime());
+            StartCoroutine(CastSpell(1f, "CastingWhileMoving1.Cast", 12, 0.3f, 0, 0, healWaveSound, 0.5f, null, healWave, null, 0.25f));
+
         }
-        if ((controls.Gameplay.DPadDown.triggered || Input.GetKey("h")) && attackEmitting == false && canCast){
-			//10 second cooldown
-            StartCoroutine(attackWaveTime());
+        if ((controls.Gameplay.DPadDown.triggered || Input.GetKey("h")) && waterEmitting == false && canCast){
+			//10 second cooldown?
+            StartCoroutine(CastSpell(1f, "CastingWhileMoving2.Cast", 13, 0.4f, 0, 0, attackWaveSound, 0.5f, null, attackWave, null, 0.5f));
+
         }
-		if ((controls.Gameplay.DPadLeft.triggered || Input.GetKey("t")) && waterBallEmitting == false && canCast){
-			//10 second cooldown
-            StartCoroutine(waterBallTime());
+		if ((controls.Gameplay.DPadLeft.triggered || Input.GetKey("t")) && waterEmitting == false && canCast){
+			StartCoroutine(CastSpell(2f, "CastingWhileMoving3.Cast", 14, 0.4f, 0.2f, 1f, healWaveSound, 0.5f, waterBallForceField, waterBall, null, 0.75f));
+
         }
 
 		if (playerAnimator.GetCurrentAnimatorStateInfo(10).normalizedTime < 1f){

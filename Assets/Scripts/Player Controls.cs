@@ -154,6 +154,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Sprint"",
+                    ""type"": ""Button"",
+                    ""id"": ""a611c176-ea37-4547-afe8-692f7ed3bff9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Shoot"",
                     ""type"": ""Value"",
                     ""id"": ""d863af5d-3860-45b6-a574-3b07bc09bdcb"",
@@ -550,11 +559,33 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""3b1bba51-cff0-4fb4-921d-d0285c5be996"",
-                    ""path"": ""<Keyboard>/shift"",
+                    ""path"": ""<Keyboard>/f"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""BlockDodge"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e5afaee5-fd49-4a7c-aac3-5a7f8602cc4c"",
+                    ""path"": ""<Gamepad>/leftStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9d4a8800-f9d1-4083-bff9-c9ddd75fa5de"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -579,6 +610,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_Gameplay_DPadRight = m_Gameplay.FindAction("DPadRight", throwIfNotFound: true);
         m_Gameplay_Menu = m_Gameplay.FindAction("Menu", throwIfNotFound: true);
         m_Gameplay_Aim = m_Gameplay.FindAction("Aim", throwIfNotFound: true);
+        m_Gameplay_Sprint = m_Gameplay.FindAction("Sprint", throwIfNotFound: true);
         m_Gameplay_Shoot = m_Gameplay.FindAction("Shoot", throwIfNotFound: true);
         m_Gameplay_BlockDodge = m_Gameplay.FindAction("BlockDodge", throwIfNotFound: true);
     }
@@ -654,6 +686,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_DPadRight;
     private readonly InputAction m_Gameplay_Menu;
     private readonly InputAction m_Gameplay_Aim;
+    private readonly InputAction m_Gameplay_Sprint;
     private readonly InputAction m_Gameplay_Shoot;
     private readonly InputAction m_Gameplay_BlockDodge;
     public struct GameplayActions
@@ -674,6 +707,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @DPadRight => m_Wrapper.m_Gameplay_DPadRight;
         public InputAction @Menu => m_Wrapper.m_Gameplay_Menu;
         public InputAction @Aim => m_Wrapper.m_Gameplay_Aim;
+        public InputAction @Sprint => m_Wrapper.m_Gameplay_Sprint;
         public InputAction @Shoot => m_Wrapper.m_Gameplay_Shoot;
         public InputAction @BlockDodge => m_Wrapper.m_Gameplay_BlockDodge;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
@@ -727,6 +761,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @Aim.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAim;
                 @Aim.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAim;
                 @Aim.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAim;
+                @Sprint.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnSprint;
+                @Sprint.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnSprint;
+                @Sprint.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnSprint;
                 @Shoot.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnShoot;
                 @Shoot.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnShoot;
                 @Shoot.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnShoot;
@@ -779,6 +816,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @Aim.started += instance.OnAim;
                 @Aim.performed += instance.OnAim;
                 @Aim.canceled += instance.OnAim;
+                @Sprint.started += instance.OnSprint;
+                @Sprint.performed += instance.OnSprint;
+                @Sprint.canceled += instance.OnSprint;
                 @Shoot.started += instance.OnShoot;
                 @Shoot.performed += instance.OnShoot;
                 @Shoot.canceled += instance.OnShoot;
@@ -805,6 +845,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnDPadRight(InputAction.CallbackContext context);
         void OnMenu(InputAction.CallbackContext context);
         void OnAim(InputAction.CallbackContext context);
+        void OnSprint(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
         void OnBlockDodge(InputAction.CallbackContext context);
     }

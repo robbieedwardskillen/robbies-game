@@ -11,7 +11,7 @@ public class ManageCanvas : MonoBehaviour
     private PlayerControls controls;
     private float jump;
     private float action1;private float action2;private float action3;private float action4;private float action5;
-	private float aim; private float shoot; private float blockDodge;
+	private float aim; private float sprint; private float shoot; private float blockDodge;
 	private float dpadUp; private float dpadDown; private float dpadLeft; private float dpadRight;
 	private float menu; 
     private Vector2 move;
@@ -26,9 +26,12 @@ public class ManageCanvas : MonoBehaviour
 	public GameObject loadingScreen;
     private Canvas canvas;
 	private RadialMenu radialMenu;
+	public radialMenuElement highlightedAbility;
+	public int ability = 0;
     public bool inGame = false;
 	public bool myPlayerInstantiated = false;
 	private bool canChange = true;
+	
     void Start()
     {	
         mainCam = GameObject.Find("Main Camera");
@@ -40,21 +43,21 @@ public class ManageCanvas : MonoBehaviour
         canvasCam = GameObject.Find("Canvas Camera");
         canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
 		controls = new PlayerControls();
-        controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
+		controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Move.performed += ctx => move = Vector2.zero;
 		controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<Vector2>();
 		controls.Gameplay.Rotate.canceled += ctx => rotate = Vector2.zero;
-		controls.Gameplay.Jump.performed += ctx => jump = ctx.ReadValue<float>();
+		controls.Gameplay.Jump.performed += ctx => jump = ctx.ReadValue<float>();//a/x button
 		controls.Gameplay.Jump.canceled += ctx => jump = 0;
-		controls.Gameplay.Action1.performed += ctx => action1 = ctx.ReadValue<float>();
+		controls.Gameplay.Action1.performed += ctx => action1 = ctx.ReadValue<float>();//x/square button
 		controls.Gameplay.Action1.canceled += ctx => action1 = 0;
-		controls.Gameplay.Action2.performed += ctx => action2 = ctx.ReadValue<float>();
+		controls.Gameplay.Action2.performed += ctx => action2 = ctx.ReadValue<float>();//y/triangle button
 		controls.Gameplay.Action2.canceled += ctx => action2 = 0;
-		controls.Gameplay.Action3.performed += ctx => action3 = ctx.ReadValue<float>();
+		controls.Gameplay.Action3.performed += ctx => action3 = ctx.ReadValue<float>();//b/o button
 		controls.Gameplay.Action3.canceled += ctx => action3 = 0;
-		controls.Gameplay.Action4.performed += ctx => action4 = ctx.ReadValue<float>();
+		controls.Gameplay.Action4.performed += ctx => action4 = ctx.ReadValue<float>();//left shoulder
 		controls.Gameplay.Action4.canceled += ctx => action4 = 0;
-		controls.Gameplay.Action5.performed += ctx => action5 = ctx.ReadValue<float>();
+		controls.Gameplay.Action5.performed += ctx => action5 = ctx.ReadValue<float>();//right shoulder
 		controls.Gameplay.Action5.canceled += ctx => action5 = 0;
 		controls.Gameplay.DPadUp.performed += ctx => dpadUp = ctx.ReadValue<float>();
 		controls.Gameplay.DPadUp.canceled += ctx => dpadUp = 0;
@@ -64,11 +67,13 @@ public class ManageCanvas : MonoBehaviour
 		controls.Gameplay.DPadLeft.canceled += ctx => dpadLeft = 0;
 		controls.Gameplay.DPadRight.performed += ctx => dpadRight = ctx.ReadValue<float>();
 		controls.Gameplay.DPadRight.canceled += ctx => dpadRight = 0;
-		controls.Gameplay.Aim.performed += ctx => aim = ctx.ReadValue<float>();
+		controls.Gameplay.Aim.performed += ctx => aim = ctx.ReadValue<float>();//right clicky
 		controls.Gameplay.Aim.canceled += ctx => aim = 0;
-		controls.Gameplay.Shoot.performed += ctx => shoot = ctx.ReadValue<float>();
+		controls.Gameplay.Sprint.performed += ctx => sprint = ctx.ReadValue<float>();//right clicky
+		controls.Gameplay.Sprint.canceled += ctx => sprint = 0;
+		controls.Gameplay.Shoot.performed += ctx => shoot = ctx.ReadValue<float>();//right trigger
 		controls.Gameplay.Shoot.canceled += ctx => shoot = 0;
-		controls.Gameplay.BlockDodge.performed += ctx => blockDodge = ctx.ReadValue<float>();
+		controls.Gameplay.BlockDodge.performed += ctx => blockDodge = ctx.ReadValue<float>();//left trigger
 		controls.Gameplay.BlockDodge.canceled += ctx => blockDodge = 0;
 
 		if (controls != null){
@@ -167,41 +172,57 @@ public class ManageCanvas : MonoBehaviour
 		switch (directionNumber)
 		{
 		case 0:
+			highlightedAbility = radialMenu.elements[0];
+			ability = 0;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[0].GetImage2();
 			radialMenu.elements[0].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
 			break;
 		case 1:
+			highlightedAbility = radialMenu.elements[1];
+			ability = 1;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[1].GetImage2();
 			radialMenu.elements[1].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
 			break;
 		case 2:
+			highlightedAbility = radialMenu.elements[2];
+			ability = 2;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[2].GetImage2();
 			radialMenu.elements[2].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
 			break;
 		case 3:
+			highlightedAbility = radialMenu.elements[3];
+			ability = 3;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[3].GetImage2();
 			radialMenu.elements[3].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
 			break;
 		case 4:
+			ability = 4;
+			highlightedAbility = radialMenu.elements[4];
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[4].GetImage2();
 			radialMenu.elements[4].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
 			break;
 		case 5:
+			ability = 5;
+			highlightedAbility = radialMenu.elements[5];
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[5].GetImage2();
 			radialMenu.elements[5].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
 			break;
 		case 6:
+			ability = 6;
+			highlightedAbility = radialMenu.elements[6];
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[6].GetImage2();
 			radialMenu.elements[6].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
 			break;
 		case 7:
+			ability = 7;
+			highlightedAbility = radialMenu.elements[7];
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
 			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[7].GetImage2();
 			radialMenu.elements[7].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);

@@ -76,6 +76,8 @@ public class PlayerNameInputField : MonoBehaviour
         PhotonNetwork.NickName = value;
         //PlayerPrefs.SetString(playerNamePrefKey,value);
         PlayerPrefs.SetString(playerNamePrefKey,value);
+        GameObject.Find("Canvas/Main Panels/Home/Content/Profile/Soldier Name").GetComponent<TextMeshProUGUI>().text = PhotonNetwork.NickName;
+        GameObject.Find("Canvas/Main Panels/Bottom Panel/Party/You/Info/Profile Nick").GetComponent<TextMeshProUGUI>().text = PhotonNetwork.NickName;
     }
 
 

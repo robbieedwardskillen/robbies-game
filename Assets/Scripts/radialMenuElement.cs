@@ -17,6 +17,9 @@ public class radialMenuElement : MonoBehaviour, IPointerClickHandler, IPointerEn
     public void SetName(string name){
         this.elementName.text = name;
     }
+    public string GetName(){
+        return this.elementName.text;
+    }
     public void SetImage (Sprite spr){
         image.sprite = spr;
     }
