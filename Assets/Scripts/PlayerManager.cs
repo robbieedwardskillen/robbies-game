@@ -830,11 +830,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 		if (healWave != null){
             if (waterEmitting == false)
-            healWave.enabled = false;
+            	healWave.enabled = false;
         } 
 		if (attackWave != null){
             if (waterEmitting == false)
-            attackWave.enabled = false;
+            	attackWave.enabled = false;
         }
 		if (waterBall != null){
             if (waterEmitting == false){
@@ -850,18 +850,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			eraserTimerOn = false;
 			eraserTimer = 0f;
 		}
-        if ((controls.Gameplay.DPadUp.triggered && canvasManager.ability == 0 || Input.GetKey("g")) && waterEmitting == false && canCast){
+		
+        if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 0 || Input.GetKey("g")) && waterEmitting == false && canCast){
+			print(canvasManager.ability);
 			//global cooldown
 			//if used more than 10 times do an erase or after 3 seconds and not refreshed
+			StartCoroutine(CastSpell(1f, "CastingWhileMoving2.Cast", 13, 0.4f, 0, 0, attackWaveSound, 0.5f, null, attackWave, null, 0.5f));
+            
+
+        }
+        if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 3 || Input.GetKey("h")) && waterEmitting == false && canCast){
+			print(canvasManager.ability);
+			//10 second cooldown?
             StartCoroutine(CastSpell(1f, "CastingWhileMoving1.Cast", 12, 0.3f, 0, 0, healWaveSound, 0.5f, null, healWave, null, 0.25f));
 
         }
-        if ((controls.Gameplay.DPadDown.triggered || Input.GetKey("h")) && waterEmitting == false && canCast){
-			//10 second cooldown?
-            StartCoroutine(CastSpell(1f, "CastingWhileMoving2.Cast", 13, 0.4f, 0, 0, attackWaveSound, 0.5f, null, attackWave, null, 0.5f));
-
-        }
-		if ((controls.Gameplay.DPadLeft.triggered || Input.GetKey("t")) && waterEmitting == false && canCast){
+		if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 4 || Input.GetKey("t")) && waterEmitting == false && canCast){
+			print(canvasManager.ability);
 			StartCoroutine(CastSpell(2f, "CastingWhileMoving3.Cast", 14, 0.4f, 0.2f, 1f, healWaveSound, 0.5f, waterBallForceField, waterBall, null, 0.75f));
 
         }
@@ -1405,10 +1410,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 					//end attacks
 					if (controls.Gameplay.Action5.triggered) {
-						if (grenades > 0) {
+
+						//commenting out grenades for now
+
+						/* if (grenades > 0) {
 							playerAnimator.SetTrigger ("throw");
 							StartCoroutine (rollThenBlowUp ());
-						} 
+						}  */
 					} 
 
 					if (controls.Gameplay.Jump.triggered && !isAerial && !playerAnimator.GetBool("blocking") && !underWater) {

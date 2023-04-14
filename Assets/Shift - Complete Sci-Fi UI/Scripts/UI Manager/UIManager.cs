@@ -12,7 +12,7 @@ namespace Michsky.UI.Shift
         [HideInInspector] public bool editorHints = true;
 
         // [Header("BACKGROUND")]
-        public Color backgroundColorTint = new Color(255, 255, 255, 255);
+        public Color backgroundColorTint = new Color(0, 0, 0, 255);
         public BackgroundType backgroundType;
         public Sprite backgroundImage;
         public VideoClip backgroundVideo;
@@ -56,5 +56,6 @@ namespace Michsky.UI.Shift
             BASIC,
             ADVANCED
         }
+
     }
 }

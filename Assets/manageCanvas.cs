@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using Michsky.UI.Shift;
 
 public class ManageCanvas : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class ManageCanvas : MonoBehaviour
     private float posX = 0;
 	private float acceleration = 0f;
 
+	//public UIManager UIManagerAsset;
     private GameObject mainCam;
     private GameObject canvasCam;
 	private GameObject canvasGameObject;
@@ -31,9 +33,18 @@ public class ManageCanvas : MonoBehaviour
     public bool inGame = false;
 	public bool myPlayerInstantiated = false;
 	private bool canChange = true;
-	
+	private AudioSource audio;
+	public AudioClip music1;
+	public AudioClip music2;
+	public AudioClip music3;
+	public AudioClip music4;
+	public AudioClip music5;
+	public AudioClip music6;
+	public AudioClip music7;
+	private bool doneLoading = false;
     void Start()
     {	
+		//print(uiManager.backgroundColorTint);
         mainCam = GameObject.Find("Main Camera");
 		canvasGameObject = GameObject.Find("Canvas");
 		canvasInGameGameObject = GameObject.Find("Canvas In Game");
@@ -80,6 +91,10 @@ public class ManageCanvas : MonoBehaviour
 			controls.Gameplay.Enable();
 		}
 
+		audio = gameObject.GetComponent<AudioSource> ();
+
+
+		
     }
 
 	public bool MyPlayerInstantiated {
@@ -95,8 +110,30 @@ public class ManageCanvas : MonoBehaviour
 		}
 	}
 
+	IEnumerator WaitForLoading(){
+		yield return new WaitForSeconds(1f);
+		doneLoading = true;
+	}
+
     void Update()
     {//myPlayerInstantiated
+		StartCoroutine(WaitForLoading());
+		if(doneLoading){
+			print("test");
+			if(GameObject.Find("/Canvas/Main Panels/Cards").activeSelf){
+				//UIManagerAsset.backgroundMusic = audio.clip;
+				audio.Pause();
+				audio.clip = music2;
+				audio.Play();
+			} else {
+				audio.Pause();
+				audio.clip = music1;
+				audio.Play();
+			}
+		}
+
+
+
 		if (GameObject.Find("Launcher").GetComponent<Launcher>().connected){ //set to only work after joining game
 			if (controls.Gameplay.Menu.triggered){
 				SwitchCam(inGame);
@@ -115,14 +152,14 @@ public class ManageCanvas : MonoBehaviour
 			SetRadialMenuWithDPad();
 
     }
-	public void SwitchCam(bool inTheGame) { //true for no menu false for menu (except at start cause this doesn't get called then)
+	public void SwitchCam(bool inTheGame) { 
 		if (inTheGame == false){
-			//canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+			//audio.Stop(); //why would I do this?
 			canvasGameObject.SetActive(true);
 			canvasInGameGameObject.SetActive(false);
 		}
 		else {
-			//canvas.renderMode = RenderMode.ScreenSpaceCamera;
+			//audio.Play();
 			canvasGameObject.SetActive(false);
 			canvasInGameGameObject.SetActive(true);
 		}
@@ -231,6 +268,7 @@ public class ManageCanvas : MonoBehaviour
 
 		
 	}
+
 	IEnumerator AvoidAccidentalDirection() {
 		canChange = false;
 		yield return new WaitForSeconds(0.25f);

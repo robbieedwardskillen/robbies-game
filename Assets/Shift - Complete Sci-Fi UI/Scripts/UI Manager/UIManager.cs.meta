@@ -3,7 +3,22 @@ guid: 9aabd12c6a06b464ba68864f87a71c02
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - backgroundImage: {instanceID: 0}
+  - backgroundVideo: {instanceID: 0}
+  - lightFont: {instanceID: 0}
+  - regularFont: {instanceID: 0}
+  - mediumFont: {instanceID: 0}
+  - semiBoldFont: {instanceID: 0}
+  - boldFont: {instanceID: 0}
+  - gameLogo: {instanceID: 0}
+  - backgroundMusic: {fileID: 8300000, guid: 17a4ef43cef98c14c8e029349c9b03e9, type: 3}
+  - backgroundMusic2: {fileID: 8300000, guid: 91ef291dc6683304b88cd00d50223dd7, type: 3}
+  - backgroundMusic3: {instanceID: 0}
+  - hoverSound: {fileID: 8300000, guid: a6473f5264a14804e992a7a4a29cd744, type: 3}
+  - clickSound: {fileID: 8300000, guid: bfc5803fa8fa8924bbeaa34f4f689bb1, type: 3}
+  - hoverSound2: {fileID: 8300000, guid: 74945d99d7ff63447addf8af8c94139d, type: 3}
+  - clickSound2: {fileID: 8300000, guid: 6c88e5e2883a03e458fcb2234ee9ae08, type: 3}
   executionOrder: 0
   icon: {fileID: 2800000, guid: a1559c6a1930beb469beaff5050f4d02, type: 3}
   userData: 

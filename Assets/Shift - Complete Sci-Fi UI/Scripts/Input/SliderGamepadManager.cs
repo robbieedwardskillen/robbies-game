@@ -10,7 +10,7 @@ namespace Michsky.UI.Shift
         Slider sliderObject;
 
         [Header("Input")]
-        public string horizontalAxis = "Xbox Right Stick Horizontal";
+        public string horizontalAxis = "Horizontal";
 
         void Start()
         {

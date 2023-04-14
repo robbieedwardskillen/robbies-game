@@ -68,6 +68,7 @@ namespace Michsky.UI.Shift
 
         void UpdateBackground()
         {
+
             try
             {
                 if (enableMobileMode == true)
