@@ -29,11 +29,29 @@ namespace Michsky.UI.Shift
         PointerEventData pointer;
         Vector2 cursorPos;
         RectTransform cursorObj;
-
+        private AudioSource audio;
+        public AudioClip music1;
+        public AudioClip music2;
+        public AudioClip music4;
+        public AudioClip music5;
+        public AudioClip music6;
+        public AudioClip music7;
+        private AudioClip mainMenuMusic;
         private ManageCanvas manageCanvas;
 
         public new void Start()
         {
+
+            audio = gameObject.GetComponent<AudioSource> ();
+            if(Random.Range(0,2) == 0){
+                audio.clip = music6;
+                mainMenuMusic = music6;
+                audio.Play();
+            } else {
+                audio.clip = music7;
+                mainMenuMusic = music7;
+                audio.Play();
+            }
             manageCanvas = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
             rr = new List<RaycastResult>();
             cursorObj = this.GetComponent<RectTransform>();
@@ -61,6 +79,7 @@ namespace Michsky.UI.Shift
             if (manageCanvas.myPlayerInstantiated)
                 this.Process();
         }
+
 
         public override void Process()
         {  
@@ -92,6 +111,29 @@ namespace Michsky.UI.Shift
 		    
                 if (this.m_RaycastResultCache.Count > 0)
                 {  
+                    
+
+                    if(raycastResult.gameObject.name == "Multiplayer"){
+                        //UIManagerAsset.backgroundMusic = audio.clip;
+                        //audio.Pause();
+                        audio.clip = music4;
+                        audio.Play();
+                    } else if (raycastResult.gameObject.name == "Settings") {
+                        //audio.Pause();
+                        audio.clip = music5;
+                        audio.Play();
+                    } else if (raycastResult.gameObject.name == "Cards") {
+                        //audio.Pause();
+                        audio.clip = music2;
+                        audio.Play();
+                    } else if (raycastResult.gameObject.name == "Home") {
+                        //audio.Pause();
+                        audio.clip = mainMenuMusic;
+                        audio.Play();
+                    }
+                    
+
+
                     //-Robbie added so it doesn't deselect needs to only be in input page
                     if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.name == "Text") {
                         pointer.selectedObject = raycastResult.gameObject;

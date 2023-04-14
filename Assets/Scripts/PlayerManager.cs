@@ -87,7 +87,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private int grenades = 1;
 	private int rifleAmmo = 4;
 	private int maxRifleAmmo;
-	public int handgunAmmo = 4;
+	public int handgunAmmo = 10;
 	private int maxHandgunAmmo;
 	private float attackSpeed = 1f;
 	private Transform grenadeArea;
@@ -1207,7 +1207,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				
 				if (rolling && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.1f
 				&& playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 0.6f){
-					transform.GetComponent<Rigidbody>().AddForce(transform.forward * 23f); //add force to roll anim during actual roll time
+					//transform.GetComponent<Rigidbody>().AddForce(transform.forward * 10f); //add force to roll anim during actual roll time
 				}
 				if (!rolling && !changingWeps){
 					//start attacks
@@ -1659,7 +1659,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					rotation = Quaternion.identity;
 				}
 				if (rolling){
-					rollSpeed = 0.5f;
+					rollSpeed = 1f; //meh it's fine
 				} else {
 					rollSpeed = 1f;
 				}
@@ -1910,7 +1910,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		yield return new WaitForSeconds(1f);
 		playerAnimator.SetLayerWeight(4, 0f);
 		//playerAnimator.SetBool("reloading", false);
-		handgunAmmo = 4;
+		handgunAmmo = maxHandgunAmmo;
 	}
 
 	IEnumerator ReloadHandgunContinueShooting() {
@@ -1939,7 +1939,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		reloadToShootTime = 0f;
 
-		handgunAmmo = 4;
+		handgunAmmo = maxHandgunAmmo;
 	}
 
 	IEnumerator ReloadRifleContinueShooting() {
@@ -2221,7 +2221,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		} else {
 			playerAnimator.Play("Handgun Reload", 4, 0);
-			handgunAmmo = 4;
+			handgunAmmo = maxHandgunAmmo;
 		}
 	}
 	void firingRifle() { //for zoomed in

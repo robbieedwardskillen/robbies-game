@@ -10,7 +10,7 @@ namespace Michsky.UI.Shift
         Scrollbar scrollbarObject;
 
         [Header("Input")]
-        public string inputAxis = "Xbox Right Stick Vertical";
+        public string inputAxis = "Vertical";
         //changed to just Horizontal or Vertical in project
         public bool invertAxis = false;
 

@@ -33,15 +33,7 @@ public class ManageCanvas : MonoBehaviour
     public bool inGame = false;
 	public bool myPlayerInstantiated = false;
 	private bool canChange = true;
-	private AudioSource audio;
-	public AudioClip music1;
-	public AudioClip music2;
-	public AudioClip music3;
-	public AudioClip music4;
-	public AudioClip music5;
-	public AudioClip music6;
-	public AudioClip music7;
-	private bool doneLoading = false;
+
     void Start()
     {	
 		//print(uiManager.backgroundColorTint);
@@ -91,10 +83,6 @@ public class ManageCanvas : MonoBehaviour
 			controls.Gameplay.Enable();
 		}
 
-		audio = gameObject.GetComponent<AudioSource> ();
-
-
-		
     }
 
 	public bool MyPlayerInstantiated {
@@ -110,29 +98,9 @@ public class ManageCanvas : MonoBehaviour
 		}
 	}
 
-	IEnumerator WaitForLoading(){
-		yield return new WaitForSeconds(1f);
-		doneLoading = true;
-	}
 
     void Update()
     {//myPlayerInstantiated
-		StartCoroutine(WaitForLoading());
-		if(doneLoading){
-			print("test");
-			if(GameObject.Find("/Canvas/Main Panels/Cards").activeSelf){
-				//UIManagerAsset.backgroundMusic = audio.clip;
-				audio.Pause();
-				audio.clip = music2;
-				audio.Play();
-			} else {
-				audio.Pause();
-				audio.clip = music1;
-				audio.Play();
-			}
-		}
-
-
 
 		if (GameObject.Find("Launcher").GetComponent<Launcher>().connected){ //set to only work after joining game
 			if (controls.Gameplay.Menu.triggered){
