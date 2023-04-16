@@ -36,7 +36,6 @@ public class findAndAttachToPlayer : MonoBehaviour
     }
     void Start()
     {
-        
         StartCoroutine(WaitThenFindPlayer());
         
     }
@@ -88,9 +87,10 @@ public class findAndAttachToPlayer : MonoBehaviour
 
 
             if (playerLiquidDetector.GetComponent<ZibraLiquidDetector>() != null){
-                if (playerLiquidDetector.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0){
+                if (playerLiquidDetector.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0 && !players[playerId-1].GetComponent<PlayerManager>().castingHealingWater){
                     elapsedTime += Time.deltaTime;
 
+                    //detach liquid collider so it can move then push character towards that position
                     
                     if (playerId - 1 == 0){
                         player1ColliderAttached = false;

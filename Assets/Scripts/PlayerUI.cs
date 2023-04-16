@@ -29,7 +29,7 @@ public class PlayerUI : MonoBehaviour
 
     #region MonoBehaviour Callbacks
 
-    void Awake()
+    void Start()
     {
         _canvasGroup = this.GetComponent<CanvasGroup>();
         this.transform.SetParent(GameObject.Find("Canvas In Game").GetComponent<Transform>(), false);

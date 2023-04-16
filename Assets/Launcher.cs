@@ -89,7 +89,8 @@ public class Launcher : MonoBehaviourPunCallbacks
         if (GameObject.Find("Canvas/Main Panels/Home/Content/Play Story") != null){
             GameObject.Find("Canvas/Main Panels/Home/Content/Play Story").GetComponent<Button>().interactable = false;
         }
-        
+        manageCanvas.SwitchCam(true);
+        m_cam.GetComponent<AudioListener>().enabled = true;
         //not related to networking
         progressLabel.SetActive(true);
         controlPanel.SetActive(false);
@@ -128,14 +129,18 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-        manageCanvas.SwitchCam(true);
-        m_cam.GetComponent<AudioListener>().enabled = true;
+
+
+        /* manageCanvas.SwitchCam(true);
+        m_cam.GetComponent<AudioListener>().enabled = true; */
+
+
+
         //testing
 /*         progressLabel.SetActive(false);
         controlPanel.SetActive(false); */
         
         
-
         Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
         {
@@ -145,7 +150,7 @@ public class Launcher : MonoBehaviourPunCallbacks
             //PhotonNetwork.LoadLevel("Room for 1");
             PhotonNetwork.LoadLevel("Room for 1 2");
             
-        }
+        } 
         //PhotonNetwork.InstantiateSceneObject(placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
         connected = true;
     }

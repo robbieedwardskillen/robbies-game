@@ -123,11 +123,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private ZibraLiquidEmitter waterBall;
 	private ZibraLiquidEmitter attackWave;
 	private ZibraLiquidEmitter healWave;
+	public bool castingHealingWater = false;
 	private bool eraserTimerOn = false;
 	private float eraserTimer = 0f;
 	private bool waterEmitting = false;
-
 	private GameObject waterEraser;
+	private bool foundTheLiquids = false;
 
 	private MeleeWeaponTrail mwt;
 	private MeleeWeaponTrail mwt2;
@@ -190,7 +191,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (stream.IsWriting)
 		{
 			// We own this player: send the others our data
-			stream.SendNext(pvp);
+/* 			stream.SendNext(pvp);
 			stream.SendNext(team);
 			stream.SendNext(Health);
 
@@ -202,12 +203,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if (mwt != null)
 				stream.SendNext(mwt.enabled);
 			if (mwt2 != null)
-				stream.SendNext(mwt2.enabled);
+				stream.SendNext(mwt2.enabled); */
 
-			foreach (GameObject obj in equippedWeps){
-				stream.SendNext(obj.activeSelf);
-			}
-			if (this.Health <= 0){
+/* 			if (equippedWeps.Length > 0){
+				foreach (GameObject obj in equippedWeps){
+					stream.SendNext(obj.activeSelf);
+				}
+			} */
+
+
+/* 			if (this.Health <= 0){
 				stream.SendNext(playerAnimator.enabled);
 				stream.SendNext(alive);
 					
@@ -240,11 +245,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				stream.SendNext(lowerRightLeg.GetComponent<Rigidbody>().isKinematic);
 
 				
-			}
+			} */
 		}
 		else
 		{
-			// Network player, receive data
+/* 			// Network player, receive data
 			this.pvp = (int)stream.ReceiveNext();
 			this.team = (string)stream.ReceiveNext();
 			this.Health = (float)stream.ReceiveNext();
@@ -257,10 +262,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if (this.mwt != null)
 				this.mwt.enabled = (bool)stream.ReceiveNext();
 			if (this.mwt2 != null)
-				this.mwt2.enabled = (bool)stream.ReceiveNext();
-			foreach (GameObject obj in equippedWeps){
-				obj.SetActive((bool)stream.ReceiveNext());
-			}
+				this.mwt2.enabled = (bool)stream.ReceiveNext(); */
+/* 			if (equippedWeps.Length > 0){
+				foreach (GameObject obj in equippedWeps){
+					obj.SetActive((bool)stream.ReceiveNext());
+				}
+			} */
+/* 
 			if (this.Health <= 0){
 				this.playerAnimator.enabled = (bool)stream.ReceiveNext();
 				this.alive = (bool)stream.ReceiveNext();
@@ -292,7 +300,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				lowerRightArm.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
 				lowerLeftLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
 				lowerRightLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
-			}
+			} */
 			
 
 		}
@@ -465,20 +473,20 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			PlayerManager.LocalPlayerInstance = this.gameObject;
 			canvasManager = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
 			canvasManager.MyPlayerInstantiated = true;
-			print("test");
-		}
+		} 
 
 		// #Critical
 		// we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
 		DontDestroyOnLoad(this.gameObject);
 
 		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-		healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
+		print("HealWave" + playerId);
+/* 		healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
 		attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
 		waterBall = GameObject.Find("WaterBall" + playerId).GetComponent<ZibraLiquidEmitter>();
 		waterBallForceField = GameObject.Find("WaterBallForceField" + playerId).GetComponent<ZibraLiquidForceField>();
 		waterEraser = GameObject.Find("Void");
-		StartCoroutine(eraseWater());
+		StartCoroutine(eraseWater()); */
 		
 		controls = new PlayerControls();
 		controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
@@ -524,7 +532,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		alive = true;
 		audio = gameObject.GetComponent<AudioSource> ();
 		audio.volume = 1f;
-		fire = transform.Find ("Fire");
+		//fire = transform.Find ("Fire");
 		recursiveFindingSpine(transform);
 		recursiveFindingHead(transform);
 		recursiveFindingHand(transform);
@@ -710,9 +718,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		AllColliders (gameObject.transform, false);
 
-		crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
+		//crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
 		GameObject.Find("Canvas In Game").transform.Find("Control Panel").transform.gameObject.SetActive(false);
 		
+
+/* 		healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
+		attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
+		waterBall = GameObject.Find("WaterBall" + playerId).GetComponent<ZibraLiquidEmitter>();
+		waterBallForceField = GameObject.Find("WaterBallForceField" + playerId).GetComponent<ZibraLiquidForceField>();
+		waterEraser = GameObject.Find("Void");
+		StartCoroutine(eraseWater()); */
+
+
+
 	}
 	IEnumerator GCD(int layer, float time) {
 		//not really global can vary
@@ -833,10 +851,30 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
  
 	void Update () {
 		//testing
-		if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
-		{
+		if (!PhotonNetwork.IsConnected)
 			return;
+		//if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+		if (photonView.IsMine == false)
+			return;
+		
+		if(foundTheLiquids == false){
+			if (GameObject.Find("HealWave" + playerId) != null && GameObject.Find("AttackWave" + playerId) != null && 
+				GameObject.Find("WaterBall" + playerId) != null && GameObject.Find("WaterBallForceField" + playerId) != null &&
+				GameObject.Find("Void") != null){
+					healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
+					attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
+					waterBall = GameObject.Find("WaterBall" + playerId).GetComponent<ZibraLiquidEmitter>();
+					waterBallForceField = GameObject.Find("WaterBallForceField" + playerId).GetComponent<ZibraLiquidForceField>();
+					waterEraser = GameObject.Find("Void");
+					StartCoroutine(eraseWater());
+					foundTheLiquids = true;
+			}
 		}
+	
+
+
+
+
 		if (healWave != null){
             if (waterEmitting == false)
             	healWave.enabled = false;
@@ -855,13 +893,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			eraserTimer += Time.deltaTime;
 		}
 		if (eraserTimer >= 5f){
+			print("test");
+			if (castingHealingWater){
+				castingHealingWater = false;
+			}
 			StartCoroutine(eraseWater());
 			eraserTimerOn = false;
 			eraserTimer = 0f;
 		}
 		
         if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 0 || Input.GetKey("g")) && waterEmitting == false && canCast){
-			print(canvasManager.ability);
 			//global cooldown
 			//if used more than 10 times do an erase or after 3 seconds and not refreshed
 			StartCoroutine(CastSpell(1f, "CastingWhileMoving2.Cast", 13, 0.4f, 0, 0, attackWaveSound, 0.5f, null, attackWave, null, 0.5f));
@@ -869,13 +910,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
         }
         if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 3 || Input.GetKey("h")) && waterEmitting == false && canCast){
-			print(canvasManager.ability);
 			//10 second cooldown?
+			castingHealingWater = true;
             StartCoroutine(CastSpell(1f, "CastingWhileMoving1.Cast", 12, 0.3f, 0, 0, healWaveSound, 0.5f, null, healWave, null, 0.25f));
 
         }
 		if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 4 || Input.GetKey("t")) && waterEmitting == false && canCast){
-			print(canvasManager.ability);
 			StartCoroutine(CastSpell(2f, "CastingWhileMoving3.Cast", 14, 0.4f, 0.2f, 1f, healWaveSound, 0.5f, waterBallForceField, waterBall, null, 0.75f));
 
         }
@@ -920,8 +960,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 
 
-		if (photonView.IsMine && connected){
-
+		if (photonView.IsMine){// && connected?
 			playerAnimator.SetBool("jumping", isAerial);
 			rolling = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll");
 
@@ -1520,7 +1559,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					if (crossHair != null){
 						crossHair.gameObject.SetActive(false);
 					} else {
-						crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
+						if (GameObject.Find("Canvas In Game") != null)
+							crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
 					}
 				}
 				
