@@ -33,18 +33,13 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (PlayerManager.LocalPlayerInstance == null){
 
-
-
-            if (1 == 1){
-                PhotonNetwork.Instantiate(this.knightPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
+            if (1 == 1){//huh?
+                //PhotonNetwork.Instantiate(this.knightPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
+                PhotonNetwork.Instantiate(this.knightPrefab.name, new Vector3(22f, - 3.8f, 7f), Quaternion.identity);
             }
-            //if (){} 
-            
 
 
-
-
-            PhotonNetwork.InstantiateRoomObject(this.placeObjects.name, new Vector3(5f, 40.65f, 5f), Quaternion.identity);
+            //PhotonNetwork.InstantiateRoomObject(this.placeObjects.name, new Vector3(5f, 40.65f, 5f), Quaternion.identity);
             //UnityEngine.Random.Range(0,7f)
             connected = true;
         }
@@ -90,7 +85,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             Debug.LogError("PhotonNetwork : Trying to Load a level but we are not the master Client");
         }
         Debug.LogFormat("PhotonNetwork : Loading Level : {0}", PhotonNetwork.CurrentRoom.PlayerCount);
-        PhotonNetwork.LoadLevel("Room for " + PhotonNetwork.CurrentRoom.PlayerCount);
+        //PhotonNetwork.LoadLevel("Room for " + PhotonNetwork.CurrentRoom.PlayerCount);
+        PhotonNetwork.LoadLevel("Room for " + PhotonNetwork.CurrentRoom.PlayerCount + " " + PhotonNetwork.CurrentRoom.PlayerCount);
         
     }
 

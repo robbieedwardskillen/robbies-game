@@ -35,7 +35,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public bool underWater = false;
 	public bool aiming = false;
 	private float lerpVal = 0f;
-	private float lerpVal2 = 1f;
+	private float lerpVal2 = 0f;
 	private Vector3 rayCollision = Vector3.zero;
 	private CinemachineFreeLook freeLookCam;
 	private CinemachineVirtualCamera virtualLookCam;
@@ -193,11 +193,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			stream.SendNext(pvp);
 			stream.SendNext(team);
 			stream.SendNext(Health);
-			stream.SendNext(fire.gameObject.activeSelf);
-			stream.SendNext(muzzleFlashParticleEmission.enabled);
-			stream.SendNext(muzzleFlashParticleEmission2.enabled);
-			stream.SendNext(mwt.enabled);
-			stream.SendNext(mwt2.enabled);
+
+			//stream.SendNext(fire.gameObject.activeSelf);
+			if (muzzleFlashParticle != null)
+				stream.SendNext(muzzleFlashParticleEmission.enabled);
+			if (muzzleFlashParticle2 != null)
+				stream.SendNext(muzzleFlashParticleEmission2.enabled);
+			if (mwt != null)
+				stream.SendNext(mwt.enabled);
+			if (mwt2 != null)
+				stream.SendNext(mwt2.enabled);
 
 			foreach (GameObject obj in equippedWeps){
 				stream.SendNext(obj.activeSelf);
@@ -243,11 +248,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			this.pvp = (int)stream.ReceiveNext();
 			this.team = (string)stream.ReceiveNext();
 			this.Health = (float)stream.ReceiveNext();
-			this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
-			this.muzzleFlashParticleEmission.enabled = (bool)stream.ReceiveNext();
-			this.muzzleFlashParticleEmission2.enabled = (bool)stream.ReceiveNext();
-			this.mwt.enabled = (bool)stream.ReceiveNext();
-			this.mwt2.enabled = (bool)stream.ReceiveNext();
+
+			//this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
+			if (this.muzzleFlashParticle != null)
+				this.muzzleFlashParticleEmission.enabled = (bool)stream.ReceiveNext();
+			if (this.muzzleFlashParticle2 != null)
+				this.muzzleFlashParticleEmission2.enabled = (bool)stream.ReceiveNext();
+			if (this.mwt != null)
+				this.mwt.enabled = (bool)stream.ReceiveNext();
+			if (this.mwt2 != null)
+				this.mwt2.enabled = (bool)stream.ReceiveNext();
 			foreach (GameObject obj in equippedWeps){
 				obj.SetActive((bool)stream.ReceiveNext());
 			}
@@ -457,7 +467,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			canvasManager.MyPlayerInstantiated = true;
 			print("test");
 		}
-		
+
 		// #Critical
 		// we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
 		DontDestroyOnLoad(this.gameObject);
@@ -513,7 +523,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		alive = true;
 		audio = gameObject.GetComponent<AudioSource> ();
-		audio.volume = 0.2f;
+		audio.volume = 1f;
 		fire = transform.Find ("Fire");
 		recursiveFindingSpine(transform);
 		recursiveFindingHead(transform);
@@ -558,7 +568,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		knife.transform.gameObject.SetActive(false); */
 		bigSword.transform.gameObject.SetActive(false);
 		fireSword.transform.gameObject.SetActive(false);
-		
+
 		
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
@@ -579,9 +589,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		gameObject.GetComponent<Rigidbody> ().isKinematic = false;
 		
-
 		mwt = swordBlade.GetComponent<MeleeWeaponTrail> ();
 		mwt2 = bigSword.GetComponent<MeleeWeaponTrail> ();
+
 		
 
 		swordBlade.transform.GetComponent<CapsuleCollider> ().isTrigger = true;
@@ -702,7 +712,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
 		GameObject.Find("Canvas In Game").transform.Find("Control Panel").transform.gameObject.SetActive(false);
-
 		
 	}
 	IEnumerator GCD(int layer, float time) {
@@ -1097,10 +1106,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if(takingDamage && alive){
 				StartCoroutine(blinking());
 			}
-			underWater = (transform.position.y <= 40.3f) ? true : false;
-			if (transform.position.y < 0f){
+			//underWater = (transform.position.y <= 40.3f) ? true : false;
+			underWater = (transform.position.y <= -4.5f) ? true : false;
+/* 			if (transform.position.y < 0f){
 				Health = 0;
-			}
+			} */
 			isAerial = !IsGrounded ();
 			if (isAerial){
 				playerAnimator.SetLayerWeight(5, 1);
@@ -1123,7 +1133,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			bool swordDown = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordDown");
 			var rb = transform.GetComponent<Rigidbody>();
 			if (underWater){
-				if (jump == 1 && transform.position.y <= 40f) {
+				//if (jump == 1 && transform.position.y <= 40f) {
+				if (jump == 1 && transform.position.y <= -4.5f) {
 						moveLegs = false;
 						gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(0, 4f, 0));
 					}		
@@ -1659,7 +1670,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					rotation = Quaternion.identity;
 				}
 				if (rolling){
-					rollSpeed = 1f; //meh it's fine
+					rollSpeed = 1f; //fix later (can roll without moving currently)
 				} else {
 					rollSpeed = 1f;
 				}
@@ -1808,10 +1819,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		int randomFootSound = Random.Range(0, 2);
 		if (randomFootSound == 0){
 			if (!audio.isPlaying)
-			audio.PlayOneShot(soundEffectFoot1, 0.5f);
+			audio.PlayOneShot(soundEffectFoot1, 1f);
 		} else if (randomFootSound == 1){
 			if (!audio.isPlaying)
-			audio.PlayOneShot(soundEffectFoot2, 0.5f);
+			audio.PlayOneShot(soundEffectFoot2, 1f);
 		} 
 	}
 	[PunRPC]
@@ -1819,10 +1830,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		int randomFootSound = Random.Range(0, 2);
 		if (randomFootSound == 0){
 			if (!audio.isPlaying)
-			audio.PlayOneShot(soundEffectFoot3, 0.5f);
+			audio.PlayOneShot(soundEffectFoot3, 1f);
 		} else if (randomFootSound == 1){
 			if (!audio.isPlaying)
-			audio.PlayOneShot(soundEffectFoot4, 0.5f);
+			audio.PlayOneShot(soundEffectFoot4, 1f);
 		} 
 	}
 
@@ -1836,18 +1847,18 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
 
 	void reloadHandgunSound() {
-			audio.PlayOneShot(soundEffectHandgunReload, 0.5f);
+			audio.PlayOneShot(soundEffectHandgunReload, 0.35f);
 	}
 	void shootHandgunSound() {
 		int randomHandgunSound = Random.Range(0, 4);
 		if (randomHandgunSound == 0){
-			audio.PlayOneShot(soundEffectHandgunShot1, 0.5f);
+			audio.PlayOneShot(soundEffectHandgunShot1, 0.25f);
 		} else if (randomHandgunSound == 1){
-			audio.PlayOneShot(soundEffectHandgunShot2, 0.5f);
+			audio.PlayOneShot(soundEffectHandgunShot2, 0.25f);
 		} else if (randomHandgunSound == 2){
-			audio.PlayOneShot(soundEffectHandgunShot3, 0.5f);
+			audio.PlayOneShot(soundEffectHandgunShot3, 0.25f);
 		} else if (randomHandgunSound == 3){
-			audio.PlayOneShot(soundEffectHandgunShot4, 0.5f);
+			audio.PlayOneShot(soundEffectHandgunShot4, 0.25f);
 		} 
 	}
 	//for handgun (bad naming convention but I don't care)
@@ -2106,7 +2117,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				}
 			}
 			if (col.gameObject.name == "ground"){
-				playerAnimator.SetBool("falling", false); 
+				//playerAnimator.SetBool("falling", false); don't have a falling variable maybe add but probably not
 				isAerial = false;
 			}
 	} 
@@ -2303,6 +2314,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		//RaycastHit hit;
 		if (baseOfCharacter) {
 			return Physics.CheckSphere(baseOfCharacter.position, 0.05f, 1);//default layer is 1
+			
 		}
 		return false;    
 	}

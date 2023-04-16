@@ -83,6 +83,7 @@ public class ManageCanvas : MonoBehaviour
 			controls.Gameplay.Enable();
 		}
 
+
     }
 
 	public bool MyPlayerInstantiated {

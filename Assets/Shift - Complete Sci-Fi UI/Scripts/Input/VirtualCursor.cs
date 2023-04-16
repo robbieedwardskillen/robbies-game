@@ -38,20 +38,24 @@ namespace Michsky.UI.Shift
         public AudioClip music7;
         private AudioClip mainMenuMusic;
         private ManageCanvas manageCanvas;
+        private string nextButton;
 
         public new void Start()
         {
-
             audio = gameObject.GetComponent<AudioSource> ();
-            if(Random.Range(0,2) == 0){
+            audio.volume = 0.35f;
+/*             if(Random.Range(0,10) < 1){
                 audio.clip = music6;
                 mainMenuMusic = music6;
                 audio.Play();
             } else {
-                audio.clip = music7;
-                mainMenuMusic = music7;
+                audio.clip = music2;
+                mainMenuMusic = music2;
                 audio.Play();
-            }
+            } */
+            mainMenuMusic = music6;
+            audio.clip = music6;
+            audio.Play();
             manageCanvas = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
             rr = new List<RaycastResult>();
             cursorObj = this.GetComponent<RectTransform>();
@@ -80,6 +84,33 @@ namespace Michsky.UI.Shift
                 this.Process();
         }
 
+        public void SetNextButton(string nb){
+            this.nextButton = nb;
+            if(this.nextButton == "Multiplayer"){
+                //UIManagerAsset.backgroundMusic = audio.clip;
+                //audio.Pause();
+                audio.clip = music4;
+                audio.Play();
+            } else if (this.nextButton == "Settings") {
+                //audio.Pause();
+                audio.clip = music5;
+                audio.Play();
+            } else if (this.nextButton == "Cards") {
+                //audio.Pause();
+                if(Random.Range(0,2) < 1){
+                    audio.clip = music2;
+                } else {
+                    audio.clip = music7;
+                }
+                audio.Play();
+            } else if (this.nextButton == "Home") {
+                //audio.Pause();
+                audio.clip = mainMenuMusic;
+                audio.Play();
+            }
+        }
+
+
 
         public override void Process()
         {  
@@ -100,7 +131,7 @@ namespace Michsky.UI.Shift
             this.ProcessMove(pointer);
 
             if (Input.GetButtonDown("Submit"))
-            {   
+            {  
                 pointer.pressPosition = cursorPos;
                 pointer.clickTime = Time.unscaledTime;
                 pointer.pointerPressRaycast = raycastResult;
@@ -124,7 +155,11 @@ namespace Michsky.UI.Shift
                         audio.Play();
                     } else if (raycastResult.gameObject.name == "Cards") {
                         //audio.Pause();
-                        audio.clip = music2;
+                        if(Random.Range(0,2) < 1){
+                            audio.clip = music2;
+                        } else {
+                            audio.clip = music7;
+                        }
                         audio.Play();
                     } else if (raycastResult.gameObject.name == "Home") {
                         //audio.Pause();

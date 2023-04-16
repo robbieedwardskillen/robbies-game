@@ -17,15 +17,16 @@ TagManager:
   - arrow
   - FreeLookCam
   - VirtualLookCam
+  - ReflectionStatic
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - arrows
   - Water
   - UI
   - Player
-  - 
+  - PlayerLiquidCollider
   - background_image
   - 
   - 

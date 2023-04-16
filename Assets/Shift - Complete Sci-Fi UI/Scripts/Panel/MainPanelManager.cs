@@ -20,6 +20,8 @@ namespace Michsky.UI.Shift
         private GameObject currentButton;
         private GameObject nextButton;
 
+        private VirtualCursor virtualCursor;
+
         private Animator currentPanelAnimator;
         private Animator nextPanelAnimator;
         private Animator currentButtonAnimator;
@@ -58,6 +60,8 @@ namespace Michsky.UI.Shift
 
         void Awake()
         {
+            virtualCursor = GameObject.Find("Canvas/Virtual Cursor").GetComponent<VirtualCursor>();
+
             currentButton = panels[currentPanelIndex].buttonObject;
             currentButtonAnimator = currentButton.GetComponent<Animator>();
             currentButtonAnimator.Play(buttonFadeIn);
@@ -121,15 +125,17 @@ namespace Michsky.UI.Shift
         }
 
         public void NextPage()
-        {
+        {                
             if (currentPanelIndex <= panels.Count - 2)
             {
                 StopCoroutine("DisablePreviousPanel");
 
                 currentPanel = panels[currentPanelIndex].panelObject;
                 currentButton = panels[currentButtonIndex].buttonObject;
+                
                 nextButton = panels[currentButtonIndex + 1].buttonObject;
                 currentPanel.gameObject.SetActive(true);
+                virtualCursor.SetNextButton(nextButton.name);
 
                 currentPanelAnimator = currentPanel.GetComponent<Animator>();
                 currentButtonAnimator = currentButton.GetComponent<Animator>();
@@ -150,7 +156,7 @@ namespace Michsky.UI.Shift
         }
 
         public void PrevPage()
-        {
+        {                
             if (currentPanelIndex >= 1)
             {
                 StopCoroutine("DisablePreviousPanel");
@@ -160,6 +166,7 @@ namespace Michsky.UI.Shift
                 nextButton = panels[currentButtonIndex - 1].buttonObject;
                 currentPanel.gameObject.SetActive(true);
 
+                virtualCursor.SetNextButton(nextButton.name);
                 currentPanelAnimator = currentPanel.GetComponent<Animator>();
                 currentButtonAnimator = currentButton.GetComponent<Animator>();
 

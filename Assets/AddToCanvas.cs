@@ -8,8 +8,12 @@ public class AddToCanvas : MonoBehaviour
     #region MonoBehaviour Callbacks
     void Awake() {
         _canvasGroup = this.GetComponent<CanvasGroup>();
-        this.transform.SetParent(GameObject.Find("Canvas In Game").GetComponent<Transform>(), false);
+        StartCoroutine(waitForGameToLoad());
     }
     #endregion
+    IEnumerator waitForGameToLoad(){
+        yield return new WaitForSeconds(0.5f);
+        this.transform.SetParent(GameObject.Find("Canvas In Game").GetComponent<Transform>(), false);
+    }
 
 }

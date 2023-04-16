@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using UnityEditor.Events;//yes these two aren't the same
+#if UNITY_EDITOR
+
+using UnityEditor.Events;//not to be confused with UnityEngine.Events..
+
+#endif
+
 
 
 public class setButtonOnClick : MonoBehaviour
@@ -15,7 +20,15 @@ public class setButtonOnClick : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+#if UNITY_EDITOR
+
         UnityEventTools.AddPersistentListener(GetComponent<Button>().onClick, new UnityAction(testMethod));
+
+#endif
+
+        
+
+
     }
 
     // Update is called once per frame
