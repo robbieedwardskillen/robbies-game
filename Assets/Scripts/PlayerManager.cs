@@ -480,7 +480,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		DontDestroyOnLoad(this.gameObject);
 
 		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-		print("HealWave" + playerId);
 /* 		healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
 		attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
 		waterBall = GameObject.Find("WaterBall" + playerId).GetComponent<ZibraLiquidEmitter>();

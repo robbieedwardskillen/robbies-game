@@ -33,7 +33,7 @@ public class ManageCanvas : MonoBehaviour
     public bool inGame = false;
 	public bool myPlayerInstantiated = false;
 	private bool canChange = true;
-
+	private bool setInactive = false;
     void Start()
     {	
 		//print(uiManager.backgroundColorTint);
@@ -102,6 +102,18 @@ public class ManageCanvas : MonoBehaviour
 
     void Update()
     {//myPlayerInstantiated
+		if (myPlayerInstantiated && !setInactive && GameObject.Find("Canvas") != null){
+			
+			if (GameObject.Find("Canvas/Main Panels/Top Panel/Button List/Home") != null)
+				GameObject.Find("Canvas/Main Panels/Top Panel/Button List/Home").SetActive(false);
+			if (GameObject.Find("Canvas/Main Panels/Home/Content/Play Story") != null)
+				GameObject.Find("Canvas/Main Panels/Home/Content/Play Story").SetActive(false);
+			if (GameObject.Find("Canvas/Main Panels/Home/Content/Quick Match") != null)
+				GameObject.Find("Canvas/Main Panels/Home/Content/Quick Match").SetActive(false);
+
+			setInactive = true;
+		}
+
 
 		if (GameObject.Find("Launcher").GetComponent<Launcher>().connected){ //set to only work after joining game
 			if (controls.Gameplay.Menu.triggered){
