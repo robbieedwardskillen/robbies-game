@@ -36,7 +36,6 @@ namespace Michsky.UI.Shift
         public AudioClip music5;
         public AudioClip music6;
         public AudioClip music7;
-        private AudioClip mainMenuMusic;
         private ManageCanvas manageCanvas;
         private string nextButton;
 
@@ -44,18 +43,14 @@ namespace Michsky.UI.Shift
         {
             audio = gameObject.GetComponent<AudioSource> ();
             audio.volume = 0.35f;
-/*             if(Random.Range(0,10) < 1){
-                audio.clip = music6;
-                mainMenuMusic = music6;
-                audio.Play();
+
+            if(Random.Range(0,2) < 1){
+                audio.clip = music5;
             } else {
-                audio.clip = music2;
-                mainMenuMusic = music2;
-                audio.Play();
-            } */
-            mainMenuMusic = music6;
-            audio.clip = music6;
+                audio.clip = music6;
+            }
             audio.Play();
+
             manageCanvas = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
             rr = new List<RaycastResult>();
             cursorObj = this.GetComponent<RectTransform>();
@@ -93,19 +88,18 @@ namespace Michsky.UI.Shift
                 audio.Play();
             } else if (this.nextButton == "Settings") {
                 //audio.Pause();
-                audio.clip = music5;
+                audio.clip = music2;
                 audio.Play();
             } else if (this.nextButton == "Cards") {
                 //audio.Pause();
-                if(Random.Range(0,2) < 1){
-                    audio.clip = music2;
-                } else {
-                    audio.clip = music7;
-                }
+                audio.clip = music7;
                 audio.Play();
             } else if (this.nextButton == "Home") {
-                //audio.Pause();
-                audio.clip = mainMenuMusic;
+                if(Random.Range(0,2) < 1){
+                    audio.clip = music5;
+                } else {
+                    audio.clip = music6;
+                }
                 audio.Play();
             }
         }
@@ -115,11 +109,9 @@ namespace Michsky.UI.Shift
         public override void Process()
         {  
             Vector2 screenPos = Vector2.zero;
-/*             if (manageCanvas.inGame){
-                screenPos = Camera.main.WorldToScreenPoint(cursorObj.transform.position);
-            } else { */
-                screenPos = WorldToScreenPoint(null, cursorObj.transform.position);
-            //}
+
+            screenPos = WorldToScreenPoint(null, cursorObj.transform.position);
+            
             pointer.position = screenPos;
             eventSystem.RaycastAll(pointer, this.m_RaycastResultCache);
             RaycastResult raycastResult = FindFirstRaycast(this.m_RaycastResultCache);
@@ -142,32 +134,27 @@ namespace Michsky.UI.Shift
 		    
                 if (this.m_RaycastResultCache.Count > 0)
                 {  
-                    
-
                     if(raycastResult.gameObject.name == "Multiplayer"){
-                        //UIManagerAsset.backgroundMusic = audio.clip;
                         //audio.Pause();
                         audio.clip = music4;
                         audio.Play();
                     } else if (raycastResult.gameObject.name == "Settings") {
                         //audio.Pause();
-                        audio.clip = music5;
+                        audio.clip = music2;
                         audio.Play();
                     } else if (raycastResult.gameObject.name == "Cards") {
                         //audio.Pause();
-                        if(Random.Range(0,2) < 1){
-                            audio.clip = music2;
-                        } else {
-                            audio.clip = music7;
-                        }
+                        audio.clip = music7;
                         audio.Play();
                     } else if (raycastResult.gameObject.name == "Home") {
-                        //audio.Pause();
-                        audio.clip = mainMenuMusic;
+                        if(Random.Range(0,2) < 1){
+                            audio.clip = music5;
+                        } else {
+                            audio.clip = music6;
+                        }
                         audio.Play();
-                    }
-                    
 
+                    }
 
                     //-Robbie added so it doesn't deselect needs to only be in input page
                     if (raycastResult.gameObject.GetComponent<TMP_InputField>() != null || raycastResult.gameObject.name == "Text") {
