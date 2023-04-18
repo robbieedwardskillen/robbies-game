@@ -148,8 +148,10 @@ public class Launcher : MonoBehaviourPunCallbacks
             // #Critical
             // Load the Room Level.
             //PhotonNetwork.LoadLevel("Room for 1");
+
+
             PhotonNetwork.LoadLevel("Room for 1 2");
-            
+ 
         } 
         //PhotonNetwork.InstantiateSceneObject(placeObjects.name, new Vector3(0.6f, 40.65f, 5.44f), Quaternion.identity);
         connected = true;

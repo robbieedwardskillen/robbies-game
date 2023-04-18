@@ -106,7 +106,8 @@ namespace Michsky.UI.Shift
         {
             base.Awake();
 
-            if (!Initialize())
+        //Initialize() was giving me errors so I was like shiiiiit
+            //if (!Initialize())
                 enabled = false;
         }
 

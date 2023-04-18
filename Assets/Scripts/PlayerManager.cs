@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 using Cinemachine;
 using Photon.Pun;
+using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using com.zibra.liquid.Manipulators;
 
@@ -12,8 +13,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	public string team;
 	public ExitGames.Client.Photon.Hashtable hashTeam = new ExitGames.Client.Photon.Hashtable();
-	public int playerId;
 	public int playerCount;
+	public int instantiationId;
 	public int pvp = 0;
 	public ExitGames.Client.Photon.Hashtable hashPvP = new ExitGames.Client.Photon.Hashtable();
 	public float Height = 0.5f; // hard coding for now
@@ -129,6 +130,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private bool waterEmitting = false;
 	private GameObject waterEraser;
 	private bool foundTheLiquids = false;
+	private Rigidbody rigidBody;
+	private Vector3 networkPosition;
+	private Quaternion networkRotation;
 
 	private MeleeWeaponTrail mwt;
 	private MeleeWeaponTrail mwt2;
@@ -190,6 +194,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		if (stream.IsWriting)
 		{
+			stream.SendNext(rigidBody.position);
+			stream.SendNext(rigidBody.rotation);
+			stream.SendNext(rigidBody.velocity);
 			// We own this player: send the others our data
 /* 			stream.SendNext(pvp);
 			stream.SendNext(team);
@@ -246,9 +253,20 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 				
 			} */
+
+
+
 		}
 		else
 		{
+			networkPosition = (Vector3) stream.ReceiveNext();
+			networkRotation = (Quaternion) stream.ReceiveNext();
+			rigidBody.velocity = (Vector3) stream.ReceiveNext();
+
+			float lag = Mathf.Abs((float) (PhotonNetwork.Time - info.timestamp));
+			networkPosition += (this.rigidBody.velocity * lag);
+
+
 /* 			// Network player, receive data
 			this.pvp = (int)stream.ReceiveNext();
 			this.team = (string)stream.ReceiveNext();
@@ -479,11 +497,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		// we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
 		DontDestroyOnLoad(this.gameObject);
 
-		playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-/* 		healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
-		attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
-		waterBall = GameObject.Find("WaterBall" + playerId).GetComponent<ZibraLiquidEmitter>();
-		waterBallForceField = GameObject.Find("WaterBallForceField" + playerId).GetComponent<ZibraLiquidForceField>();
+		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+		instantiationId = int.Parse(photonView.InstantiationId.ToString().Substring(0, 1));
+/* 		healWave = GameObject.Find("HealWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+		attackWave = GameObject.Find("AttackWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+		waterBall = GameObject.Find("WaterBall" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+		waterBallForceField = GameObject.Find("WaterBallForceField" + instantiationId).GetComponent<ZibraLiquidForceField>();
 		waterEraser = GameObject.Find("Void");
 		StartCoroutine(eraseWater()); */
 		
@@ -531,6 +550,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		alive = true;
 		audio = gameObject.GetComponent<AudioSource> ();
 		audio.volume = 1f;
+
+		rigidBody = GetComponent<Rigidbody>();
 		//fire = transform.Find ("Fire");
 		recursiveFindingSpine(transform);
 		recursiveFindingHead(transform);
@@ -613,12 +634,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	}
 	void setTeams() {
-		if (playerCount == 1){
+		if (instantiationId == 1){
 			team = "blue";
 		}
-		if (playerCount == 2){
+		if (instantiationId == 2){
 			if (pvp == 1){
-				if (playerId == 1){
+				if (instantiationId == 1){
 					team = "blue";
 				} else {
 					team = "red";
@@ -628,11 +649,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				team = "blue";
 			}
 		}
-		if (playerCount == 3){
+		if (instantiationId == 3){
 			if (pvp == 1){
-				if (playerId == 1){
+				if (instantiationId == 1){
 					team = "blue";
-				} else if (playerId == 2) {
+				} else if (instantiationId == 2) {
 					team = "red";
 				} else {
 					team = "green";
@@ -642,9 +663,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				team = "blue";
 			}
 		}
-		if (playerCount == 4){
+		if (instantiationId == 4){
 			if (pvp == 1){
-				if (playerId == 1 || playerId == 2){
+				if (instantiationId == 1 || instantiationId == 2){
 					team = "blue";
 				} else {
 					team = "red";
@@ -654,9 +675,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				team = "blue";
 			}
 		}
-		if (playerCount == 6){
+		if (instantiationId == 6){
 			if (pvp == 1){
-				if (playerId == 1 || playerId == 2 || playerId == 3){
+				if (instantiationId == 1 || instantiationId == 2 || instantiationId == 3){
 					team = "blue";
 				} else {
 					team = "red";
@@ -666,9 +687,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				team = "blue";
 			}
 		}
-		if (playerCount == 10){
+		if (instantiationId == 10){
 			if (pvp == 1){
-				if (playerId == 1 || playerId == 2 || playerId == 3 || playerId == 4 || playerId == 5){
+				if (instantiationId == 1 || instantiationId == 2 || instantiationId == 3 || instantiationId == 4 || instantiationId == 5){
 					team = "blue";
 				} else {
 					team = "red";
@@ -691,7 +712,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		waterEraser.transform.localScale = new Vector3(0f,0f,0f);
 	}
 	void Start() {
-/* 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+/* 		
 		hashPvP.Add("pvp", (int)pvp); */
 		//setting team
 		//needs to check again after another player enters
@@ -721,10 +742,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		GameObject.Find("Canvas In Game").transform.Find("Control Panel").transform.gameObject.SetActive(false);
 		
 
-/* 		healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
-		attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
-		waterBall = GameObject.Find("WaterBall" + playerId).GetComponent<ZibraLiquidEmitter>();
-		waterBallForceField = GameObject.Find("WaterBallForceField" + playerId).GetComponent<ZibraLiquidForceField>();
+/* 		healWave = GameObject.Find("HealWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+		attackWave = GameObject.Find("AttackWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+		waterBall = GameObject.Find("WaterBall" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+		waterBallForceField = GameObject.Find("WaterBallForceField" + instantiationId).GetComponent<ZibraLiquidForceField>();
 		waterEraser = GameObject.Find("Void");
 		StartCoroutine(eraseWater()); */
 
@@ -842,9 +863,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
  
 	void FixedUpdate() {
+/* 		if (controls.Gameplay.Jump.triggered){
+			//if (instantiationId == photonView.CreatorActorNr)
+			//if (!photonView.IsMine)
+				//GetComponent<Rigidbody>().AddForce(new Vector3(-250f, 0f, 0));
+		} */
+
+
+
+
 		if (photonView.IsMine){
 			velocity = (transform.position - previousPos) / Time.deltaTime;
 			previousPos = transform.position;
+		}
+		if (!photonView.IsMine)
+		{
+			GetComponent<Rigidbody>().position = Vector3.MoveTowards(GetComponent<Rigidbody>().position, networkPosition, Time.fixedDeltaTime);
+			GetComponent<Rigidbody>().rotation = Quaternion.RotateTowards(GetComponent<Rigidbody>().rotation, networkRotation, Time.fixedDeltaTime * 100.0f);
 		}
 	}
  
@@ -857,22 +892,18 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			return;
 		
 		if(foundTheLiquids == false){
-			if (GameObject.Find("HealWave" + playerId) != null && GameObject.Find("AttackWave" + playerId) != null && 
-				GameObject.Find("WaterBall" + playerId) != null && GameObject.Find("WaterBallForceField" + playerId) != null &&
+			if (GameObject.Find("HealWave" + instantiationId) != null && GameObject.Find("AttackWave" + instantiationId) != null && 
+				GameObject.Find("WaterBall" + instantiationId) != null && GameObject.Find("WaterBallForceField" + instantiationId) != null &&
 				GameObject.Find("Void") != null){
-					healWave = GameObject.Find("HealWave" + playerId).GetComponent<ZibraLiquidEmitter>();
-					attackWave = GameObject.Find("AttackWave" + playerId).GetComponent<ZibraLiquidEmitter>();
-					waterBall = GameObject.Find("WaterBall" + playerId).GetComponent<ZibraLiquidEmitter>();
-					waterBallForceField = GameObject.Find("WaterBallForceField" + playerId).GetComponent<ZibraLiquidForceField>();
+					healWave = GameObject.Find("HealWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+					attackWave = GameObject.Find("AttackWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+					waterBall = GameObject.Find("WaterBall" + instantiationId).GetComponent<ZibraLiquidEmitter>();
+					waterBallForceField = GameObject.Find("WaterBallForceField" + instantiationId).GetComponent<ZibraLiquidForceField>();
 					waterEraser = GameObject.Find("Void");
 					StartCoroutine(eraseWater());
 					foundTheLiquids = true;
 			}
 		}
-	
-
-
-
 
 		if (healWave != null){
             if (waterEmitting == false)
@@ -959,7 +990,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 
 
-		if (photonView.IsMine){// && connected?
+		if (photonView.IsMine && connected){// && connected?
 			playerAnimator.SetBool("jumping", isAerial);
 			rolling = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll");
 
@@ -1469,10 +1500,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					} 
 
 					if (controls.Gameplay.Jump.triggered && !isAerial && !playerAnimator.GetBool("blocking") && !underWater) {
-
 						//moveLegs = false;
 						audio.PlayOneShot (soundEffectJump, 0.5f);
-						gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(0, 200f, 0));
+						rigidBody.AddForce(new Vector3(0, 200f, 0));
 					}		
 
 

@@ -20996,10 +20996,27 @@ MonoBehaviour:
     type: 3}
   impactEffectHole: {fileID: 1000010355441670, guid: 02a509a7fa70ed740ba4197e20c5d32d,
     type: 3}
+  handgunAmmo: 10
+  castingHealingWater: 0
   soundEffectSwing1: {fileID: 8300000, guid: a019ac0cca88f0f41887eb77628009f3, type: 3}
   soundEffectSwing2: {fileID: 8300000, guid: 7aa4d7eaedaae0b40b9ee223d828ec98, type: 3}
   soundEffectSwing3: {fileID: 8300000, guid: e712959691e83994b90bada876463910, type: 3}
   soundEffectSwing4: {fileID: 8300000, guid: 56497cc828c206d4c9ab8b46038870d9, type: 3}
+  soundEffectFoot1: {fileID: 0}
+  soundEffectFoot2: {fileID: 0}
+  soundEffectFoot3: {fileID: 0}
+  soundEffectFoot4: {fileID: 0}
+  soundEffectHandgunShot1: {fileID: 0}
+  soundEffectHandgunShot2: {fileID: 0}
+  soundEffectHandgunShot3: {fileID: 0}
+  soundEffectHandgunShot4: {fileID: 0}
+  soundEffectHandgunReload: {fileID: 0}
+  soundEffectArrow1: {fileID: 0}
+  soundEffectArrow2: {fileID: 0}
+  soundEffectJump: {fileID: 0}
+  soundEffectRoll: {fileID: 0}
+  healWaveSound: {fileID: 0}
+  attackWaveSound: {fileID: 0}
   PlayerUiPrefab: {fileID: 8915229389397728779, guid: 40ba13ba9c9b86644a17609b862811a7,
     type: 3}
 --- !u!95 &5323524243844711865
@@ -21205,7 +21222,7 @@ MonoBehaviour:
     SynchronizeEnabled: 1
     TeleportEnabled: 1
     TeleportIfDistanceGreaterThan: 10
-    InterpolateOption: 2
+    InterpolateOption: 4
     InterpolateMoveTowardsSpeed: 1
     InterpolateLerpSpeed: 10
     ExtrapolateOption: 0
@@ -21381,6 +21398,12 @@ MonoBehaviour:
   - Type: 4
     SynchronizeType: 2
     Name: Unarmed
+  - Type: 4
+    SynchronizeType: 0
+    Name: reloading
+  - Type: 4
+    SynchronizeType: 0
+    Name: firing
   m_SynchronizeLayers:
   - SynchronizeType: 2
     LayerIndex: 0
@@ -21406,6 +21429,12 @@ MonoBehaviour:
     LayerIndex: 10
   - SynchronizeType: 2
     LayerIndex: 11
+  - SynchronizeType: 0
+    LayerIndex: 12
+  - SynchronizeType: 0
+    LayerIndex: 13
+  - SynchronizeType: 0
+    LayerIndex: 14
 --- !u!1 &5323524243844576660
 GameObject:
   m_ObjectHideFlags: 0
