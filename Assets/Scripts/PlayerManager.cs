@@ -124,6 +124,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private ZibraLiquidEmitter waterBall;
 	private ZibraLiquidEmitter attackWave;
 	private ZibraLiquidEmitter healWave;
+
 	public bool castingHealingWater = false;
 	private bool eraserTimerOn = false;
 	private float eraserTimer = 0f;
@@ -179,6 +180,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	bool blockTurning = false;
 	bool knockDown = false;
 	bool changingWeps = false;
+	private int testing = 0;
 
 	[Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
 	public static GameObject LocalPlayerInstance;
@@ -489,8 +491,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		// used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
 		if (photonView.IsMine){
 			PlayerManager.LocalPlayerInstance = this.gameObject;
-			canvasManager = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
-			canvasManager.MyPlayerInstantiated = true;
+
 		} 
 
 		// #Critical
@@ -712,6 +713,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		waterEraser.transform.localScale = new Vector3(0f,0f,0f);
 	}
 	void Start() {
+		canvasManager = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
+		canvasManager.MyPlayerInstantiated = true;
 /* 		
 		hashPvP.Add("pvp", (int)pvp); */
 		//setting team
@@ -764,9 +767,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	IEnumerator CastSpell(float gcd, string layerAndAnimName, int layerNumber, float firstPause,  float audioPitch1, float audioPitch2, 
 		AudioClip castSound, float volume, ZibraLiquidForceField ff, ZibraLiquidEmitter waterSpell, GameObject spell, float secondPause){
-
+print("cast attack wave 1");
 		if (spell != null || waterSpell != null){
-			
+						
 
 			StartCoroutine(GCD(layerNumber, gcd));
 			playerAnimator.Play(layerAndAnimName, layerNumber, 0f);
@@ -867,15 +870,32 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		}
 	}
  
-	void Update () {
-		//testing
+	void Update() {
+
+
+/*         if ((controls.Gameplay.Action5.triggered || Input.GetKeyDown("g")) && canvasManager.ability == 0 && waterEmitting == false && canCast){
+			//global cooldown
+			print("cast attack wave");
+			//if used more than 10 times do an erase or after 3 seconds and not refreshed
+			StartCoroutine(CastSpell(1f, "CastingWhileMoving2.Cast", 13, 0.4f, 0, 0, attackWaveSound, 0.5f, null, attackWave, null, 0.5f));
+        }
+ */
+
+
+
 		if (!PhotonNetwork.IsConnected)
 			return;
+
 		//if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
 		if (photonView.IsMine == false)
 			return;
-		
+
+	
+
+
+
 		if(foundTheLiquids == false){
+			testing += 1;
 			if (GameObject.Find("HealWave" + instantiationId) != null && GameObject.Find("AttackWave" + instantiationId) != null && 
 				GameObject.Find("WaterBall" + instantiationId) != null && GameObject.Find("WaterBallForceField" + instantiationId) != null &&
 				GameObject.Find("Void") != null){
@@ -887,6 +907,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 					StartCoroutine(eraseWater());
 					foundTheLiquids = true;
 			}
+			print(testing);//prints out 1 2 3 4, why?
 		}
 
 		if (healWave != null){
@@ -907,7 +928,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			eraserTimer += Time.deltaTime;
 		}
 		if (eraserTimer >= 5f){
-			print("test");
 			if (castingHealingWater){
 				castingHealingWater = false;
 			}
@@ -916,20 +936,26 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			eraserTimer = 0f;
 		}
 		
-        if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 0 || Input.GetKey("g")) && waterEmitting == false && canCast){
+
+
+
+        if ((controls.Gameplay.Action5.triggered || Input.GetKeyDown("g")) && canvasManager.ability == 0 && waterEmitting == false && canCast){
 			//global cooldown
+
 			//if used more than 10 times do an erase or after 3 seconds and not refreshed
 			StartCoroutine(CastSpell(1f, "CastingWhileMoving2.Cast", 13, 0.4f, 0, 0, attackWaveSound, 0.5f, null, attackWave, null, 0.5f));
             
 
         }
-        if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 3 || Input.GetKey("h")) && waterEmitting == false && canCast){
+        if ((controls.Gameplay.Action5.triggered || Input.GetKeyDown("h")) && canvasManager.ability == 3 && waterEmitting == false && canCast){
 			//10 second cooldown?
+			print("cast heal wave");
 			castingHealingWater = true;
             StartCoroutine(CastSpell(1f, "CastingWhileMoving1.Cast", 12, 0.3f, 0, 0, healWaveSound, 0.5f, null, healWave, null, 0.25f));
 
         }
-		if ((controls.Gameplay.Action5.triggered && canvasManager.ability == 4 || Input.GetKey("t")) && waterEmitting == false && canCast){
+		if ((controls.Gameplay.Action5.triggered || Input.GetKeyDown("t")) && canvasManager.ability == 4 && waterEmitting == false && canCast){
+			print("cast water ball");
 			StartCoroutine(CastSpell(2f, "CastingWhileMoving3.Cast", 14, 0.4f, 0.2f, 1f, healWaveSound, 0.5f, waterBallForceField, waterBall, null, 0.75f));
 
         }

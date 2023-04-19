@@ -15,8 +15,6 @@ public class CameraController1 : MonoBehaviourPunCallbacks {
 	private bool aiming = false;
 	private GameObject loadingScreen;
 	private Vector3 offset;
-	private bool setAimingOffset = false;
-	private bool setRegularOffset = true;
 	private GameObject aptRoom1;
 	private GameObject aptRoom2;
 	private GameObject aptRoom3;

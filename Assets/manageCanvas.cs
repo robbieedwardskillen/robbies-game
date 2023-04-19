@@ -17,8 +17,6 @@ public class ManageCanvas : MonoBehaviour
 	private float menu; 
     private Vector2 move;
 	private Vector2 rotate;
-    private float posX = 0;
-	private float acceleration = 0f;
 
 	//public UIManager UIManagerAsset;
     private GameObject mainCam;
@@ -135,12 +133,10 @@ public class ManageCanvas : MonoBehaviour
     }
 	public void SwitchCam(bool inTheGame) { 
 		if (inTheGame == false){
-			//audio.Stop(); //why would I do this?
 			canvasGameObject.SetActive(true);
 			canvasInGameGameObject.SetActive(false);
 		}
 		else {
-			//audio.Play();
 			canvasGameObject.SetActive(false);
 			canvasInGameGameObject.SetActive(true);
 		}

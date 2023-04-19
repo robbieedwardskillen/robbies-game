@@ -16115,7 +16115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80395030132a9bc4c8c115b95ea7cb58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasInGameGameObject: {fileID: 0}
+  canvasInGameGameObject: {fileID: 49830825}
   loadingScreen: {fileID: 0}
   highlightedAbility: {fileID: 0}
   ability: 0

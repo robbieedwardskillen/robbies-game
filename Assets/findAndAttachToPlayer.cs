@@ -7,10 +7,6 @@ using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using com.zibra.liquid.Manipulators;
 
-
-
-
-
 public class findAndAttachToPlayer : MonoBehaviour
 {
     GameObject[] players;
@@ -25,8 +21,6 @@ public class findAndAttachToPlayer : MonoBehaviour
     private GameObject playerLiquidCollider;
     private GameObject playerLiquidDetector;
 
-    private bool foundPlayer1 = false;
-    private bool foundPlayer2 = false;
     private List<int> playerList = new List<int>();
     // Start is called before the first frame update
 
@@ -53,13 +47,12 @@ public class findAndAttachToPlayer : MonoBehaviour
             for (int i = 0; i < players.Length; i++){
                 if (!PhotonView.Get(players[i]).IsMine){
                     //print("not mine " + PhotonView.Get(players[i]).ActorNumber);
-                    print("not mine " + PhotonView.Get(players[i]).InstantiationId.ToString().ToCharArray()[0]);
+                    //print("not mine " + PhotonView.Get(players[i]).InstantiationId.ToString().ToCharArray()[0]);
 
                     continue;
                 }   
                 instantiationId = int.Parse(PhotonView.Get(players[i]).InstantiationId.ToString().Substring(0, 1));   
-                var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
-                print("mine " + instantiationId);
+                //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
                 //print(PhotonView.Get(players[i]).localPlayerIndex);
                 
                 

@@ -8,8 +8,8 @@ public class fallDownBig : MonoBehaviourPunCallbacks, IPunObservable
 {
     private Rigidbody rb;
     public float health = 5;
-    private float radius = 1.25F;
-    private float power = 20.0F;
+/*     private float radius = 1.25F;
+    private float power = 20.0F; */
     private float speed;
 
     #region IPunObservable implementation

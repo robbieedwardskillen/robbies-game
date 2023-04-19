@@ -6,8 +6,8 @@ public class fallDownSmall : MonoBehaviour
 {
     private Rigidbody rb;
     float health = 1;
-    private float radius = 1.25F;
-    private float power = 10.0F;
+/*     private float radius = 1.25F;
+    private float power = 10.0F; */
     private float speed;
     // Start is called before the first frame update
     void Start()
