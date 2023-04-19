@@ -10619,7 +10619,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1915462258608872027}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9676c48e3638b17468bede6b6a481672, type: 3}
+  m_Script: {fileID: 11500000, guid: 6cbd8ca1ccada044098e725c8dc00b5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   team: 
@@ -10627,7 +10627,7 @@ MonoBehaviour:
   instantiationId: 0
   pvp: 0
   Height: 0.5
-  Health: 5
+  Health: 0
   super: 0
   alive: 1
   busy: 0

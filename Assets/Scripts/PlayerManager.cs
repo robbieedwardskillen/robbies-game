@@ -760,23 +760,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		canCast = true;
 		playerAnimator.SetLayerWeight(layer, 0f);
 	}
-	IEnumerator healWaveTime() {
-		
-        if (healWave != null){
-			StartCoroutine(GCD(12, 1f));
-			playerAnimator.Play("CastingWhileMoving1.Cast", 12, 0f);
-			yield return new WaitForSeconds(0.3f);
-			audio.PlayOneShot (healWaveSound, 0.5f);
-			eraserTimer = 0f;
-			eraserTimerOn = true;
-            waterEmitting = true;
-            healWave.enabled = true;
-            yield return new WaitForSeconds(0.25f);
-            waterEmitting = false;
-            healWave.enabled = false;
 
-        }
-    }
 
 	IEnumerator CastSpell(float gcd, string layerAndAnimName, int layerNumber, float firstPause,  float audioPitch1, float audioPitch2, 
 		AudioClip castSound, float volume, ZibraLiquidForceField ff, ZibraLiquidEmitter waterSpell, GameObject spell, float secondPause){
