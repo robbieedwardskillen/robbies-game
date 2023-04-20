@@ -2393,7 +2393,7 @@ print("cast attack wave 1");
 	bool IsGrounded() {
 		//RaycastHit hit;
 		if (baseOfCharacter) {
-			return Physics.CheckSphere(baseOfCharacter.position, 0.05f, 1);//default layer is 1
+			return Physics.CheckSphere(baseOfCharacter.position, 0.1f, 1);//default layer is 1
 			
 		}
 		return false;    

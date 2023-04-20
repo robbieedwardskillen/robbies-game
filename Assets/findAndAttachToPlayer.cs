@@ -7,7 +7,7 @@ using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using com.zibra.liquid.Manipulators;
 
-public class findAndAttachToPlayer : MonoBehaviour
+public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable
 {
     GameObject[] players;
     private int instantiationId;
@@ -18,11 +18,40 @@ public class findAndAttachToPlayer : MonoBehaviour
     private Vector3 endPositionLiquidCollider;
     private float elapsedTime = 0f;
 
+    private ZibraLiquidEmitter zle;
     private GameObject playerLiquidCollider;
     private GameObject playerLiquidDetector;
 
     private List<int> playerList = new List<int>();
     // Start is called before the first frame update
+
+
+
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+
+		if (stream.IsWriting)
+		{
+
+			if (zle != null)
+				stream.SendNext((bool)zle.enabled);
+
+		}
+		else
+		{
+
+			if (this.zle != null)
+				this.zle.enabled = (bool) stream.ReceiveNext();
+
+		}
+
+    } 
+
+
+
+
+
 
     void Start()
     {
@@ -42,6 +71,14 @@ public class findAndAttachToPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (GetComponent<ZibraLiquidEmitter>() != null){
+            if (zle == null){
+                zle = GetComponent<ZibraLiquidEmitter>();
+                print(zle);
+            }
+
+        }
+
         //int playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
        if(doneSearching){
             for (int i = 0; i < players.Length; i++){
