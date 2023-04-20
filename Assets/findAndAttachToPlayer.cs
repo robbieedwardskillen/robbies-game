@@ -45,12 +45,10 @@ public class findAndAttachToPlayer : MonoBehaviour
         //int playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
        if(doneSearching){
             for (int i = 0; i < players.Length; i++){
-                if (!PhotonView.Get(players[i]).IsMine){
-                    //print("not mine " + PhotonView.Get(players[i]).ActorNumber);
-                    //print("not mine " + PhotonView.Get(players[i]).InstantiationId.ToString().ToCharArray()[0]);
-
+/*                 if (!PhotonView.Get(players[i]).IsMine){
+                    //don't need is mine here
                     continue;
-                }   
+                }    */
                 instantiationId = int.Parse(PhotonView.Get(players[i]).InstantiationId.ToString().Substring(0, 1));   
                 //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
                 //print(PhotonView.Get(players[i]).localPlayerIndex);

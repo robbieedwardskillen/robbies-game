@@ -180,7 +180,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	bool blockTurning = false;
 	bool knockDown = false;
 	bool changingWeps = false;
-	private int testing = 0;
+	private int testing1 = 0;
+		private int testing2 = 0;
 
 	[Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
 	public static GameObject LocalPlayerInstance;
@@ -881,8 +882,6 @@ print("cast attack wave 1");
         }
  */
 
-
-
 		if (!PhotonNetwork.IsConnected)
 			return;
 
@@ -894,8 +893,8 @@ print("cast attack wave 1");
 
 
 
-		if(foundTheLiquids == false){
-			testing += 1;
+
+		if (healWave == null && attackWave == null && waterBall == null && waterBallForceField == null && waterEraser == null){
 			if (GameObject.Find("HealWave" + instantiationId) != null && GameObject.Find("AttackWave" + instantiationId) != null && 
 				GameObject.Find("WaterBall" + instantiationId) != null && GameObject.Find("WaterBallForceField" + instantiationId) != null &&
 				GameObject.Find("Void") != null){
@@ -905,10 +904,12 @@ print("cast attack wave 1");
 					waterBallForceField = GameObject.Find("WaterBallForceField" + instantiationId).GetComponent<ZibraLiquidForceField>();
 					waterEraser = GameObject.Find("Void");
 					StartCoroutine(eraseWater());
-					foundTheLiquids = true;
+
 			}
-			print(testing);//prints out 1 2 3 4, why?
 		}
+
+
+		
 
 		if (healWave != null){
             if (waterEmitting == false)
