@@ -26,6 +26,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     private GameObject canvasCam;
     private GameObject canvas;
     private GameObject canvasInGame;
+    private GameObject postFx;
     #endregion
     
 
@@ -61,12 +62,15 @@ public class Launcher : MonoBehaviourPunCallbacks
         PhotonNetwork.GameVersion = gameVersion;
 
         //not related to networking
+        postFx = GameObject.Find("PostFX");
+
         camRotateWithZeroY = GameObject.Find("CamRotateWithZeroY");
         
         cinemachineCam1 = GameObject.Find("CinemachineCam1");
         cinemachineCam2 = GameObject.Find("CinemachineCam2");
         loading = GameObject.Find("Loading");
         rotation = GameObject.Find("Rotation");
+        
         if (SceneManager.GetActiveScene ().name == "Launcher"){
             DontDestroyOnLoad(this.gameObject);
             DontDestroyOnLoad(camRotateWithZeroY);
@@ -78,6 +82,7 @@ public class Launcher : MonoBehaviourPunCallbacks
             DontDestroyOnLoad(cinemachineCam1);
             DontDestroyOnLoad(cinemachineCam2);
             DontDestroyOnLoad(canvasManager);
+            DontDestroyOnLoad(postFx);
             m_cam.GetComponent<AudioListener>().enabled = false;
         }
 

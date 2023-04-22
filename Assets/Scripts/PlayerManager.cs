@@ -8,6 +8,7 @@ using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using com.zibra.liquid.Manipulators;
+using UnityEngine.Rendering.PostProcessing;
 
 public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
@@ -929,9 +930,50 @@ print("cast attack wave 1");
 		audio.PlayOneShot(soundEffectSwing2, 0.7f);
 	}
 	IEnumerator slowMotionForABit() {
+
+
+		//requires way too much code for just this post processing change
+
+		PostProcessLayer v2_PostProcess = GameObject.Find("Main Camera").GetComponent<PostProcessLayer>();
+
+		List<PostProcessVolume> volList = new List<PostProcessVolume>();
+     	PostProcessManager.instance.GetActiveVolumes(v2_PostProcess, volList, true, true);
+
+		foreach (PostProcessVolume vol in volList)
+		{
+			PostProcessProfile ppp = vol.profile;
+			if (ppp)
+			{
+				DepthOfField d;
+				if (ppp.TryGetSettings<DepthOfField>(out d))
+				{
+					//d.focusDistance.value = 69;
+					//d.aperture.value = 30;
+					d.focalLength.value = 150;
+					//d.kernelSize.value = KernelSize.VeryLarge;
+				}
+			}
+		}
+
+
+
 		slowMotion = true;
 		Time.timeScale = 0.5f;
 		yield return new WaitForSeconds(2.5f);
+
+		foreach (PostProcessVolume vol in volList)
+		{
+			PostProcessProfile ppp = vol.profile;
+			if (ppp)
+			{
+				DepthOfField d;
+				if (ppp.TryGetSettings<DepthOfField>(out d))
+				{
+					d.focalLength.value = 70;
+				}
+			}
+		}
+
 		Time.timeScale = 1f;
 	}
 
