@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using TMPro;
 public class PlayerUI : MonoBehaviour
 {
     #region Public Fields
@@ -11,7 +11,7 @@ public class PlayerUI : MonoBehaviour
     private Vector3 screenOffset = new Vector3(0f,30f,0f);
     [Tooltip("UI Text to display Player's Name")]
     [SerializeField]
-    private Text playerNameText;
+    private TextMeshProUGUI playerNameText;
 
     [Tooltip("UI Slider to display Player's Health")]
     [SerializeField]
@@ -90,7 +90,7 @@ public class PlayerUI : MonoBehaviour
 
         if (playerNameText != null)
         {
-            playerNameText.text = target.photonView.Owner.NickName;
+            playerNameText.GetComponent<TextMeshProUGUI>().text = target.photonView.Owner.NickName;
         }
     }
 

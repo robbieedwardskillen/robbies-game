@@ -7,7 +7,7 @@ using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using com.zibra.liquid.Manipulators;
 
-public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable
+public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, IPunOwnershipCallbacks
 {
     GameObject[] players;
     private int instantiationId;
@@ -24,6 +24,33 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable
 
     private List<int> playerList = new List<int>();
     // Start is called before the first frame update
+    private PhotonView pv;
+    private Player photonPlayer;
+    
+
+    public void OnOwnershipRequest(PhotonView targetView, Player requestingPlayer)
+    {
+        if (targetView != base.photonView) // just an optional step not sure why this helps
+            return;
+        
+        //add checks here
+
+
+        base.photonView.TransferOwnership(requestingPlayer);
+    }
+    public void OnOwnershipTransfered(PhotonView targetView, Player previousPlayer)
+    {
+        if (targetView != base.photonView)
+            return;
+    }
+    public void OnOwnershipTransferFailed(PhotonView targetView, Player player)
+    {
+        if (targetView != base.photonView)
+            return;
+    }
+
+
+
 
 
 
@@ -55,7 +82,14 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable
 
     void Start()
     {
+        PhotonNetwork.AddCallbackTarget(this);
+        pv = GetComponent<PhotonView>();
         StartCoroutine(WaitThenFindPlayer());
+    }
+
+    private void OnDestroy()
+    {
+        PhotonNetwork.RemoveCallbackTarget(this);
     }
 
     IEnumerator WaitThenFindPlayer(){
@@ -82,10 +116,15 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable
         //int playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
        if(doneSearching){
             for (int i = 0; i < players.Length; i++){
-/*                 if (!PhotonView.Get(players[i]).IsMine){
-                    //don't need is mine here
-                    continue;
-                }    */
+
+
+
+                //for ownership transfer later
+
+                //photonPlayer = PhotonView.Get(players[i]) as Player;
+
+
+
                 instantiationId = int.Parse(PhotonView.Get(players[i]).InstantiationId.ToString().Substring(0, 1));   
                 //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
                 //print(PhotonView.Get(players[i]).localPlayerIndex);
@@ -97,6 +136,11 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable
                 if (this.gameObject.name == "HealWave" + instantiationId){
                     this.transform.position = new Vector3 (players[i].transform.position.x,
                     players[i].transform.position.y + 1f, players[i].transform.position.z);
+
+                    
+                    //pv.TransferOwnership(PhotonView.Get(players[i]));
+
+
                 } else if (this.gameObject.name == "AttackWave" + instantiationId){
                     this.transform.position = players[i].transform.position + players[i].transform.forward * 1f;
                     this.transform.rotation = players[i].transform.rotation;//doens't help just change initial velocity of z instead in herarchy

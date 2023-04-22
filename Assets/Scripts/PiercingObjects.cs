@@ -31,17 +31,29 @@ public class PiercingObjects : MonoBehaviourPunCallbacks
 		} 
 	}
     void OnCollisionEnter(Collision c) {
-
+        rb.isKinematic=true;
         if (c.gameObject.tag != "Player" || c.gameObject.GetComponent<Rigidbody>() == null){
             ArrowHitSound();
-            rb.isKinematic=true;
-            //issues with pun and changing parent
-            //transform.parent.transform.SetParent(c.transform);//arrow 1 is child of arrow(Clone) b/c rotation issues
+        }
+        if (c.gameObject.tag == "Player"){
+            GetComponent<MeleeWeaponTrail>().enabled = false;
+            
+            if (this.gameObject.tag != "dead arrow"){
+                GetComponent<BoxCollider>().enabled = false;
+                transform.parent.transform.SetParent(c.transform);//arrow 1 is child of arrow(Clone) b/c rotation issues
+            }
+            StartCoroutine(waitSmallThenDelete());
+        }
+        else {
             StartCoroutine(waitThenDelete());
         }
+        
     }
     IEnumerator waitThenDelete() {
-        yield return new WaitForSeconds (5);
+
+        yield return new WaitForSeconds(0.2f);
+        this.gameObject.tag = "dead arrow";
+        yield return new WaitForSeconds (10);
         if (photonView.IsMine){
             if (this.transform.parent.name == "arrow(Clone)"){
                 PhotonNetwork.Destroy (this.transform.parent.gameObject);
@@ -49,6 +61,16 @@ public class PiercingObjects : MonoBehaviourPunCallbacks
             
         }
     }
-
+    IEnumerator waitSmallThenDelete() {
+        yield return new WaitForSeconds(0.2f);
+        this.gameObject.tag = "dead arrow";
+        yield return new WaitForSeconds (1f);
+        if (photonView.IsMine){
+            if (this.transform.parent.name == "arrow(Clone)"){
+                PhotonNetwork.Destroy (this.transform.parent.gameObject);
+            }
+            
+        }
+    }
 
 }

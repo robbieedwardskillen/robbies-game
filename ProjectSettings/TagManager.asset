@@ -18,6 +18,8 @@ TagManager:
   - FreeLookCam
   - VirtualLookCam
   - ReflectionStatic
+  - dead arrow
+  - reticle
   layers:
   - Default
   - TransparentFX
@@ -28,8 +30,8 @@ TagManager:
   - Player
   - PlayerLiquidCollider
   - background_image
-  - 
-  - 
+  - EnemyWeapon
+  - MyWeapon
   - 
   - 
   - 

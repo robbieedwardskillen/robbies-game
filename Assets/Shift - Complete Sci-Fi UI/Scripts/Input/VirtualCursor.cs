@@ -44,11 +44,11 @@ namespace Michsky.UI.Shift
             audio = gameObject.GetComponent<AudioSource> ();
             audio.volume = 0.35f;
 
-            if(Random.Range(0,2) < 1){
+            //if(Random.Range(0,2) < 1){
                 audio.clip = music5;
-            } else {
+ /*            } else {
                 audio.clip = music6;
-            }
+            } */
             audio.Play();
 
             manageCanvas = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
@@ -97,9 +97,9 @@ namespace Michsky.UI.Shift
             } else if (this.nextButton == "Home") {
                 if(Random.Range(0,2) < 1){
                     audio.clip = music5;
-                } else {
+                } /* else {
                     audio.clip = music6;
-                }
+                } */
                 audio.Play();
             }
         }
@@ -149,9 +149,9 @@ namespace Michsky.UI.Shift
                     } else if (raycastResult.gameObject.name == "Home") {
                         if(Random.Range(0,2) < 1){
                             audio.clip = music5;
-                        } else {
+                        } /* else {
                             audio.clip = music6;
-                        }
+                        } */
                         audio.Play();
 
                     }

@@ -1023,7 +1023,7 @@ namespace Photon.Pun
 
             if (PhotonNetwork.LogLevel >= PunLogLevel.Full)
             {
-                Debug.Log("Registered PhotonView: " + netView.ViewID);
+                //Debug.Log("Registered PhotonView: " + netView.ViewID);
             }
         }
 
@@ -1205,7 +1205,7 @@ namespace Photon.Pun
 
             if (PhotonNetwork.LogLevel >= PunLogLevel.Full)
             {
-                Debug.Log("Sending RPC \"" + methodName + "\" to target: " + target + " or player:" + player + ".");
+                //Debug.Log("Sending RPC \"" + methodName + "\" to target: " + target + " or player:" + player + ".");
             }
 
 

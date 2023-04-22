@@ -96,8 +96,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform followTarget;
 	private Transform crossHair;
 	private Transform shootZone;
-	private ParticleSystem flames;
-	private ParticleSystem embers;
 	private Transform swordBlade;
 	private Transform ignitionFlame;
 	private Transform muzzleFlash;
@@ -106,6 +104,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private ParticleSystem muzzleFlashParticle2;
 	private ParticleSystem.EmissionModule muzzleFlashParticleEmission;
 	private ParticleSystem.EmissionModule muzzleFlashParticleEmission2;
+	private ParticleSystem embers;
+	private ParticleSystem.EmissionModule embersParticleEmission;
+	private ParticleSystem flames;
+	private ParticleSystem.EmissionModule flamesParticleEmission;
 	private Transform rightHandContainer;
 	private Transform rightForearm;
 	private Transform rightHand;
@@ -118,6 +120,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Transform knife; */
 	private Transform bigSword;
 	private Transform fireSword;
+
 
 	private bool canCast = true;
 	private ZibraLiquidForceField waterBallForceField;
@@ -141,6 +144,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private	GameObject head; private GameObject upperLeftArm; private GameObject lowerLeftArm; private GameObject upperRightArm;
 	private GameObject lowerRightArm; private GameObject hips; private GameObject spineGameObject; private GameObject upperLeftLeg;
 	private GameObject lowerLeftLeg; private GameObject upperRightLeg; private GameObject lowerRightLeg; private GameObject crosshairLookAt;
+	private GameObject tailA; private GameObject tailL; private GameObject tailR; private GameObject pointLight;
+
 
 	private AudioSource audio;
 	public AudioClip soundEffectSwing1;
@@ -175,6 +180,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	private ManageCanvas canvasManager;
 
+	private bool slowMotion = false;
+
 	private bool connected = false;
 	bool moveLegs = false;
 	bool blockTurning = false;
@@ -201,11 +208,22 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			stream.SendNext(rigidBody.rotation);
 			stream.SendNext(rigidBody.velocity);
 			// We own this player: send the others our data
-/* 			stream.SendNext(pvp);
+			stream.SendNext(pvp);
 			stream.SendNext(team);
 			stream.SendNext(Health);
-
+/* 			if(this.pointLight != null)
+			{
+				if (this.pointLight.GetComponent<Light>() != null)
+					stream.SendNext((bool)pointLight.GetComponent<Light>().enabled);
+			} */
+			
 			//stream.SendNext(fire.gameObject.activeSelf);
+			if (flames != null){
+				stream.SendNext(flamesParticleEmission.enabled);
+			}
+			if (embers != null){
+				stream.SendNext(embersParticleEmission.enabled);
+			}
 			if (muzzleFlashParticle != null)
 				stream.SendNext(muzzleFlashParticleEmission.enabled);
 			if (muzzleFlashParticle2 != null)
@@ -213,16 +231,17 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if (mwt != null)
 				stream.SendNext(mwt.enabled);
 			if (mwt2 != null)
-				stream.SendNext(mwt2.enabled); */
+				stream.SendNext(mwt2.enabled); 
 
-/* 			if (equippedWeps.Length > 0){
+ 			if (equippedWeps.Length > 0){
 				foreach (GameObject obj in equippedWeps){
 					stream.SendNext(obj.activeSelf);
 				}
-			} */
+			}
+			stream.SendNext(bigSword.GetComponent<BoxCollider>().enabled);
+			stream.SendNext(bigSword.GetComponent<BoxCollider>().isTrigger);
 
-
-/* 			if (this.Health <= 0){
+			if (this.Health <= 0){
 				stream.SendNext(playerAnimator.enabled);
 				stream.SendNext(alive);
 					
@@ -230,6 +249,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				stream.SendNext(gameObject.GetComponent<Rigidbody> ().isKinematic);
 				
 				//redundancy because of photon
+
 				stream.SendNext(head.GetComponent<SphereCollider>().enabled);
 				stream.SendNext(spineGameObject.GetComponent<BoxCollider>().enabled);
 				stream.SendNext(hips.GetComponent<BoxCollider>().enabled);
@@ -242,6 +262,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				stream.SendNext(lowerLeftLeg.GetComponent<CapsuleCollider>().enabled);
 				stream.SendNext(lowerRightLeg.GetComponent<CapsuleCollider>().enabled);
 
+
+				stream.SendNext(tailA.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(tailL.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(tailR.GetComponent<Rigidbody>().isKinematic);
 				stream.SendNext(head.GetComponent<Rigidbody>().isKinematic);
 				stream.SendNext(spineGameObject.GetComponent<Rigidbody>().isKinematic);
 				stream.SendNext(hips.GetComponent<Rigidbody>().isKinematic);
@@ -252,10 +276,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				stream.SendNext(lowerLeftArm.GetComponent<Rigidbody>().isKinematic);
 				stream.SendNext(lowerRightArm.GetComponent<Rigidbody>().isKinematic);
 				stream.SendNext(lowerLeftLeg.GetComponent<Rigidbody>().isKinematic);
-				stream.SendNext(lowerRightLeg.GetComponent<Rigidbody>().isKinematic);
+				stream.SendNext(lowerRightLeg.GetComponent<Rigidbody>().isKinematic); 
 
 				
-			} */
+			}
 
 
 
@@ -270,12 +294,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			networkPosition += (this.rigidBody.velocity * lag);
 
 
-/* 			// Network player, receive data
+			// Network player, receive data
 			this.pvp = (int)stream.ReceiveNext();
 			this.team = (string)stream.ReceiveNext();
 			this.Health = (float)stream.ReceiveNext();
+/* 			if(this.pointLight != null)
+			{
+				if (this.pointLight.GetComponent<Light>() != null)
+					this.pointLight.GetComponent<Light>().enabled = (bool) stream.ReceiveNext();
+			} */
 
 			//this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
+			if (this.flames != null){
+				this.flamesParticleEmission.enabled = (bool)stream.ReceiveNext();
+			}
+			if (this.embers != null){
+				this.embersParticleEmission.enabled = (bool)stream.ReceiveNext();
+			}
 			if (this.muzzleFlashParticle != null)
 				this.muzzleFlashParticleEmission.enabled = (bool)stream.ReceiveNext();
 			if (this.muzzleFlashParticle2 != null)
@@ -283,13 +318,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if (this.mwt != null)
 				this.mwt.enabled = (bool)stream.ReceiveNext();
 			if (this.mwt2 != null)
-				this.mwt2.enabled = (bool)stream.ReceiveNext(); */
-/* 			if (equippedWeps.Length > 0){
+				this.mwt2.enabled = (bool)stream.ReceiveNext();
+			if (equippedWeps.Length > 0){
 				foreach (GameObject obj in equippedWeps){
 					obj.SetActive((bool)stream.ReceiveNext());
 				}
-			} */
-/* 
+			}
+			bigSword.GetComponent<BoxCollider>().enabled = (bool)stream.ReceiveNext();
+			bigSword.GetComponent<BoxCollider>().isTrigger = (bool)stream.ReceiveNext();
 			if (this.Health <= 0){
 				this.playerAnimator.enabled = (bool)stream.ReceiveNext();
 				this.alive = (bool)stream.ReceiveNext();
@@ -298,6 +334,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				gameObject.GetComponent<Rigidbody> ().isKinematic = (bool)stream.ReceiveNext();
 
 
+				
 				head.GetComponent<SphereCollider>().enabled = (bool)stream.ReceiveNext();
 				spineGameObject.GetComponent<BoxCollider>().enabled = (bool)stream.ReceiveNext();
 				hips.GetComponent<BoxCollider>().enabled = (bool)stream.ReceiveNext();
@@ -310,6 +347,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				lowerLeftLeg.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
 				lowerRightLeg.GetComponent<CapsuleCollider>().enabled = (bool)stream.ReceiveNext();
 
+				tailA.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				tailL.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
+				tailR.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
 				head.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
 				spineGameObject.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
 				hips.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
@@ -320,8 +360,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				lowerLeftArm.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
 				lowerRightArm.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
 				lowerLeftLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
-				lowerRightLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext();
-			} */
+				lowerRightLeg.GetComponent<Rigidbody>().isKinematic = (bool)stream.ReceiveNext(); 
+			}
 			
 
 		}
@@ -331,14 +371,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	#if UNITY_5_4_OR_NEWER
 	void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode loadingMode)
 	{
-		this.CalledOnLevelWasLoaded(scene.buildIndex);
+		//this.CalledOnLevelWasLoaded(scene.buildIndex);
 	}
 	#endif
 
-	#if !UNITY_5_4_OR_NEWER
+/* 	#if !UNITY_5_4_OR_NEWER
 	void OnLevelWasLoaded(int level)
 	{
-		this.CalledOnLevelWasLoaded(level);
+		if (photonView.IsMine){
+			this.CalledOnLevelWasLoaded(level);
+		}
 	}
 	#endif
 
@@ -347,7 +389,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		GameObject _uiGo = Instantiate(this.PlayerUiPrefab);
 		_uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
 		//check position and change if in the wrong spot here
-	}
+	} */
 
 	//----feet
 	private void getBase(Transform parent) {
@@ -362,6 +404,27 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private void AllColliders(Transform parent, bool condition) {
 
 		foreach (Transform t in parent) {
+
+			if (t.gameObject.name == "rig:tail_A"){
+				tailA = t.gameObject;
+				t.gameObject.GetComponent<Rigidbody> ().isKinematic = !condition;
+			}
+
+			if (t.gameObject.name == "rig:tail_L"){
+				tailL = t.gameObject;
+				t.gameObject.GetComponent<Rigidbody> ().isKinematic = !condition;
+			}
+
+			if (t.gameObject.name == "rig:tail_R"){
+				tailR = t.gameObject;
+				t.gameObject.GetComponent<Rigidbody> ().isKinematic = !condition;
+			}
+			if (t.gameObject.name == "Point Light"){
+				pointLight = t.gameObject;
+				t.gameObject.GetComponent<Light>().enabled = false;
+			}
+
+
 	 		if (t.gameObject.GetComponent<SphereCollider>() != null){
 				if (t.gameObject.name == "head_28_cap_A" || t.gameObject.name == "Head" || t.gameObject.name =="rig:Head"){
 					head = t.gameObject;
@@ -561,20 +624,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		recursiveFindingLeftFoot(transform);
 		recursiveFindingRightFoot(transform);
 		followTarget = gameObject.transform.Find("Follow Target");
-
-		foreach (Transform child in spine)
-		{
-			if (child.name == "Flames"){
-				flames = child.GetComponent<ParticleSystem>();
-				flames.enableEmission = false;
-				foreach(Transform c in child){
-					if (c.name == "FireEmbers") {
-						embers = c.GetComponent<ParticleSystem>();
-						embers.enableEmission = false;
-					}
-				}
-			}
-		}
 		
 		
 		//----begin player setup
@@ -603,10 +652,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
 
-		equippedWeps[0] = bow.gameObject;
+		equippedWeps[0] = bigSword.gameObject;
 		equippedWeps[0].SetActive(true);
 		equippedWeps[1] = handgun.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
+		flames = transform.Find("Fire").GetComponent<ParticleSystem>();
+		flamesParticleEmission = flames.emission;
+		embers = transform.Find("Fire").transform.Find("FireEmbers").GetComponent<ParticleSystem>();
+		embersParticleEmission = embers.emission;
 		muzzleFlash = handgun.Find("MuzzleFlashEffect");
 		muzzleFlash2 = rifle.Find("MuzzleFlashEffect");
 		muzzleFlashParticle = muzzleFlash.gameObject.GetComponent<ParticleSystem>();
@@ -616,6 +669,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		swordBlade = rightHandContainer.transform.Find("FireSword").transform.Find("sword blade");
 		ignitionFlame = rightHandContainer.transform.Find("FireSword").transform.Find("IgnitionFlame");
 		getBase (gameObject.transform);
+
+		impactEffectPlayer.tag = "bullet";
 
 		gameObject.GetComponent<Rigidbody> ().isKinematic = false;
 		
@@ -723,7 +778,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		//setTeams();
 		//end seting team
 
-		Health = 5;
+		Health = 10;
 		maxHandgunAmmo = handgunAmmo;
 		maxRifleAmmo = rifleAmmo;
 		#if UNITY_5_4_OR_NEWER
@@ -742,10 +797,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		AllColliders (gameObject.transform, false);
 
-		//crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
-		GameObject.Find("Canvas In Game").transform.Find("Control Panel").transform.gameObject.SetActive(false);
 		
 
+		GameObject.Find("Canvas In Game").transform.Find("Control Panel").transform.gameObject.SetActive(false);
+		
+		StartCoroutine(waitForGameToLoad());
 /* 		healWave = GameObject.Find("HealWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
 		attackWave = GameObject.Find("AttackWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
 		waterBall = GameObject.Find("WaterBall" + instantiationId).GetComponent<ZibraLiquidEmitter>();
@@ -753,6 +809,31 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		waterEraser = GameObject.Find("Void");
 		StartCoroutine(eraseWater()); */
 
+
+
+	}
+
+
+	IEnumerator waitForGameToLoad(){
+		GameObject[] reticles = GameObject.FindGameObjectsWithTag("reticle");
+		foreach(var reticle in reticles){
+			reticle.SetActive(false);
+		}
+		yield return new WaitForSeconds(1f);
+		crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle" + instantiationId);
+		if (crossHair != null){
+			crossHair.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f,0f);
+			crossHair.gameObject.SetActive(false);
+		}
+		if(photonView.IsMine){
+
+			bigSword.gameObject.layer = LayerMask.NameToLayer("MyWeapon");
+
+		} else {
+			bigSword.gameObject.layer = LayerMask.NameToLayer("EnemyWeapon");
+
+		}
+	
 
 
 	}
@@ -847,7 +928,12 @@ print("cast attack wave 1");
 		}
 		audio.PlayOneShot(soundEffectSwing2, 0.7f);
 	}
-
+	IEnumerator slowMotionForABit() {
+		slowMotion = true;
+		Time.timeScale = 0.5f;
+		yield return new WaitForSeconds(2.5f);
+		Time.timeScale = 1f;
+	}
 
  
 	void FixedUpdate() {
@@ -856,7 +942,9 @@ print("cast attack wave 1");
 			//if (!photonView.IsMine)
 				//GetComponent<Rigidbody>().AddForce(new Vector3(-250f, 0f, 0));
 		} */
-
+		if (Health <= 0 && slowMotion == false){
+			StartCoroutine(slowMotionForABit());
+		}
 
 
 
@@ -872,8 +960,6 @@ print("cast attack wave 1");
 	}
  
 	void Update() {
-
-
 /*         if ((controls.Gameplay.Action5.triggered || Input.GetKeyDown("g")) && canvasManager.ability == 0 && waterEmitting == false && canCast){
 			//global cooldown
 			print("cast attack wave");
@@ -889,7 +975,13 @@ print("cast attack wave 1");
 		if (photonView.IsMine == false)
 			return;
 
-	
+		if (aiming == true){
+			if (crossHair != null)
+				crossHair.gameObject.SetActive(true);
+		} else {
+			if (crossHair != null)
+				crossHair.gameObject.SetActive(false);
+		}
 
 
 
@@ -1095,7 +1187,6 @@ print("cast attack wave 1");
 
 
 				if (aiming == true){
-
 
 					if(playerAnimator.GetCurrentAnimatorStateInfo(7).normalizedTime > 0.9f){ //non looping animation checking to see if animation is done
 						if (shoot > 0.5f){
@@ -1367,9 +1458,9 @@ print("cast attack wave 1");
 						if (equippedNothing && blocking) {
 							playerAnimator.speed = 1;
 							if (controls.Gameplay.Action1.triggered && !punching) {
-								StartCoroutine(shootFireball());
+/* 								StartCoroutine(shootFireball());
 								playerAnimator.Play("fireball", 0, .5f);
-								secondHit = false;
+								secondHit = false; */
 							}
 						}
 					}
@@ -1556,7 +1647,8 @@ print("cast attack wave 1");
 				//----begin player death
 				if (Health <= 0) {
 					playerAnimator.enabled = false;
-					fire.gameObject.SetActive (false);
+					photonView.RPC("NoFlames", RpcTarget.All);
+					//fire.gameObject.SetActive (false);
 					gameObject.GetComponent<CapsuleCollider> ().isTrigger = true;
 					gameObject.GetComponent<Rigidbody> ().isKinematic = true;
 					AllColliders (gameObject.transform, true);
@@ -1574,17 +1666,7 @@ print("cast attack wave 1");
 				}
 				
 				if (aiming){
-					if(bow.gameObject.activeSelf){
-						if(crossHair != null)
-						crossHair.gameObject.SetActive(false);
-					} else {
-						if (crossHair != null){
-							crossHair.gameObject.SetActive(true);
-						} else {
-							crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
-						}
-						
-					}
+
 					playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180) + 0f));//radians to degrees offsetting 0-x% because animations are off
 					transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
 					RaycastHit hit;
@@ -1595,14 +1677,7 @@ print("cast attack wave 1");
 						followTarget.transform.rotation = Quaternion.Euler(m_camRotation.transform.eulerAngles.x,
 						m_camRotation.transform.eulerAngles.y, m_camRotation.transform.eulerAngles.z);
 					}
-				} else {
-					if (crossHair != null){
-						crossHair.gameObject.SetActive(false);
-					} else {
-						if (GameObject.Find("Canvas In Game") != null)
-							crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle");
-					}
-				}
+				} 
 				
 				camRotateWithZeroY.transform.position = new Vector3(m_cam.transform.position.x, transform.position.y, m_cam.transform.position.z);
 				camRotateWithZeroY.transform.LookAt(transform.position);
@@ -1798,7 +1873,24 @@ print("cast attack wave 1");
         muzzleFlashParticle.Play();
 		muzzleFlashParticle2.Play();
     }
-
+	[PunRPC]
+	void LoseMediumHealth() {
+		Health -= 3;
+	}
+	[PunRPC]
+	void LoseSmallHealth() {
+		Health -= 2;
+	}
+	[PunRPC]
+	void Flames() {
+		flames.Play();
+		embers.Play();
+	}
+	[PunRPC]
+	void NoFlames() {
+		flames.Stop();
+		embers.Stop();
+	}
 	[PunRPC]
 	void ShootArrow() {
 		if (photonView.IsMine){
@@ -1806,7 +1898,7 @@ print("cast attack wave 1");
 			Vector3 eulerRot = new Vector3(shootZone.eulerAngles.x, shootZone.eulerAngles.y, shootZone.eulerAngles.z);
 			newArrow = PhotonNetwork.Instantiate (arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
 			//newArrow = Instantiate (arrow, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
-			newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 75);
+			newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 75);//75
 			newArrow.gameObject.tag = "arrow";
 			shootArrowSound();
 		}
@@ -1815,7 +1907,8 @@ print("cast attack wave 1");
 
 	[PunRPC]
 	void ShootHandgun() {
-	
+		if (!photonView.IsMine)
+			return;
 		if(handgunAmmo > 0){ //does an extra shot because I have to start at the end of an animation
 				handgunAmmo -= 1;
 
@@ -1829,12 +1922,12 @@ print("cast attack wave 1");
 				RaycastHit hit;
 				shootHandgunSound();
 				if (Physics.Raycast(handgun.position, shootZoneOrCrosshair.forward, out hit, range)){
-					
 					if (hit.rigidbody != null) {
 						hit.rigidbody.AddForce(hit.normal * -15f);
 					}
-					if (hit.transform.tag == "Player" || hit.transform.name == "cop"){
-						impactEffectPlayer.tag = "bullet";
+					if (hit.transform.tag == "Player" || hit.transform.name == "cop" || hit.transform.name == "BulletImpactFleshSmallEffect(Clone)"){
+						print("test2");
+						//impactEffectPlayer.tag = "bullet";
 						PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
 						PhotonNetwork.Instantiate(impactEffectHole.name, hit.point, Quaternion.LookRotation(hit.normal));
@@ -2106,14 +2199,7 @@ print("cast attack wave 1");
 		if (photonView.IsMine)
 		PhotonNetwork.Destroy (newGrenade);
 	}
-	IEnumerator shootFireball() {
-		yield return new WaitForSeconds(0.2f);
-		flames.enableEmission = true;//obsolete use emission.enabled instead of particlesystem.enableemission
-		embers.enableEmission = true;
-		yield return new WaitForSeconds(0.3f);
-		flames.enableEmission = false;
-		embers.enableEmission = false;
-	}
+
 	void changeWeapon() {
 		changingWeps = true;
 		while(changeWeaponTransitionTime < 1f){
@@ -2159,22 +2245,29 @@ print("cast attack wave 1");
 		//needed for land animation
 	}
 	void OnTriggerEnter (Collider col) {
-		if (!photonView.IsMine){return;}
-		if (alive) {
-			if (col.gameObject.tag == "Explosion") {
+		//if (!photonView.IsMine){return;}
+		if (!takingDamage && photonView.IsMine) {
+			if (col.gameObject.layer == LayerMask.NameToLayer("EnemyWeapon")){
+				StartCoroutine(takeMediumDamage());
+			}
+			if (col.gameObject.tag == "bullet" ||  col.gameObject.name.Contains("bullet")){
+				StartCoroutine(takeSmallDamage());
+			}
+
+/* 			if (col.gameObject.tag == "Explosion") {
 				StartCoroutine (takeBigDamage ());
 			}
-			if (col.gameObject.tag == "bullet" || col.gameObject.tag == "bigBullet"){
+			if (col.gameObject.tag == "bullet" || col.gameObject.tag == "bigBullet" || col.gameObject.name.Contains("bullet")){
 				takeDamageNoWait (col.gameObject.tag);
 			}
-			if (col.gameObject.tag == "damage" && !takingDamage){
+			if ((col.gameObject.tag == "arrow" || col.gameObject.tag == "damage") && !takingDamage){
 				if (mwt.enabled && transform.root != col.gameObject.transform.root)
 				StartCoroutine (takeDamage());
 			} 
 			if (col.gameObject.tag == "Medium Damage" && !takingDamage){
 				if(mwt2.enabled && transform.root != col.gameObject.transform.root)
 				StartCoroutine (takeMediumDamage());
-			}
+			} */
 		}
 	}
 	void OnTriggerStay(Collider other) {
@@ -2186,20 +2279,36 @@ print("cast attack wave 1");
 		}
 	}
  	void OnCollisionEnter (Collision col){
-		if (!photonView.IsMine){return;}
-			if (col.gameObject.tag == "Explosion") {
-				StartCoroutine (takeBigDamage ());
-			}
-			if (col.gameObject.tag == "arrow"){
-				if (!gameTransition.transitioning){
-					Health -= 3f;
-					Destroy(col.gameObject);
+		//if (!photonView.IsMine){return;}
+		print(col.collider);
+		if (photonView.IsMine){
+			if (!takingDamage ){
+				//collision's collider?
+				//use col.collider for child collisions
+				if (col.collider.gameObject.layer == LayerMask.NameToLayer("EnemyWeapon")){
+					StartCoroutine(takeSmallDamage());
 				}
+				if (col.gameObject.tag == "Explosion") {
+					StartCoroutine (takeBigDamage ());
+				}
+				if (col.gameObject.tag == "arrow"){
+					//if (!gameTransition.transitioning){
+					StartCoroutine(takeMediumDamage());
+						//Destroy(col.gameObject);
+					//}
+				}		
+
+	/* 			if (col.gameObject.tag == "bullet" ||  col.gameObject.name.Contains("bullet")){
+					StartCoroutine(takeSmallDamage());
+				} */
 			}
+
 			if (col.gameObject.name == "ground"){
 				//playerAnimator.SetBool("falling", false); don't have a falling variable maybe add but probably not
 				isAerial = false;
 			}
+		}
+
 	} 
 	IEnumerator takeBigDamage() {
 		if (!gameTransition.transitioning){
@@ -2221,7 +2330,7 @@ print("cast attack wave 1");
 		if (!gameTransition.transitioning){
 			knockDown = true;
 			takingDamage = true;
-			Health -= 3;
+			photonView.RPC("LoseMediumHealth", RpcTarget.All);
 			yield return new WaitForSeconds (1);
 			takingDamage = false;
 			if (IsGrounded()){
@@ -2234,12 +2343,23 @@ print("cast attack wave 1");
 		}
 	}
 	IEnumerator takeMediumDamage() {
-		if (!gameTransition.transitioning){
+		if (photonView.IsMine){
 			takingDamage = true;
-			Health -= 3f;
-			yield return new WaitForSeconds (1);
+			photonView.RPC("LoseMediumHealth", RpcTarget.All);
+			yield return new WaitForSeconds (0.5f);
 			takingDamage = false;
 		}
+
+		
+	}
+	IEnumerator takeSmallDamage() {
+		if (photonView.IsMine){
+			takingDamage = true;
+			photonView.RPC("LoseSmallHealth", RpcTarget.All);
+			yield return new WaitForSeconds (0.5f);
+			takingDamage = false;
+		}
+		
 	}
 	IEnumerator takeDamage() {
 		
@@ -2251,7 +2371,7 @@ print("cast attack wave 1");
 		}
 	}
 	void takeDamageNoWait(string bulletType) {
-		if (!gameTransition.transitioning){
+		//if (!gameTransition.transitioning){
 			if (bulletType == "bullet")
 			Health -= 1f;
 			if (bulletType == "bigBullet")
@@ -2260,18 +2380,13 @@ print("cast attack wave 1");
 				
 				Health -= 3f;
 			}
-		}
+		//}
 	}
 	IEnumerator blinking() {
-		
-		for (int i = 0; i < 5; i++){
-			head.SetActive(false);
-			gameObject.transform.Find("body").gameObject.SetActive(false);
-			yield return new WaitForSeconds (0.1f);
-			head.SetActive(true);
-			gameObject.transform.Find("body").gameObject.SetActive(true);
-			yield return new WaitForSeconds (0.1f);
-		}
+		photonView.RPC("Flames", RpcTarget.All);
+		yield return new WaitForSeconds (0.5f);
+		photonView.RPC("NoFlames", RpcTarget.All);
+	
 	}
 
 	void firingHandgun() {
