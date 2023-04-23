@@ -135,6 +135,15 @@ public class ManageCanvas : MonoBehaviour
 		if (inTheGame == false){
 			canvasGameObject.SetActive(true);
 			canvasInGameGameObject.SetActive(false);
+			
+            GameObject.Find("Canvas/Virtual Cursor").GetComponent<AudioSource> ().volume = 0.35f;
+
+            //if(Random.Range(0,2) < 1){
+                GameObject.Find("Canvas/Virtual Cursor").GetComponent<AudioSource> ().clip = GameObject.Find("Canvas/Virtual Cursor").GetComponent<VirtualCursor> ().music5;
+ /*            } else {
+                audio.clip = music6;
+            } */
+            GameObject.Find("Canvas/Virtual Cursor").GetComponent<AudioSource> ().Play();
 		}
 		else {
 			canvasGameObject.SetActive(false);

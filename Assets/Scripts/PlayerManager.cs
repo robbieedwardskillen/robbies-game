@@ -85,6 +85,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public GameObject impactEffectHole;
 	private bool blocking = false;
 	private bool firing = false;
+	private bool gettingUp = false;
+	private bool fireball = false;
+	private Quaternion rotation;
+
+
 	//private bool shootingArrow = false;
 	private int grenades = 1;
 	private int rifleAmmo = 4;
@@ -895,7 +900,7 @@ print("cast attack wave 1");
 		//playerAnimator.Play("bigSwing3", 0, .2f);
 		yield return new WaitForSeconds(0.1f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing3"))
-		audio.PlayOneShot(soundEffectSwing1, 0.7f); 
+		audio.PlayOneShot(soundEffectSwing1, 0.1f); 
 	}
 	IEnumerator waitForSecondBigHit2(){
 		yield return new WaitForSeconds(0.25f);
@@ -903,7 +908,7 @@ print("cast attack wave 1");
 		//playerAnimator.Play("bigSwing1", 0, .2f);
 		yield return new WaitForSeconds(0.1f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing1"))
-		audio.PlayOneShot(soundEffectSwing1, 0.7f);
+		audio.PlayOneShot(soundEffectSwing1, 0.1f);
 	}
 	IEnumerator waitForSecondSmallHit1() {
 		yield return new WaitForSeconds(0.05f);
@@ -969,7 +974,7 @@ print("cast attack wave 1");
 				DepthOfField d;
 				if (ppp.TryGetSettings<DepthOfField>(out d))
 				{
-					d.focalLength.value = 70;
+					d.focalLength.value = 85;
 				}
 			}
 		}
@@ -984,15 +989,227 @@ print("cast attack wave 1");
 			//if (!photonView.IsMine)
 				//GetComponent<Rigidbody>().AddForce(new Vector3(-250f, 0f, 0));
 		} */
+		if (!PhotonNetwork.IsConnected)
+			return;
+
+
 		if (Health <= 0 && slowMotion == false){
 			StartCoroutine(slowMotionForABit());
 		}
 
 
-
 		if (photonView.IsMine){
 			velocity = (transform.position - previousPos) / Time.deltaTime;
 			previousPos = transform.position;
+
+
+
+
+
+
+
+
+
+
+			if (GameManager.Instance != null){
+				if (GameManager.Instance.connected && !connected){
+					freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
+					virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
+					freeLookCam.Priority = 1;
+					virtualLookCam.Priority = 0;
+					connected = true;
+
+				}
+			}
+
+		
+
+			
+			if(virtualLookCam.Priority > 0){
+				m_camRotation.transform.position = virtualLookCam.transform.position;
+				m_camRotation.transform.rotation = virtualLookCam.transform.rotation;
+			}
+			
+			if (aiming){
+
+				playerAnimator.SetFloat("rotateY", Mathf.Sin(-m_camRotation.transform.eulerAngles.x * (Mathf.PI / 180) + 0f));//radians to degrees offsetting 0-x% because animations are off
+				transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
+				RaycastHit hit;
+				if(Physics.Raycast(m_camRotation.transform.position, m_camRotation.transform.forward, out hit, 200.0f)){
+
+					followTarget.LookAt(hit.point);//fix later
+				} else {
+					followTarget.transform.rotation = Quaternion.Euler(m_camRotation.transform.eulerAngles.x,
+					m_camRotation.transform.eulerAngles.y, m_camRotation.transform.eulerAngles.z);
+				}
+			} 
+			
+			camRotateWithZeroY.transform.position = new Vector3(m_cam.transform.position.x, transform.position.y, m_cam.transform.position.z);
+			camRotateWithZeroY.transform.LookAt(transform.position);
+
+			forward = camRotateWithZeroY.transform.forward;
+			right = camRotateWithZeroY.transform.right;
+
+	
+			forward.y = 0f;
+			
+			Vector3 moveDirection = (h * right + v * forward);
+			//moveDirection is not a direction it is a position just copied the name from a dum
+
+			if (knockDown == true){
+				playerAnimator.SetBool("falling", true);
+			} else {
+				playerAnimator.SetBool("falling", false);
+			}
+
+			if (h > 0.80f || v > 0.80f || h < -0.80f || v < -0.80f){
+				moveSpeed = 2f;
+			} else {
+				moveSpeed = 1f;
+			}
+			if (moveDirection != Vector3.zero) {
+				rotation = Quaternion.LookRotation(Vector3.up);
+			} else {
+				rotation = Quaternion.Euler (forward);
+			}
+			movement = Vector3.ClampMagnitude(new Vector3(moveDirection.x * Time.deltaTime * moveSpeed, moveDirection.y,
+				moveDirection.z * Time.deltaTime * moveSpeed) * 100, 1f);
+			if (moveDirection != Vector3.zero && !knockDown && !gettingUp && !fireball && !aiming) { //!aiming
+				rotation = Quaternion.LookRotation (moveDirection);
+				lastMoveDirection = moveDirection; 
+			}  
+			
+
+
+			if (!aiming && (playerAnimator.GetBool("ShootingHandgun") || playerAnimator.GetBool("ShootingRifle") ||
+			playerAnimator.GetBool("ShootingBow") || dynamicHitting) || playerAnimator.GetBool("firing") && !playerAnimator.GetBool("blocking")){
+
+				if (playerAnimator.GetLayerWeight(4) < 0.01f){//not reloading
+					firing = true;
+				} else {
+					firing = false;
+				}
+				freeLookCam.m_YAxis.m_MaxSpeed = 0; //can't rotate vertically
+				freeLookCam.m_XAxis.m_MaxSpeed = 0; //can't rotate horizontally
+				playerAnimator.SetFloat("rotateY", rotate.y); //freelook aim up/down
+				playerAnimator.SetFloat("rotateX", rotate.x); //freelook aim left/right (bow)
+
+				//strafing and turning free look
+
+				var forwardA = m_cam.transform.rotation * Vector3.forward;
+				var forwardB = transform.rotation * Vector3.forward;
+
+				// get a numeric angle for each vector, on the X-Z plane (relative to world forward)
+				var angleA = Mathf.Atan2(forwardA.x, forwardA.z) * Mathf.Rad2Deg;
+				var angleB = Mathf.Atan2(forwardB.x, forwardB.z) * Mathf.Rad2Deg;
+
+				// get the signed difference in these angles
+				var relativeAngle = -Mathf.DeltaAngle(angleA, angleB);//delta angle calculates shortest distance of angle ex. 340 degrees is 20 degrees -delta because.. idk it works
+				Vector3 relativeRotationVec = new Vector3(0f, relativeAngle, 0f);
+				Quaternion relativeRotation = Quaternion.Euler(relativeRotationVec);
+				Vector3 relativeRotationForward = relativeRotation * Vector3.forward;
+				Vector3 relativeRotationRight = relativeRotation * Vector3.right;
+				Vector3 relativeMoveDirection = (relativeRotationRight * h + relativeRotationForward * v);
+
+				float howVertical = relativeMoveDirection.z;
+				float howHorizontal = relativeMoveDirection.x;
+				//*******need to work on this stuff********
+				//reverse horizontal
+				playerAnimator.SetFloat("horizontalStrafing", howHorizontal);
+				playerAnimator.SetFloat("verticalStrafing", howVertical);
+				if (howVertical < 0f && Mathf.Abs(howHorizontal) < 0.1f){ //moving backwards without strafing
+					playerAnimator.SetLayerWeight(9, 0f);
+					playerAnimator.SetLayerWeight(3, 1f);
+					playerAnimator.SetFloat("turn", 1f);
+				} else if (howVertical >= 0f){ //moving forwards
+					playerAnimator.SetLayerWeight(9, howVertical - Mathf.Abs(howHorizontal) * 2 );//how vertical joystick is - a set horizontal value
+					playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal) * 2);
+				} else if (howVertical < 0f && Mathf.Abs(howHorizontal) > 0.1f){ //moving backwards with strafing
+					playerAnimator.SetLayerWeight(9, 0f);
+					playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal) * 2); 
+				}
+
+				if (howVertical < 0f){
+					playerAnimator.SetLayerWeight(3, Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+					playerAnimator.SetFloat("turn", Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+				} else {
+					if (howVertical >= 0f && !blockTurning){
+						playerAnimator.SetLayerWeight(3, 0f);
+						playerAnimator.SetFloat("turn", 0f);
+					}
+				}
+				
+			}
+			else if (!aiming) {//not shooting and not aiming
+				firing = false;
+				freeLookCam.m_YAxis.m_MaxSpeed = 2; //can rotate vertically again
+				freeLookCam.m_XAxis.m_MaxSpeed = 200;
+				playerAnimator.SetLayerWeight(9, 0f);
+				playerAnimator.SetLayerWeight(2, 0f);
+				if (!blockTurning)
+				playerAnimator.SetLayerWeight(3, 0f);
+			}
+			if (aiming){
+				freeLookCam.Priority = 0;
+				virtualLookCam.Priority = 1;
+				StartCoroutine(transitionToCam2());
+				//strafing and turning virtual cam
+				float howVertical = Input.GetAxis("Vertical");
+				float howHorizontal = Input.GetAxis("Horizontal");
+				playerAnimator.SetFloat("verticalStrafing", howVertical);
+				playerAnimator.SetFloat("horizontalStrafing", howHorizontal);
+				playerAnimator.SetLayerWeight(2, Mathf.Abs(howHorizontal));
+				playerAnimator.SetFloat("turn", rotate.x);
+				if (howVertical < 0f){ //not moving forward (is at idle animation when not moving)
+					playerAnimator.SetFloat("turn", 1f);
+				}
+				
+				if((!moveLegs && Mathf.Abs(howHorizontal) == 0f && Mathf.Abs(rotate.x) > 0.01f)){ //not moving and rotating
+					playerAnimator.SetFloat("turn", 1f);
+				} else {
+					if (howVertical < 0f){
+						playerAnimator.SetLayerWeight(3, Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+						playerAnimator.SetFloat("turn", Mathf.Abs(howVertical) - Mathf.Abs(howHorizontal));
+					} else {
+						if (howVertical >= 0f && !blockTurning){
+							playerAnimator.SetLayerWeight(3, 0f);
+							playerAnimator.SetFloat("turn", 0f);
+						}
+	
+					}
+				}
+			} else {
+				StartCoroutine(transitionToCam1());
+				virtualLookCam.Priority = 0;
+				freeLookCam.Priority = 1;
+			}
+			if (lastMoveDirection != Vector3.zero) {
+				rotation = Quaternion.LookRotation (lastMoveDirection);
+			} else {
+				rotation = Quaternion.identity;
+			}
+			if (rolling){
+				rollSpeed = 1f; //fix later (can roll without moving currently)
+			} else {
+				rollSpeed = 1f;
+			}
+			if (!gameTransition.transitioning && alive){
+					if (!playerAnimator.GetBool("blocking") && !bigSwing && !knockDown && !gettingUp && !fireball) {
+						transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
+					}
+					if (bigSwing && isAerial) {
+						transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
+					}
+				
+			}
+
+			if (!aiming && !firing){
+				transform.rotation = rotation;
+			} 
+
+
+
+
 		}
 		if (!photonView.IsMine)
 		{
@@ -1008,14 +1225,38 @@ print("cast attack wave 1");
 			//if used more than 10 times do an erase or after 3 seconds and not refreshed
 			StartCoroutine(CastSpell(1f, "CastingWhileMoving2.Cast", 13, 0.4f, 0, 0, attackWaveSound, 0.5f, null, attackWave, null, 0.5f));
         }
- */
+ */		
 
 		if (!PhotonNetwork.IsConnected)
 			return;
 
+
+		if (Health <= 0 && slowMotion == false){
+			StartCoroutine(slowMotionForABit());
+		}
+
 		//if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
 		if (photonView.IsMine == false)
 			return;
+
+
+
+			if (!gameTransition.transitioning && alive){
+					if (!playerAnimator.GetBool("blocking") && !bigSwing && !knockDown && !gettingUp && !fireball) {
+						transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
+					}
+					if (bigSwing && isAerial) {
+						transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
+					}
+				
+			}
+
+			if (!aiming && !firing){
+				transform.rotation = rotation;
+			} 
+
+
+
 
 		if (aiming == true){
 			if (crossHair != null)
@@ -1119,19 +1360,6 @@ print("cast attack wave 1");
 			pvp = 0;
 			hashPvP["pvp"] = pvp;
 			PhotonNetwork.LocalPlayer.SetCustomProperties(hashPvP);
-		}
-
-
-
-		if (GameManager.Instance != null){
-			if (GameManager.Instance.connected && !connected){
-				freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
-				virtualLookCam = GameObject.Find("CinemachineCam2").GetComponent<CinemachineVirtualCamera>();
-				freeLookCam.Priority = 1;
-				virtualLookCam.Priority = 0;
-				connected = true;
-
-			}
 		}
 
 
@@ -1330,13 +1558,13 @@ print("cast attack wave 1");
 			} else {
 				playerAnimator.SetLayerWeight(5, 0);
 			}
-			bool gettingUp = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("Getting Up");
+			gettingUp = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("Getting Up");
 			bool punch1 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch1");
 			bool punch2 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch2");
 			bool punch3 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch3");
 			bool punch4 = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("punch4");
 			bool kick = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("kick");
-			bool fireball = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("fireball");
+			fireball = playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("fireball");
 			bool knifeRight = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("knifeRight");
 			bool swordLeft = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordLeft");
 			bool swordRight = playerAnimator.GetCurrentAnimatorStateInfo (0).IsName ("swordRight");
@@ -1532,7 +1760,7 @@ print("cast attack wave 1");
 						if (controls.Gameplay.Action1.triggered && !bigSwing){
 							photonView.RPC("RPCTrigger2", RpcTarget.All, "bigSwing5");
 							//playerAnimator.Play("bigSwing5", 0, .2f);
-							audio.PlayOneShot(soundEffectSwing1, 0.7f);
+							audio.PlayOneShot(soundEffectSwing1, 0.1f);
 						}
 						if (shoot > 0.5f){
 							dynamicHitting = true;
@@ -1699,7 +1927,7 @@ print("cast attack wave 1");
 				//----end player death
 
 
-			
+/* 			
 
 				
 				if(virtualLookCam.Priority > 0){
@@ -1729,7 +1957,6 @@ print("cast attack wave 1");
 
 		
 				forward.y = 0f;
-				Quaternion rotation;
 				
 				Vector3 moveDirection = (h * right + v * forward);
 				//moveDirection is not a direction it is a position just copied the name from a dum
@@ -1870,8 +2097,8 @@ print("cast attack wave 1");
 					rollSpeed = 1f; //fix later (can roll without moving currently)
 				} else {
 					rollSpeed = 1f;
-				}
-				if (!gameTransition.transitioning && alive){
+				} */
+/* 				if (!gameTransition.transitioning && alive){
 
 						if (!playerAnimator.GetBool("blocking") && !bigSwing && !knockDown && !gettingUp && !fireball) {
 							transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
@@ -1885,7 +2112,7 @@ print("cast attack wave 1");
 
 				if (!aiming && !firing){
 					transform.rotation = rotation;
-				} 
+				}  */
 				
 			}
 		}
@@ -2124,7 +2351,7 @@ print("cast attack wave 1");
 		//playerAnimator.Play(anim, 0, .2f);
 		yield return new WaitForSeconds(0.35f);
 		if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName(anim)){
-			audio.PlayOneShot(ac, 0.7f);
+			audio.PlayOneShot(ac, 0.1f);
 		}
 	}
 	IEnumerator ReloadHandgun() {//not used
