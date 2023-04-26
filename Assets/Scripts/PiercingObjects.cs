@@ -31,7 +31,9 @@ public class PiercingObjects : MonoBehaviourPunCallbacks
 		} 
 	}
     void OnCollisionEnter(Collision c) {
-        
+        if (c.gameObject.tag == "arrow") {
+            Physics.IgnoreCollision(gameObject.GetComponent<Collider>(), c.gameObject.GetComponent<Collider>(), true);
+        }
         if (c.gameObject.tag != "Player" || c.gameObject.GetComponent<Rigidbody>() == null){
             rb.isKinematic=true;
             ArrowHitSound();
@@ -51,6 +53,7 @@ public class PiercingObjects : MonoBehaviourPunCallbacks
         }
         
     }
+    
     IEnumerator waitThenDelete() {
 
         yield return new WaitForSeconds(0.2f);

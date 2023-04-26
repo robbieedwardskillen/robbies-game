@@ -10635,6 +10635,7 @@ MonoBehaviour:
   busy: 0
   punching: 0
   bigSwing: 0
+  takingDamage: 0
   moveSpeed: 1
   animationMoveSpeed: 0
   underWater: 0

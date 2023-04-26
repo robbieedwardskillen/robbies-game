@@ -26,7 +26,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public bool punching = false;
 	public bool bigSwing = false;
 	private bool dynamicHitting = false;
-	private bool takingDamage = false;
+	public bool takingDamage = false;
 	private bool isAerial = false;
 	private bool rolling = false;
 	private float rollSpeed = 1f;
@@ -80,6 +80,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public GameObject grenade;
 	public GameObject arrow;
 	private GameObject newArrow;
+	private int currentArrowId = 0;
 	public GameObject impactEffectGround;
 	public GameObject impactEffectPlayer;
 	public GameObject impactEffectWall;
@@ -2172,7 +2173,8 @@ print("cast attack wave 1");
 		if (photonView.IsMine){
 			newArrow = null;
 			Vector3 eulerRot = new Vector3(shootZone.eulerAngles.x, shootZone.eulerAngles.y, shootZone.eulerAngles.z);
-			newArrow = PhotonNetwork.Instantiate (arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
+			newArrow = PhotonNetwork.Instantiate(arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
+			currentArrowId = PhotonView.Get(newArrow).ViewID;
 			//newArrow = Instantiate (arrow, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
 			newArrow.transform.GetChild(0).gameObject.GetComponent<Rigidbody> ().AddForce (shootZone.forward * 75);//75
 			newArrow.gameObject.tag = "arrow";
@@ -2202,7 +2204,6 @@ print("cast attack wave 1");
 						hit.rigidbody.AddForce(hit.normal * -15f);
 					}
 					if (hit.transform.tag == "Player" || hit.transform.name == "cop" || hit.transform.name == "BulletImpactFleshSmallEffect(Clone)"){
-						print("test2");
 						//impactEffectPlayer.tag = "bullet";
 						PhotonNetwork.Instantiate(impactEffectPlayer.name, hit.point, Quaternion.LookRotation(hit.normal));
 					} else if (hit.transform.tag == "shelter" || hit.transform.tag == "lamp"){
@@ -2571,11 +2572,11 @@ print("cast attack wave 1");
 				if (col.gameObject.tag == "Explosion") {
 					StartCoroutine (takeBigDamage ());
 				}
-				if (col.gameObject.tag == "arrow" && col.gameObject.transform.parent.gameObject != this.newArrow){
-					//if (!gameTransition.transitioning){
-					StartCoroutine(takeMediumDamage());
-						//Destroy(col.gameObject);
-					//}
+
+				if (col.gameObject.tag == "arrow"){
+					if (PhotonView.Get(col.gameObject).ViewID != currentArrowId){
+						StartCoroutine(takeMediumDamage());
+					}
 				}		
 
 	/* 			if (col.gameObject.tag == "bullet" ||  col.gameObject.name.Contains("bullet")){
