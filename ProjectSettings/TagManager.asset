@@ -20,6 +20,7 @@ TagManager:
   - ReflectionStatic
   - dead arrow
   - reticle
+  - liquid
   layers:
   - Default
   - TransparentFX

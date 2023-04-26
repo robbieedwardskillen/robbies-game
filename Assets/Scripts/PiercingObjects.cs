@@ -31,11 +31,13 @@ public class PiercingObjects : MonoBehaviourPunCallbacks
 		} 
 	}
     void OnCollisionEnter(Collision c) {
-        rb.isKinematic=true;
+        
         if (c.gameObject.tag != "Player" || c.gameObject.GetComponent<Rigidbody>() == null){
+            rb.isKinematic=true;
             ArrowHitSound();
         }
-        if (c.gameObject.tag == "Player"){
+        if (c.gameObject.tag == "Player" && PhotonView.Get(c.gameObject.GetComponent<PlayerManager>()).IsMine == false && c.gameObject.tag != "liquid") {
+            rb.isKinematic=true;
             GetComponent<MeleeWeaponTrail>().enabled = false;
             
             if (this.gameObject.tag != "dead arrow"){

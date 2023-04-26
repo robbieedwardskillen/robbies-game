@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Photon.Pun;
+using Photon.Pun.UtilityScripts;
+using Photon.Realtime;
+
 public class PlayerUI : MonoBehaviour
 {
     #region Public Fields
@@ -34,7 +38,6 @@ public class PlayerUI : MonoBehaviour
         _canvasGroup = this.GetComponent<CanvasGroup>();
         this.transform.SetParent(GameObject.Find("Canvas In Game").GetComponent<Transform>(), false);
     }
-
     void Update()
     {
         // Destroy itself if the target is null, It's a fail safe when Photon is destroying Instances of a Player over the network
@@ -50,7 +53,7 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
-    void FixedUpdate()//suppoed to be LateUpdate but changing it for Cinemachine 
+    void LateUpdate()
     {
         // Do not show the UI if we are not visible to the camera, thus avoid potential bugs with seeing the UI, but not the player itself.
         if (targetRenderer!=null)
@@ -65,6 +68,16 @@ public class PlayerUI : MonoBehaviour
             targetPosition.y += characterControllerHeight;
             //this.transform.position = Camera.main.WorldToScreenPoint (targetPosition) + screenOffset;
             this.transform.position = Camera.main.WorldToScreenPoint (targetPosition) + screenOffset;
+        }
+        if (target == null)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        // Reflect the Player Health
+        if (playerHealthSlider != null)
+        {
+            playerHealthSlider.value = target.Health;
         }
     }
 

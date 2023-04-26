@@ -32,7 +32,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private float rollSpeed = 1f;
 	private bool secondHit = false;
     private float range = 200f;
-	public float moveSpeed = 1f;
+	public float moveSpeed = 3f;
 	public float animationMoveSpeed = 0f;
 	public bool underWater = false;
 	public bool aiming = false;
@@ -79,6 +79,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private GameObject[] equippedWeps = new GameObject[2];
 	public GameObject grenade;
 	public GameObject arrow;
+	private GameObject newArrow;
 	public GameObject impactEffectGround;
 	public GameObject impactEffectPlayer;
 	public GameObject impactEffectWall;
@@ -88,7 +89,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private bool gettingUp = false;
 	private bool fireball = false;
 	private Quaternion rotation;
-
+	private bool canJump = false;
 
 	//private bool shootingArrow = false;
 	private int grenades = 1;
@@ -195,7 +196,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	bool changingWeps = false;
 	private int testing1 = 0;
 		private int testing2 = 0;
-
+ //dad wants me to put my name in so here Robbie Skillen
 	[Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
 	public static GameObject LocalPlayerInstance;
 
@@ -658,9 +659,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		
 		//selection screen should get chosen weps and put them into equippedWeps[0] & equippedWeps[1]
 
-		equippedWeps[0] = bigSword.gameObject;
+		equippedWeps[0] = handgun.gameObject;
 		equippedWeps[0].SetActive(true);
-		equippedWeps[1] = handgun.gameObject;
+		equippedWeps[1] = bow.gameObject;
 		playerAnimator.SetBool(equippedWeps[0].name, true);
 		flames = transform.Find("Fire").GetComponent<ParticleSystem>();
 		flamesParticleEmission = flames.emission;
@@ -821,12 +822,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 
 	IEnumerator waitForGameToLoad(){
+
+		yield return new WaitForSeconds(1f);
+		crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle" + instantiationId);
+
+
 		GameObject[] reticles = GameObject.FindGameObjectsWithTag("reticle");
 		foreach(var reticle in reticles){
 			reticle.SetActive(false);
 		}
-		yield return new WaitForSeconds(1f);
-		crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle" + instantiationId);
 		if (crossHair != null){
 			crossHair.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f,0f);
 			crossHair.gameObject.SetActive(false);
@@ -936,7 +940,6 @@ print("cast attack wave 1");
 	}
 	IEnumerator slowMotionForABit() {
 
-
 		//requires way too much code for just this post processing change
 
 		PostProcessLayer v2_PostProcess = GameObject.Find("Main Camera").GetComponent<PostProcessLayer>();
@@ -981,7 +984,6 @@ print("cast attack wave 1");
 
 		Time.timeScale = 1f;
 	}
-
  
 	void FixedUpdate() {
 /* 		if (controls.Gameplay.Jump.triggered){
@@ -1002,15 +1004,6 @@ print("cast attack wave 1");
 			velocity = (transform.position - previousPos) / Time.deltaTime;
 			previousPos = transform.position;
 
-
-
-
-
-
-
-
-
-
 			if (GameManager.Instance != null){
 				if (GameManager.Instance.connected && !connected){
 					freeLookCam = GameObject.Find("CinemachineCam1").GetComponent<CinemachineFreeLook>();
@@ -1022,7 +1015,11 @@ print("cast attack wave 1");
 				}
 			}
 
-		
+			if (canJump){
+				audio.PlayOneShot (soundEffectJump, 0.5f);
+				rigidBody.AddForce(new Vector3(0, 175f, 0));
+			}
+			canJump = false;
 
 			
 			if(virtualLookCam.Priority > 0){
@@ -1072,8 +1069,8 @@ print("cast attack wave 1");
 			} else {
 				rotation = Quaternion.Euler (forward);
 			}
-			movement = Vector3.ClampMagnitude(new Vector3(moveDirection.x * Time.deltaTime * moveSpeed, moveDirection.y,
-				moveDirection.z * Time.deltaTime * moveSpeed) * 100, 1f);
+
+			movement = new Vector3(moveDirection.x, moveDirection.y, moveDirection.z);
 			if (moveDirection != Vector3.zero && !knockDown && !gettingUp && !fireball && !aiming) { //!aiming
 				rotation = Quaternion.LookRotation (moveDirection);
 				lastMoveDirection = moveDirection; 
@@ -1195,10 +1192,15 @@ print("cast attack wave 1");
 			}
 			if (!gameTransition.transitioning && alive){
 					if (!playerAnimator.GetBool("blocking") && !bigSwing && !knockDown && !gettingUp && !fireball) {
-						transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
+						//transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
+	
+
+ 						//GetComponent<Rigidbody>().AddForce(((transform.position + movement) - transform.position) * 10);
+						GetComponent<Rigidbody>().velocity = new Vector3(movement.x * moveSpeed, GetComponent<Rigidbody>().velocity.y, movement.z * moveSpeed);
+
 					}
 					if (bigSwing && isAerial) {
-						transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
+						GetComponent<Rigidbody>().velocity = new Vector3(movement.x * moveSpeed, GetComponent<Rigidbody>().velocity.y, movement.z * moveSpeed);
 					}
 				
 			}
@@ -1217,7 +1219,7 @@ print("cast attack wave 1");
 			GetComponent<Rigidbody>().rotation = Quaternion.RotateTowards(GetComponent<Rigidbody>().rotation, networkRotation, Time.fixedDeltaTime * 100.0f);
 		}
 	}
- 
+
 	void Update() {
 /*         if ((controls.Gameplay.Action5.triggered || Input.GetKeyDown("g")) && canvasManager.ability == 0 && waterEmitting == false && canCast){
 			//global cooldown
@@ -1239,8 +1241,12 @@ print("cast attack wave 1");
 		if (photonView.IsMine == false)
 			return;
 
+		//in Update as well as FixedUpdate to try and update it in all frames
+		if (!aiming && !firing){
+			transform.rotation = rotation;
+		} 
 
-
+/* 
 			if (!gameTransition.transitioning && alive){
 					if (!playerAnimator.GetBool("blocking") && !bigSwing && !knockDown && !gettingUp && !fireball) {
 						transform.position += movement * (moveSpeed * rollSpeed) * Time.deltaTime;
@@ -1253,7 +1259,7 @@ print("cast attack wave 1");
 
 			if (!aiming && !firing){
 				transform.rotation = rotation;
-			} 
+			}  */
 
 
 
@@ -1325,7 +1331,7 @@ print("cast attack wave 1");
         }
         if ((controls.Gameplay.Action5.triggered || Input.GetKeyDown("h")) && canvasManager.ability == 3 && waterEmitting == false && canCast){
 			//10 second cooldown?
-			print("cast heal wave");
+			Health += 1f;
 			castingHealingWater = true;
             StartCoroutine(CastSpell(1f, "CastingWhileMoving1.Cast", 12, 0.3f, 0, 0, healWaveSound, 0.5f, null, healWave, null, 0.25f));
 
@@ -1586,8 +1592,8 @@ print("cast attack wave 1");
 				}
 				rb.mass = 1f;
 			} else {
-				rb.mass = 1f;
-				rb.drag = 2.5f;
+/* 				rb.mass = 1f;
+				rb.drag = 2.5f; */
 			}
 
 			if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("bigSwing1") ||
@@ -1615,9 +1621,9 @@ print("cast attack wave 1");
 			if (alive) {
 				//squatting animation
 				blocking = playerAnimator.GetBool("blocking");
-				if (Health < 3) {
-					playerAnimator.SetBool("injured", true);
-				}
+/* 				if (Health < 3) {
+					playerAnimator.SetBool("injured", true); //causes game to be really laggy idk why
+				} */
 				if (controls.Gameplay.Action2.triggered && !busy && !changingWeps && shoot < 0.5f) {
 					playerAnimator.SetTrigger("changeWep");
 					changeWeapon();
@@ -1873,8 +1879,9 @@ print("cast attack wave 1");
 
 					if (controls.Gameplay.Jump.triggered && !isAerial && !playerAnimator.GetBool("blocking") && !underWater) {
 						//moveLegs = false;
-						audio.PlayOneShot (soundEffectJump, 0.5f);
-						rigidBody.AddForce(new Vector3(0, 200f, 0));
+						canJump = true;
+/* 						audio.PlayOneShot (soundEffectJump, 0.5f);
+						rigidBody.AddForce(new Vector3(0, 200f, 0)); */
 					}		
 
 
@@ -1893,7 +1900,7 @@ print("cast attack wave 1");
 		
 				}
 
-				if (h < 0.01 && h > -0.01 && v < 0.01 && v > -0.01) {
+				if (h < 0.225 && h > -0.225 && v < 0.225 && v > -0.225) {
 					moveLegs = false;
 					playerAnimator.SetBool("moving", false);
 				} else {
@@ -2163,7 +2170,7 @@ print("cast attack wave 1");
 	[PunRPC]
 	void ShootArrow() {
 		if (photonView.IsMine){
-			GameObject newArrow = null;
+			newArrow = null;
 			Vector3 eulerRot = new Vector3(shootZone.eulerAngles.x, shootZone.eulerAngles.y, shootZone.eulerAngles.z);
 			newArrow = PhotonNetwork.Instantiate (arrow.name, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
 			//newArrow = Instantiate (arrow, shootZone.transform.position, Quaternion.Euler(eulerRot)) as GameObject;
@@ -2515,13 +2522,18 @@ print("cast attack wave 1");
 	}
 	void OnTriggerEnter (Collider col) {
 		//if (!photonView.IsMine){return;}
-		if (!takingDamage && photonView.IsMine) {
+		if (!takingDamage) {
 			if (col.gameObject.layer == LayerMask.NameToLayer("EnemyWeapon")){
 				StartCoroutine(takeMediumDamage());
 			}
-			if (col.gameObject.tag == "bullet" ||  col.gameObject.name.Contains("bullet")){
+			if ((col.gameObject.tag == "bullet" || col.gameObject.name.Contains("bullet"))
+			&& col.gameObject != this.impactEffectPlayer && col.gameObject != this.impactEffectHole
+			&& col.gameObject != this.impactEffectGround && col.gameObject != this.impactEffectWall){
 				StartCoroutine(takeSmallDamage());
 			}
+
+
+
 
 /* 			if (col.gameObject.tag == "Explosion") {
 				StartCoroutine (takeBigDamage ());
@@ -2539,7 +2551,7 @@ print("cast attack wave 1");
 			} */
 		}
 	}
-	void OnTriggerStay(Collider other) {
+	void OnTriggerStay(Collider other) {//hmm?
 		if (!photonView.IsMine){return;}
 	}
 	void OnParticleCollision(GameObject other){
@@ -2549,9 +2561,8 @@ print("cast attack wave 1");
 	}
  	void OnCollisionEnter (Collision col){
 		//if (!photonView.IsMine){return;}
-		print(col.collider);
-		if (photonView.IsMine){
-			if (!takingDamage ){
+
+			if (!takingDamage){
 				//collision's collider?
 				//use col.collider for child collisions
 				if (col.collider.gameObject.layer == LayerMask.NameToLayer("EnemyWeapon")){
@@ -2560,7 +2571,7 @@ print("cast attack wave 1");
 				if (col.gameObject.tag == "Explosion") {
 					StartCoroutine (takeBigDamage ());
 				}
-				if (col.gameObject.tag == "arrow"){
+				if (col.gameObject.tag == "arrow" && col.gameObject.transform.parent.gameObject != this.newArrow){
 					//if (!gameTransition.transitioning){
 					StartCoroutine(takeMediumDamage());
 						//Destroy(col.gameObject);
@@ -2576,7 +2587,7 @@ print("cast attack wave 1");
 				//playerAnimator.SetBool("falling", false); don't have a falling variable maybe add but probably not
 				isAerial = false;
 			}
-		}
+		
 
 	} 
 	IEnumerator takeBigDamage() {
@@ -2820,7 +2831,7 @@ print("cast attack wave 1");
 		}
 	}
 
-
+ //dad wants me to put my name in so here Robbie Skillen
 	public static void DumpToConsole(object obj){
 		var output = JsonUtility.ToJson(obj, true);
 		Debug.Log(output);

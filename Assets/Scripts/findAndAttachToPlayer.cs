@@ -103,7 +103,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (GetComponent<ZibraLiquidEmitter>() != null){
             if (zle == null){
@@ -142,7 +142,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
                 } else if (this.gameObject.name == "AttackWave" + instantiationId){
-                    this.transform.position = players[i].transform.position + players[i].transform.forward * 1f;
+                    this.transform.position = players[i].transform.position + players[i].transform.forward * 1.5f;
                     this.transform.rotation = players[i].transform.rotation;//doens't help just change initial velocity of z instead in herarchy
                     this.transform.rotation = Quaternion.Euler(players[i].transform.localRotation.eulerAngles.x, players[i].transform.localRotation.eulerAngles.y, 90f); 
                 } else if (this.gameObject.name == "PlayerLiquidCollider" + instantiationId){
@@ -170,8 +170,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
                 if (playerLiquidDetector != null){
-                    if (playerLiquidDetector.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0 && !players[i].GetComponent<PlayerManager>().castingHealingWater){
-                        elapsedTime += Time.deltaTime;
+                    if (playerLiquidDetector.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0 && !players[i].GetComponent<PlayerManager>().castingHealingWater){//not sure how to fix healing spell
+                        //elapsedTime += Time.deltaTime;
 
                         //detach liquid collider so it can move then push character towards that position
                         
@@ -181,15 +181,32 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                             player2ColliderAttached = false;
                         }
 
-                        if (GetComponent<ZibraLiquidCollider>() != null && elapsedTime > 0.1f){
-                            players[i].GetComponent<Rigidbody>().AddForce((playerLiquidCollider.transform.position - players[i].transform.position) * 10);
+
+
+
+
+
+
+                    //NEED TO FIX ONLY ONLY PLAYER CAN EFFECT THE OTHER CURRENTLY
+
+
+
+
+
+
+
+
+                        //if (elapsedTime > 0.1f){
+                            print("instantiation id " + instantiationId);
+                            print("i " + i);
+                            players[i].GetComponent<Rigidbody>().AddForce((playerLiquidCollider.transform.position - players[i].transform.position) * 25);
 
                             //players[i].transform.position = Vector3.Lerp(players[i].transform.position, playerLiquidCollider.transform.position, fractionOfDistance);
-                        }
+                        //}
 
 
                     } else {
-                        elapsedTime = 0f;
+                        //elapsedTime = 0f;
                         if (instantiationId == 1){
                             player1ColliderAttached = true;
                         } else if (instantiationId == 2) {
