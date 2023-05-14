@@ -1034,7 +1034,7 @@ print("cast attack wave 1");
 				transform.rotation = Quaternion.Euler(0f, m_camRotation.transform.eulerAngles.y, 0f);
 				RaycastHit hit;
 				if(Physics.Raycast(m_camRotation.transform.position, m_camRotation.transform.forward, out hit, 200.0f)){
-
+					//don't know where I got the name followTarget.. it is for raycasts to hit what the cursor is on.
 					followTarget.LookAt(hit.point);//fix later
 				} else {
 					followTarget.transform.rotation = Quaternion.Euler(m_camRotation.transform.eulerAngles.x,
