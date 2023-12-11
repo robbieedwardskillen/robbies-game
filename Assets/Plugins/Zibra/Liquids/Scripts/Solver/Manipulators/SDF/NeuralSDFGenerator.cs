@@ -261,7 +261,7 @@ namespace com.zibra.liquid.Editor.SDFObjects
             {
                 if (requestURL != "")
                 {
-                    CurrentRequest = UnityWebRequest.PostWwwForm(requestURL, json);
+                    CurrentRequest = UnityWebRequest.Post(requestURL, json);
                     CurrentRequest.SendWebRequest();
                 }
             }
