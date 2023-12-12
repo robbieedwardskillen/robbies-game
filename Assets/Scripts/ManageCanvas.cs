@@ -26,7 +26,7 @@ public class ManageCanvas : MonoBehaviour
 	public GameObject loadingScreen;
     private Canvas canvas;
 	private RadialMenu radialMenu;
-	public radialMenuElement highlightedAbility;
+	public RadialMenuElement highlightedAbility;
 	public int ability = 0;
     public bool inGame = false;
 	public bool myPlayerInstantiated = false;
@@ -195,60 +195,77 @@ public class ManageCanvas : MonoBehaviour
 		switch (directionNumber)
 		{
 		case 0:
-			highlightedAbility = radialMenu.elements[0];
-			ability = 0;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[0].GetImage2();
-			radialMenu.elements[0].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			if (radialMenu.elements.Count > 0){
+				highlightedAbility = radialMenu.elements[0];
+				ability = 0;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[0].GetImage2();
+				radialMenu.elements[0].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			}
+			
 			break;
 		case 1:
-			highlightedAbility = radialMenu.elements[1];
-			ability = 1;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[1].GetImage2();
-			radialMenu.elements[1].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			if (radialMenu.elements.Count > 1){
+				highlightedAbility = radialMenu.elements[1];
+				ability = 1;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[1].GetImage2();
+				radialMenu.elements[1].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			}
 			break;
 		case 2:
-			highlightedAbility = radialMenu.elements[2];
-			ability = 2;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[2].GetImage2();
-			radialMenu.elements[2].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			if (radialMenu.elements.Count > 2){
+				highlightedAbility = radialMenu.elements[2];
+				ability = 2;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[2].GetImage2();
+				radialMenu.elements[2].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			}
 			break;
 		case 3:
-			highlightedAbility = radialMenu.elements[3];
-			ability = 3;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[3].GetImage2();
-			radialMenu.elements[3].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			if (radialMenu.elements.Count > 3){
+				highlightedAbility = radialMenu.elements[3];
+				ability = 3;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[3].GetImage2();
+				radialMenu.elements[3].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			}
 			break;
 		case 4:
-			ability = 4;
-			highlightedAbility = radialMenu.elements[4];
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[4].GetImage2();
-			radialMenu.elements[4].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			if (radialMenu.elements.Count > 4){
+				ability = 4;
+				highlightedAbility = radialMenu.elements[4];
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[4].GetImage2();
+				radialMenu.elements[4].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			}
 			break;
 		case 5:
-			ability = 5;
-			highlightedAbility = radialMenu.elements[5];
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[5].GetImage2();
-			radialMenu.elements[5].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			if (radialMenu.elements.Count > 5){
+				ability = 5;
+				highlightedAbility = radialMenu.elements[5];
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[5].GetImage2();
+				radialMenu.elements[5].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			}
 			break;
 		case 6:
-			ability = 6;
-			highlightedAbility = radialMenu.elements[6];
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[6].GetImage2();
-			radialMenu.elements[6].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			if (radialMenu.elements.Count > 6){
+				ability = 6;
+				highlightedAbility = radialMenu.elements[6];
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[6].GetImage2();
+				radialMenu.elements[6].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			}
 			break;
 		case 7:
-			ability = 7;
-			highlightedAbility = radialMenu.elements[7];
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
-			GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[7].GetImage2();
-			radialMenu.elements[7].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			if (radialMenu.elements.Count > 7){
+				ability = 7;
+				highlightedAbility = radialMenu.elements[7];
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().enabled = true;
+				GameObject.Find("Canvas In Game/RadialMenu/mask/CardImage").GetComponent<Image>().sprite = radialMenu.elements[7].GetImage2();
+				radialMenu.elements[7].GetComponent<RectTransform>().localScale = new Vector3(0.9f, 0.9f ,0f);
+			}
 			break;
 		}
 

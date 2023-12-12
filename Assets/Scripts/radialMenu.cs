@@ -8,30 +8,31 @@ public class RadialMenu : MonoBehaviour
     public GameObject elementPrefab;
 
     public float radius = 75f;
-
+    public int maxCards = 8;
     public List<Sprite> images;
     public List<Sprite> images2;
     public Sprite placeholderImage1;
     public Sprite placeholderImage2;
-    public List<radialMenuElement> elements;
+    public List<RadialMenuElement> elements;
     // Start is called before the first frame update
     void Awake()
     {
-        elements = new List<radialMenuElement>();
+        elements = new List<RadialMenuElement>();
         Open();
         transform.Find("mask").gameObject.transform.Find("CardImage").GetComponent<Image>().enabled = false;
     }
 
     void addElement(string name, Sprite img, Sprite img2){
         GameObject element = Instantiate(elementPrefab, transform);
-        radialMenuElement rme = element.GetComponent<radialMenuElement>();
+        RadialMenuElement rme = element.GetComponent<RadialMenuElement>();
         rme.SetName(name);
         rme.SetImage(img);
         rme.SetImage2(img2);
         elements.Add(rme);
     }
     public void Open(){
-        for (int i=0; i<8; i++){ //elements.Count
+        
+        for (int i=0; i< maxCards; i++){
             int actualNumber = i + 1;
             if (images[i] == null || images2[i] == null){
                 addElement("Card" + actualNumber.ToString(), placeholderImage1, placeholderImage2);
