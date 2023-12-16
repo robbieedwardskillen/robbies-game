@@ -15,7 +15,7 @@ public class SetCardMenu : MonoBehaviour
             if (rm.elements[i].GetImage().name != "No card"){
                 card = Instantiate(cardPrefab) as GameObject;
                 card.GetComponent<ChapterButton>().backgroundImage = rm.elements[i].image.sprite;
-                card.transform.parent = this.gameObject.transform;
+                card.transform.SetParent (this.gameObject.transform);
                 card.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f ,1f);
             }
         }

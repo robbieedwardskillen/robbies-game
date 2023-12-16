@@ -27,6 +27,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     private GameObject canvas;
     private GameObject canvasInGame;
     private GameObject postFx;
+    private Text debugText;
     #endregion
     
 
@@ -85,8 +86,7 @@ public class Launcher : MonoBehaviourPunCallbacks
             DontDestroyOnLoad(postFx);
             m_cam.GetComponent<AudioListener>().enabled = false;
         }
-
-
+        debugText = canvasInGame.transform.Find("Debugging").GetComponent<Text>();
             //DontDestroyOnLoad(loading);
         //end
     }
@@ -134,7 +134,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-
+        debugText.text = "Joined room. Region: " + PhotonNetwork.CloudRegion;
 
         /* manageCanvas.SwitchCam(true);
         m_cam.GetComponent<AudioListener>().enabled = true; */
@@ -164,7 +164,8 @@ public class Launcher : MonoBehaviourPunCallbacks
  
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.Log("PUN Basics Tutorial/Launcher:OnJoinRandomFailed() was called by PUN. No random room available, so we create one.\nCalling: PhotonNetwork.CreateRoom");
+        //debugText = GameObject.Find("Debugging").transform.GetChild(0).GetComponent<Text>();
+        debugText.text = "Failed joining room. Region: " + PhotonNetwork.CloudRegion;
 
         // #Critical: we failed to join a random room, maybe none exists or they are all full. No worries, we create a new room.
         PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
