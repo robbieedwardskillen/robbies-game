@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using com.zibra.liquid.Manipulators;
+using UnityEngine.UI;
 
 public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, IPunOwnershipCallbacks
 {
@@ -26,7 +27,14 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     // Start is called before the first frame update
     private PhotonView pv;
     private Player photonPlayer;
-    
+    private GameObject canvasInGame;
+    private Text debugText;
+
+//just ends up pushing both of them or neither of them
+/*  [PunRPC]
+	void PushPlayer (int i){
+        players[i].GetComponent<Rigidbody>().AddForce((playerLiquidCollider.transform.position - players[i].transform.position) * 25);
+    } */
 
     public void OnOwnershipRequest(PhotonView targetView, Player requestingPlayer)
     {
@@ -85,6 +93,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
         PhotonNetwork.AddCallbackTarget(this);
         pv = GetComponent<PhotonView>();
         StartCoroutine(WaitThenFindPlayer());
+
     }
 
     private void OnDestroy()
@@ -97,18 +106,16 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
         yield return new WaitForSeconds(1);
 
         players = GameObject.FindGameObjectsWithTag("Player");
-
-      
+        canvasInGame = GameObject.Find("Canvas In Game");
+        debugText = canvasInGame.transform.Find("Debugging").GetComponent<Text>();
         doneSearching = true;
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    void Update() //changed from FixedUpdate don't know if it made it worse or better.
     {
         if (GetComponent<ZibraLiquidEmitter>() != null){
             if (zle == null){
                 zle = GetComponent<ZibraLiquidEmitter>();
-                print(zle);
             }
 
         }
@@ -173,6 +180,18 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                     if (playerLiquidDetector.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0 && !players[i].GetComponent<PlayerManager>().castingHealingWater){//not sure how to fix healing spell
                         //elapsedTime += Time.deltaTime;
 
+
+
+                        //*** TO FIX
+                        //master (2) is unable to find water particles on player 1
+                        debugText.text = "Water particles found on player: " + instantiationId;
+
+
+
+
+
+
+
                         //detach liquid collider so it can move then push character towards that position
                         
                         if (instantiationId == 1){
@@ -180,17 +199,6 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                         } else if (instantiationId == 2) {
                             player2ColliderAttached = false;
                         }
-
-
-
-
-
-
-
-                    //NEED TO FIX ONLY ONLY PLAYER CAN EFFECT THE OTHER CURRENTLY
-
-
-
 
 
 

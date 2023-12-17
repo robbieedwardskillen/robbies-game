@@ -2313,9 +2313,9 @@ print("cast attack wave 1");
 	}
 	//for handgun (bad naming convention but I don't care)
 	void callFlash(AnimationEvent myEvent) {// called from the scene's animator
-		if (photonView.IsMine){
+		if (photonView.IsMine){ 
 			if (myEvent.intParameter == 3){ //only call from center shot to avoid multi calls when anim tree combines animations
-				if(playerAnimator.GetLayerWeight(4) < 1f){
+				if(playerAnimator.GetLayerWeight(4) < 1f){ //probably dumb should have just made one call from 3 I guess oh well.
 					if (handgunAmmo > 0){
 						photonView.RPC("Flash", RpcTarget.All);
 						photonView.RPC("ShootHandgun", RpcTarget.All);
