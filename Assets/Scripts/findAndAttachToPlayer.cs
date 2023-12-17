@@ -11,7 +11,9 @@ using UnityEngine.UI;
 public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, IPunOwnershipCallbacks
 {
     GameObject[] players;
+    GameObject player;
     private int instantiationId;
+    private int playerID;
     private bool doneSearching = false;
     private bool player1ColliderAttached = true;
     private bool player2ColliderAttached = true;
@@ -121,7 +123,116 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
         }
 
         //int playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+
        if(doneSearching){
+
+      /*   for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++){
+            if (players[i]){
+
+            }
+        } */
+
+                //for ownership transfer later
+
+                //photonPlayer = PhotonView.Get(players[i]) as Player;
+
+            
+
+            playerID = PhotonNetwork.LocalPlayer.ActorNumber;
+            //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
+            //print(PhotonView.Get(players[i]).localPlayerIndex);
+            
+            
+            playerLiquidCollider = GameObject.Find("PlayerLiquidCollider" + playerID);
+            playerLiquidDetector = GameObject.Find("PlayerLiquidDetector" + playerID);
+
+            if (this.gameObject.name == "HealWave" + playerID){
+                this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
+                PlayerManager.LocalPlayerInstance.transform.position.y + 1f, PlayerManager.LocalPlayerInstance.transform.position.z);
+
+                
+
+
+            } else if (this.gameObject.name == "AttackWave" + playerID){
+                this.transform.position = PlayerManager.LocalPlayerInstance.transform.position + PlayerManager.LocalPlayerInstance.transform.forward * 1.5f;
+                this.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;//doens't help just change initial velocity of z instead in herarchy
+                this.transform.rotation = Quaternion.Euler(PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.x, PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.y, 90f); 
+            } else if (this.gameObject.name == "PlayerLiquidCollider" + playerID){
+                if (playerID == 1 && player1ColliderAttached){
+                    
+                    this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
+                        PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f, PlayerManager.LocalPlayerInstance.transform.position.z);
+
+                } else if (playerID == 2 && player2ColliderAttached) {
+                    this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
+                        PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f , PlayerManager.LocalPlayerInstance.transform.position.z);
+                }
+
+            } else if (this.gameObject.name == "PlayerLiquidDetector" + playerID){
+                this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
+                PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f, PlayerManager.LocalPlayerInstance.transform.position.z); 
+            } else if (this.gameObject.name == "WaterBall" + playerID || this.gameObject.name == "WaterBallForceField" + playerID){
+                this.transform.position = new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, PlayerManager.LocalPlayerInstance.transform.position.y + 1.5f,
+                PlayerManager.LocalPlayerInstance.transform.position.z) + PlayerManager.LocalPlayerInstance.transform.forward * 6f;
+                this.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;
+            }
+
+
+
+
+
+            if (playerLiquidDetector != null){
+                if (playerLiquidDetector.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0 && !PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){//not sure how to fix healing spell
+                    //elapsedTime += Time.deltaTime;
+
+
+
+                    //*** TO FIX
+                    //master (2) is unable to find water particles on player 1
+                    debugText.text = "Players ID " + PhotonNetwork.LocalPlayer.ActorNumber;
+
+
+
+
+
+
+
+                    //detach liquid collider so it can move then push character towards that position
+                    
+                    if (playerID == 1){
+                        player1ColliderAttached = false;
+                    } else if (playerID == 2) {
+                        player2ColliderAttached = false;
+                    }
+
+
+
+
+
+                    //if (elapsedTime > 0.1f){
+                        PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((playerLiquidCollider.transform.position - PlayerManager.LocalPlayerInstance.transform.position) * 25);
+
+                        //players[i].transform.position = Vector3.Lerp(players[i].transform.position, playerLiquidCollider.transform.position, fractionOfDistance);
+                    //}
+
+
+                } else {
+                    //elapsedTime = 0f;
+                    if (playerID == 1){
+                        player1ColliderAttached = true;
+                    } else if (playerID == 2) {
+                        player2ColliderAttached = true;
+                    }
+                }
+            }
+
+
+            
+        }
+
+
+
+/*        if(doneSearching){
             for (int i = 0; i < players.Length; i++){
 
 
@@ -130,9 +241,9 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
                 //photonPlayer = PhotonView.Get(players[i]) as Player;
 
+                
 
-
-                instantiationId = int.Parse(PhotonView.Get(players[i]).InstantiationId.ToString().Substring(0, 1));   
+                instantiationId = int.Parse(PhotonView.Get(players[i]).InstantiationId.ToString().Substring(0, 1)); 
                 //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
                 //print(PhotonView.Get(players[i]).localPlayerIndex);
                 
@@ -184,7 +295,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
                         //*** TO FIX
                         //master (2) is unable to find water particles on player 1
-                        debugText.text = "Water particles found on player: " + instantiationId;
+                        debugText.text = "Players ID " + PhotonNetwork.LocalPlayer.ActorNumber;
 
 
 
@@ -225,7 +336,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
             }
-        }
+        } */
 
     }
 
