@@ -10627,6 +10627,7 @@ MonoBehaviour:
   team: 
   playerCount: 0
   instantiationId: 0
+  playerID: 0
   pvp: 0
   Height: 0.5
   Health: 0

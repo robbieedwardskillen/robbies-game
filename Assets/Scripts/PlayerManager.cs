@@ -9,6 +9,7 @@ using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using com.zibra.liquid.Manipulators;
 using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
@@ -16,6 +17,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	public ExitGames.Client.Photon.Hashtable hashTeam = new ExitGames.Client.Photon.Hashtable();
 	public int playerCount;
 	public int instantiationId;
+	public int playerID;
 	public int pvp = 0;
 	public ExitGames.Client.Photon.Hashtable hashPvP = new ExitGames.Client.Photon.Hashtable();
 	public float Height = 0.5f; // hard coding for now
@@ -187,6 +189,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	private Vector3 velocity;
 
 	private ManageCanvas canvasManager;
+
+
+    private GameObject canvasInGame;
+    private Text debugText;
+
 
 	private bool slowMotion = false;
 
@@ -572,6 +579,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 		playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
 		instantiationId = int.Parse(photonView.InstantiationId.ToString().Substring(0, 1));
+		playerID = PhotonNetwork.LocalPlayer.ActorNumber;
 /* 		healWave = GameObject.Find("HealWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
 		attackWave = GameObject.Find("AttackWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
 		waterBall = GameObject.Find("WaterBall" + instantiationId).GetComponent<ZibraLiquidEmitter>();
@@ -699,12 +707,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	}
 	void setTeams() {
-		if (instantiationId == 1){
+		if (playerID == 1){
 			team = "blue";
 		}
-		if (instantiationId == 2){
+		if (playerID == 2){
 			if (pvp == 1){
-				if (instantiationId == 1){
+				if (playerID == 1){
 					team = "blue";
 				} else {
 					team = "red";
@@ -714,11 +722,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				team = "blue";
 			}
 		}
-		if (instantiationId == 3){
+		if (playerID == 3){
 			if (pvp == 1){
-				if (instantiationId == 1){
+				if (playerID == 1){
 					team = "blue";
-				} else if (instantiationId == 2) {
+				} else if (playerID == 2) {
 					team = "red";
 				} else {
 					team = "green";
@@ -728,9 +736,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				team = "blue";
 			}
 		}
-		if (instantiationId == 4){
+		if (playerID == 4){
 			if (pvp == 1){
-				if (instantiationId == 1 || instantiationId == 2){
+				if (playerID == 1 || playerID == 2){
 					team = "blue";
 				} else {
 					team = "red";
@@ -740,9 +748,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				team = "blue";
 			}
 		}
-		if (instantiationId == 6){
+		if (playerID == 6){
 			if (pvp == 1){
-				if (instantiationId == 1 || instantiationId == 2 || instantiationId == 3){
+				if (playerID == 1 || playerID == 2 || playerID == 3){
 					team = "blue";
 				} else {
 					team = "red";
@@ -752,9 +760,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				team = "blue";
 			}
 		}
-		if (instantiationId == 10){
+		if (playerID == 10){
 			if (pvp == 1){
-				if (instantiationId == 1 || instantiationId == 2 || instantiationId == 3 || instantiationId == 4 || instantiationId == 5){
+				if (playerID == 1 || playerID == 2 || playerID == 3 || playerID == 4 || playerID == 5){
 					team = "blue";
 				} else {
 					team = "red";
@@ -817,6 +825,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		waterEraser = GameObject.Find("Void");
 		StartCoroutine(eraseWater()); */
 
+	    canvasInGame = GameObject.Find("Canvas In Game");
+        debugText = canvasInGame.transform.Find("Debugging").GetComponent<Text>();
 
 
 	}
@@ -825,7 +835,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	IEnumerator waitForGameToLoad(){
 
 		yield return new WaitForSeconds(1f);
-		crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle" + instantiationId);
+		crossHair = GameObject.Find("Canvas In Game").transform.Find("reticle" + playerID);
 
 
 		GameObject[] reticles = GameObject.FindGameObjectsWithTag("reticle");
@@ -844,7 +854,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			bigSword.gameObject.layer = LayerMask.NameToLayer("EnemyWeapon");
 
 		}
-	
+
 
 
 	}
@@ -860,7 +870,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 	IEnumerator CastSpell(float gcd, string layerAndAnimName, int layerNumber, float firstPause,  float audioPitch1, float audioPitch2, 
 		AudioClip castSound, float volume, ZibraLiquidForceField ff, ZibraLiquidEmitter waterSpell, GameObject spell, float secondPause){
-print("cast attack wave 1");
+
 		if (spell != null || waterSpell != null){
 						
 
@@ -879,7 +889,7 @@ print("cast attack wave 1");
 				eraserTimerOn = true;
 				waterEmitting = true;
 				waterSpell.enabled = true;
-
+				debugText.text = waterSpell.name;
 				if (ff != null)
 					ff.enabled = true;
 
@@ -1277,13 +1287,13 @@ print("cast attack wave 1");
 
 
 		if (healWave == null && attackWave == null && waterBall == null && waterBallForceField == null && waterEraser == null){
-			if (GameObject.Find("HealWave" + instantiationId) != null && GameObject.Find("AttackWave" + instantiationId) != null && 
-				GameObject.Find("WaterBall" + instantiationId) != null && GameObject.Find("WaterBallForceField" + instantiationId) != null &&
+			if (GameObject.Find("HealWave" + playerID) != null && GameObject.Find("AttackWave" + playerID) != null && 
+				GameObject.Find("WaterBall" + playerID) != null && GameObject.Find("WaterBallForceField" + playerID) != null &&
 				GameObject.Find("Void") != null){
-					healWave = GameObject.Find("HealWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
-					attackWave = GameObject.Find("AttackWave" + instantiationId).GetComponent<ZibraLiquidEmitter>();
-					waterBall = GameObject.Find("WaterBall" + instantiationId).GetComponent<ZibraLiquidEmitter>();
-					waterBallForceField = GameObject.Find("WaterBallForceField" + instantiationId).GetComponent<ZibraLiquidForceField>();
+					healWave = GameObject.Find("HealWave" + playerID).GetComponent<ZibraLiquidEmitter>();
+					attackWave = GameObject.Find("AttackWave" + playerID).GetComponent<ZibraLiquidEmitter>();
+					waterBall = GameObject.Find("WaterBall" + playerID).GetComponent<ZibraLiquidEmitter>();
+					waterBallForceField = GameObject.Find("WaterBallForceField" + playerID).GetComponent<ZibraLiquidForceField>();
 					waterEraser = GameObject.Find("Void");
 					StartCoroutine(eraseWater());
 
@@ -1338,7 +1348,7 @@ print("cast attack wave 1");
 
         }
 		if ((controls.Gameplay.Action5.triggered || Input.GetKeyDown("t")) && canvasManager.ability == 4 && waterEmitting == false && canCast){
-			print("cast water ball");
+
 			StartCoroutine(CastSpell(2f, "CastingWhileMoving3.Cast", 14, 0.4f, 0.2f, 1f, healWaveSound, 0.5f, waterBallForceField, waterBall, null, 0.75f));
 
         }
