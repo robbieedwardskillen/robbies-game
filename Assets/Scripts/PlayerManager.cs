@@ -194,7 +194,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
     private GameObject canvasInGame;
     private Text debugText;
 
-
 	private bool slowMotion = false;
 
 	private bool connected = false;
@@ -202,8 +201,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	bool blockTurning = false;
 	bool knockDown = false;
 	bool changingWeps = false;
-	private int testing1 = 0;
-		private int testing2 = 0;
+	
  //dad wants me to put my name in so here Robbie Skillen
 	[Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
 	public static GameObject LocalPlayerInstance;
@@ -216,7 +214,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-
 		if (stream.IsWriting)
 		{
 			stream.SendNext(rigidBody.position);
@@ -233,6 +230,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			} */
 			
 			//stream.SendNext(fire.gameObject.activeSelf);
+
 			if (flames != null){
 				stream.SendNext(flamesParticleEmission.enabled);
 			}
@@ -320,6 +318,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			} */
 
 			//this.fire.gameObject.SetActive((bool)stream.ReceiveNext());
+
 			if (this.flames != null){
 				this.flamesParticleEmission.enabled = (bool)stream.ReceiveNext();
 			}
@@ -620,6 +619,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		controls.Gameplay.Shoot.canceled += ctx => shoot = 0;
 		controls.Gameplay.BlockDodge.performed += ctx => blockDodge = ctx.ReadValue<float>();//left trigger
 		controls.Gameplay.BlockDodge.canceled += ctx => blockDodge = 0;
+
 		if (controls != null){
 			controls.Gameplay.Enable();
 		}
@@ -704,6 +704,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		camRotateWithZeroY = GameObject.Find("CamRotateWithZeroY");
 		m_camRotation = GameObject.Find("Rotation");
 		gameTransition = GameObject.Find("Main Camera").GetComponent<Transition>();
+
 
 	}
 	void setTeams() {
@@ -889,7 +890,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				eraserTimerOn = true;
 				waterEmitting = true;
 				waterSpell.enabled = true;
-				debugText.text = waterSpell.name;
+
 				if (ff != null)
 					ff.enabled = true;
 
@@ -997,6 +998,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 	}
  
 	void FixedUpdate() {
+
 /* 		if (controls.Gameplay.Jump.triggered){
 			//if (instantiationId == photonView.CreatorActorNr)
 			//if (!photonView.IsMine)
