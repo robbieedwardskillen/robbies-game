@@ -1289,11 +1289,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 
 		if (healWave == null && attackWave == null && waterBall == null && waterBallForceField == null && waterEraser == null){
-			if (GameObject.Find("HealWave" + playerID) != null && GameObject.Find("AttackWave" + playerID) != null && 
+			if (GameObject.Find("HealWave" + playerID) != null && GameObject.Find("AttackWaveHolder" + playerID + "/AttackWave" + playerID) != null && 
 				GameObject.Find("WaterBall" + playerID) != null && GameObject.Find("WaterBallForceField" + playerID) != null &&
 				GameObject.Find("Void") != null){
 					healWave = GameObject.Find("HealWave" + playerID).GetComponent<ZibraLiquidEmitter>();
-					attackWave = GameObject.Find("AttackWave" + playerID).GetComponent<ZibraLiquidEmitter>();
+					attackWave = GameObject.Find("AttackWaveHolder" + playerID + "/AttackWave" + playerID).GetComponent<ZibraLiquidEmitter>();
 					waterBall = GameObject.Find("WaterBall" + playerID).GetComponent<ZibraLiquidEmitter>();
 					waterBallForceField = GameObject.Find("WaterBallForceField" + playerID).GetComponent<ZibraLiquidForceField>();
 					waterEraser = GameObject.Find("Void");
@@ -1302,8 +1302,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			}
 		}
 
-
-		
 
 		if (healWave != null){
             if (waterEmitting == false)

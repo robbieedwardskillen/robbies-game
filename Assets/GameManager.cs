@@ -33,10 +33,10 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (PlayerManager.LocalPlayerInstance == null){
 
-            if (1==1){
+
                 //PhotonNetwork.Instantiate(this.knightPrefab.name, new Vector3(5f, 41f, 5f), Quaternion.identity);
-                PhotonNetwork.Instantiate(this.knightPrefab.name, new Vector3(22f, - 3.8f, 7f), Quaternion.identity);
-            }
+                GameObject p = PhotonNetwork.Instantiate(this.knightPrefab.name, new Vector3(22f, - 3.8f, 7f), Quaternion.identity) as GameObject;
+           
 
 
             //PhotonNetwork.InstantiateRoomObject(this.placeObjects.name, new Vector3(5f, 40.65f, 5f), Quaternion.identity);
