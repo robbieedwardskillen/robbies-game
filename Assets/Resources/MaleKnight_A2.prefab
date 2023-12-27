@@ -11005,6 +11005,9 @@ MonoBehaviour:
   - Type: 4
     SynchronizeType: 2
     Name: firing
+  - Type: 4
+    SynchronizeType: 2
+    Name: casting
   m_SynchronizeLayers:
   - SynchronizeType: 2
     LayerIndex: 0

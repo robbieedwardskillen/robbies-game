@@ -877,6 +877,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 
 			StartCoroutine(GCD(layerNumber, gcd));
 			playerAnimator.Play(layerAndAnimName, layerNumber, 0f);
+			playerAnimator.SetBool("casting", true);
 			yield return new WaitForSeconds(firstPause);
 
 			if (audioPitch1 != 0)
@@ -901,7 +902,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 				
 				waterEmitting = false;
 				waterSpell.enabled = false;
-
+				playerAnimator.SetBool("casting", false);
 				if (ff != null)
 					ff.enabled = false;
 
