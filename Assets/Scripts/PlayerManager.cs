@@ -888,7 +888,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 			if (waterSpell != null){
 
 				eraserTimer = 0f;
-				eraserTimerOn = true;
+				eraserTimerOn = true; //*******************************NEED TO MAKE RPC FOR THIS
 				waterEmitting = true;
 				waterSpell.enabled = true;
 
@@ -1250,6 +1250,21 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable {
 		if (Health <= 0 && slowMotion == false){
 			StartCoroutine(slowMotionForABit());
 		}
+
+
+		if (eraserTimerOn){
+			eraserTimer += Time.deltaTime;
+		}
+		if (eraserTimer >= 5f){
+			if (castingHealingWater){
+				castingHealingWater = false;
+			}
+			StartCoroutine(eraseWater());
+			eraserTimerOn = false;
+			eraserTimer = 0f;
+		}
+
+
 
 		//if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
 		if (photonView.IsMine == false)

@@ -8,6 +8,8 @@ using Photon.Realtime;
 using com.zibra.liquid.Manipulators;
 using UnityEngine.UI;
 
+//All water manipulator management
+
 public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, IPunOwnershipCallbacks
 {
     GameObject[] players;
@@ -22,8 +24,6 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     private float elapsedTime = 0f;
 
     private ZibraLiquidEmitter zle;
-    private GameObject playerLiquidCollider;
-    private GameObject playerLiquidDetector;
     private GameObject playerLiquidCollider1;
     private GameObject playerLiquidDetector1;
     private GameObject playerLiquidCollider2;
@@ -36,6 +36,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     private GameObject canvasInGame;
     private Text debugText;
     private Text debugText2;
+    private bool transferredOwnership1 = false;
+    private bool transferredOwnership2 = false;
 
 
 
@@ -44,10 +46,16 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     {
         if (targetView != base.photonView)
             return;
-        
         //add checks here
-
-
+   
+        
+        if (this.gameObject.name[gameObject.name.Length-1] == '1'){
+            transferredOwnership1 = true;
+        }
+            
+        if (this.gameObject.name[gameObject.name.Length-1] == '2'){
+            transferredOwnership2 = true;
+        }
         base.photonView.TransferOwnership(requestingPlayer);
     }
 
@@ -106,7 +114,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
     IEnumerator WaitThenFindPlayer(){
 
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(1.75f);
 
         players = GameObject.FindGameObjectsWithTag("Player");
         canvasInGame = GameObject.Find("Canvas In Game");
@@ -119,10 +127,6 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
         doneSearching = true;
     }
 
-	public static void DumpToConsole(object obj){
-		var output = JsonUtility.ToJson(obj, true);
-		Debug.Log(output);
-	}
 
 
     void Update() //changed from FixedUpdate don't know if it made it worse or better.
@@ -135,15 +139,26 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
        if(doneSearching){
-    
-            playerID = PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().playerID;
-            OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
             //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
+            playerID = PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().playerID;
 
-
+            ///**********NEED TO FIX 
+            if (!transferredOwnership1){
+                if (this.gameObject.name[gameObject.name.Length-1] == '1' && playerID == 1){
+                    OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
+                }
+                    
+            }
+            if (!transferredOwnership2){
+                if (this.gameObject.name[gameObject.name.Length-1] == '2' && playerID == 2){
+                    OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
+                }
+                    
+            }
             
-            playerLiquidCollider = GameObject.Find("PlayerLiquidCollider" + playerID);
-            playerLiquidDetector = GameObject.Find("PlayerLiquidDetector" + playerID);
+
+                
+            
 
             if (this.gameObject.name == "HealWave1" || this.gameObject.name == "HealWave2"){
 
@@ -163,20 +178,12 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
             if (this.gameObject.name == "AttackWave1" || this.gameObject.name == "AttackWave2"){
 
                 for (int i = 0 ; i < players.Length; i++){
-
-
-                    //debugText2.text = "name: " + this.gameObject.name + " position: " + this.gameObject.transform.position;
-     
-
-
                     if (this.gameObject.name == "AttackWave1" && playerID == 1){
-                        //*** WORKING HERE, current theory change ownership
-                        //*** next theory see if there is a way to synchronize for all players besides rpcs
                         this.transform.parent.gameObject.transform.position = PlayerManager.LocalPlayerInstance.transform.position + PlayerManager.LocalPlayerInstance.transform.forward * 1.5f;
                         this.transform.parent.gameObject.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;//doens't help just change initial velocity of z instead in herarchy Edit: no idea what I meant here
                         this.transform.parent.gameObject.transform.rotation = Quaternion.Euler(PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.x, PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.y, 90f); 
                     }
-                    else if (this.gameObject.name == "AttackWave2" && playerID == 2){
+                    else if (this.gameObject.name == "AttackWave2" && players.Length > 1 && playerID == 2){
                         this.transform.parent.gameObject.transform.position = PlayerManager.LocalPlayerInstance.transform.position + PlayerManager.LocalPlayerInstance.transform.forward * 1.5f;
                         this.transform.parent.gameObject.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;//doens't help just change initial velocity of z instead in herarchy Edit: no idea what I meant here
                         this.transform.parent.gameObject.transform.rotation = Quaternion.Euler(PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.x, PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.y, 90f); 
@@ -185,22 +192,22 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                 }
                 
 
-                
-
-
-
             } 
             if (this.gameObject.name == "PlayerLiquidCollider1" || this.gameObject.name == "PlayerLiquidCollider2"){
                 
-                if (this.gameObject.name == "PlayerLiquidCollider1" && playerID == 1){
+                if (this.gameObject.name == "PlayerLiquidCollider1"){
                     if (player1ColliderAttached){
+                        this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
+                        this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f);
                         this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
                             PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f, PlayerManager.LocalPlayerInstance.transform.position.z);
                     } 
 
                 }
-                if (this.gameObject.name == "PlayerLiquidCollider2" && players.Length > 1 && playerID == 2){
+                if (this.gameObject.name == "PlayerLiquidCollider2"){
                     if (player2ColliderAttached){
+                        this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
+                        this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f);
                         this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
                             PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f, PlayerManager.LocalPlayerInstance.transform.position.z);
                     }
@@ -240,15 +247,17 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
             if (this.gameObject.name == "PlayerLiquidDetector1" || this.gameObject.name == "PlayerLiquidDetector2"){
-                
                 if (this.gameObject.name == "PlayerLiquidDetector1"){
                     
                     if (this.gameObject.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0){
 
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
                             player1ColliderAttached = false;
-                            PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((playerLiquidCollider1.transform.position - PlayerManager.LocalPlayerInstance.transform.position) * 25);
-                        }
+                            PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((new Vector3(playerLiquidCollider1.transform.position.x, 0f, playerLiquidCollider1.transform.position.z)
+                                - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 0f, PlayerManager.LocalPlayerInstance.transform.position.z)) * 500);
+                        }   
+                        
+
                     }
                     else {
                         player1ColliderAttached = true;
@@ -259,8 +268,10 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
                             player2ColliderAttached = false;
-                            PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((playerLiquidCollider2.transform.position - PlayerManager.LocalPlayerInstance.transform.position) * 25);
+                            PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((new Vector3(playerLiquidCollider2.transform.position.x, 0f, playerLiquidCollider2.transform.position.z)
+                                - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 0f, PlayerManager.LocalPlayerInstance.transform.position.z)) * 500);
                         }
+                                            
                     }
                     else {
                         player2ColliderAttached = true;
