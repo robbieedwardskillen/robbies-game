@@ -129,7 +129,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
 
-    void Update() //changed from FixedUpdate don't know if it made it worse or better.
+    void Update() 
     {
         if (GetComponent<ZibraLiquidEmitter>() != null){
             if (zle == null){
@@ -142,7 +142,6 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
             //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
             playerID = PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().playerID;
 
-            ///**********NEED TO FIX 
             if (!transferredOwnership1){
                 if (this.gameObject.name[gameObject.name.Length-1] == '1' && playerID == 1){
                     OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
@@ -156,10 +155,6 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                     
             }
             
-
-                
-            
-
             if (this.gameObject.name == "HealWave1" || this.gameObject.name == "HealWave2"){
 
                 if (this.gameObject.name == "HealWave1" && playerID == 1){
@@ -167,7 +162,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                     PlayerManager.LocalPlayerInstance.transform.position.y + 1f, PlayerManager.LocalPlayerInstance.transform.position.z);
 
                 } 
-                if (this.gameObject.name == "HealWave2" && players.Length > 0 && playerID == 2){
+                if (this.gameObject.name == "HealWave2" && playerID == 2){
                     this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
                     PlayerManager.LocalPlayerInstance.transform.position.y + 1f, PlayerManager.LocalPlayerInstance.transform.position.z);
                 }
@@ -177,25 +172,24 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
             if (this.gameObject.name == "AttackWave1" || this.gameObject.name == "AttackWave2"){
 
-                for (int i = 0 ; i < players.Length; i++){
-                    if (this.gameObject.name == "AttackWave1" && playerID == 1){
-                        this.transform.parent.gameObject.transform.position = PlayerManager.LocalPlayerInstance.transform.position + PlayerManager.LocalPlayerInstance.transform.forward * 1.5f;
-                        this.transform.parent.gameObject.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;//doens't help just change initial velocity of z instead in herarchy Edit: no idea what I meant here
-                        this.transform.parent.gameObject.transform.rotation = Quaternion.Euler(PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.x, PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.y, 90f); 
-                    }
-                    else if (this.gameObject.name == "AttackWave2" && players.Length > 1 && playerID == 2){
-                        this.transform.parent.gameObject.transform.position = PlayerManager.LocalPlayerInstance.transform.position + PlayerManager.LocalPlayerInstance.transform.forward * 1.5f;
-                        this.transform.parent.gameObject.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;//doens't help just change initial velocity of z instead in herarchy Edit: no idea what I meant here
-                        this.transform.parent.gameObject.transform.rotation = Quaternion.Euler(PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.x, PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.y, 90f); 
-                    }
-
+                if (this.gameObject.name == "AttackWave1" && playerID == 1){
+                    this.transform.parent.gameObject.transform.position = PlayerManager.LocalPlayerInstance.transform.position + PlayerManager.LocalPlayerInstance.transform.forward * 1.5f;
+                    this.transform.parent.gameObject.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;//doens't help just change initial velocity of z instead in herarchy Edit: no idea what I meant here
+                    this.transform.parent.gameObject.transform.rotation = Quaternion.Euler(PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.x, PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.y, 90f); 
                 }
+                else if (this.gameObject.name == "AttackWave2" && playerID == 2){
+                    this.transform.parent.gameObject.transform.position = PlayerManager.LocalPlayerInstance.transform.position + PlayerManager.LocalPlayerInstance.transform.forward * 1.5f;
+                    this.transform.parent.gameObject.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;//doens't help just change initial velocity of z instead in herarchy Edit: no idea what I meant here
+                    this.transform.parent.gameObject.transform.rotation = Quaternion.Euler(PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.x, PlayerManager.LocalPlayerInstance.transform.localRotation.eulerAngles.y, 90f); 
+                }
+
+            
                 
 
             } 
             if (this.gameObject.name == "PlayerLiquidCollider1" || this.gameObject.name == "PlayerLiquidCollider2"){
                 
-                if (this.gameObject.name == "PlayerLiquidCollider1"){
+                if (this.gameObject.name == "PlayerLiquidCollider1" && playerID == 1){
                     if (player1ColliderAttached){
                         this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
                         this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f);
@@ -204,7 +198,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                     } 
 
                 }
-                if (this.gameObject.name == "PlayerLiquidCollider2"){
+                if (this.gameObject.name == "PlayerLiquidCollider2" && playerID == 2){
                     if (player2ColliderAttached){
                         this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
                         this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f);
@@ -222,7 +216,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                     this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
                     PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f, PlayerManager.LocalPlayerInstance.transform.position.z); 
                 } 
-                if (this.gameObject.name == "PlayerLiquidDetector2" && players.Length > 1 && playerID == 2){
+                if (this.gameObject.name == "PlayerLiquidDetector2" && playerID == 2){
                     this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
                     PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f, PlayerManager.LocalPlayerInstance.transform.position.z); 
                 }
@@ -237,7 +231,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                     PlayerManager.LocalPlayerInstance.transform.position.z) + PlayerManager.LocalPlayerInstance.transform.forward * 6f;
                     this.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;
                 } 
-                if ((this.gameObject.name == "WaterBall2" || this.gameObject.name == "WaterBallForceField2") && players.Length > 1 && playerID == 2){
+                if ((this.gameObject.name == "WaterBall2" || this.gameObject.name == "WaterBallForceField2") && playerID == 2){
                     this.transform.position = new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, PlayerManager.LocalPlayerInstance.transform.position.y + 1.5f,
                     PlayerManager.LocalPlayerInstance.transform.position.z) + PlayerManager.LocalPlayerInstance.transform.forward * 6f;
                     this.transform.rotation = PlayerManager.LocalPlayerInstance.transform.rotation;
@@ -247,7 +241,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
             if (this.gameObject.name == "PlayerLiquidDetector1" || this.gameObject.name == "PlayerLiquidDetector2"){
-                if (this.gameObject.name == "PlayerLiquidDetector1"){
+                if (this.gameObject.name == "PlayerLiquidDetector1" && playerID == 1){
                     
                     if (this.gameObject.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0){
 
@@ -263,7 +257,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                         player1ColliderAttached = true;
                     }
                 }
-                if (this.gameObject.name == "PlayerLiquidDetector2"){
+                if (this.gameObject.name == "PlayerLiquidDetector2" && playerID == 2){
                     if (this.gameObject.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0){
 
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
