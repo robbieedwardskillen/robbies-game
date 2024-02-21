@@ -19,15 +19,14 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     private bool doneSearching = false;
     private bool player1ColliderAttached = true;
     private bool player2ColliderAttached = true;
-    private Vector3 startPositionPlayer;
-    private Vector3 endPositionLiquidCollider;
     private float elapsedTime = 0f;
 
     private ZibraLiquidEmitter zle;
+    public GameObject playerLiquidDetector1;
+    public GameObject playerLiquidDetector2;
     private GameObject playerLiquidCollider1;
-    private GameObject playerLiquidDetector1;
     private GameObject playerLiquidCollider2;
-    private GameObject playerLiquidDetector2;
+
 
     private List<int> playerList = new List<int>();
     // Start is called before the first frame update
@@ -49,13 +48,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
         //add checks here
    
         
-        if (this.gameObject.name[gameObject.name.Length-1] == '1'){
-            transferredOwnership1 = true;
-        }
-            
-        if (this.gameObject.name[gameObject.name.Length-1] == '2'){
-            transferredOwnership2 = true;
-        }
+
         base.photonView.TransferOwnership(requestingPlayer);
     }
 
@@ -83,13 +76,17 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 		if (stream.IsWriting)
 		{
-			if (zle != null)
-				stream.SendNext((bool)zle.enabled);
+			if (zle != null){
+                stream.SendNext((bool)zle.enabled);
+            }
+				
 		}
 		else
 		{
-			if (this.zle != null)
-				this.zle.enabled = (bool) stream.ReceiveNext();
+			if (this.zle != null){
+                this.zle.enabled = (bool) stream.ReceiveNext();
+            }
+
 
 		}
 
@@ -145,16 +142,33 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
             if (!transferredOwnership1){
                 if (this.gameObject.name[gameObject.name.Length-1] == '1' && playerID == 1){
                     OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
+
+                    if (this.gameObject.name[gameObject.name.Length-1] == '1'){
+                        transferredOwnership1 = true;
+                    }   
+                    else if (this.gameObject.name[gameObject.name.Length-1] == '2'){
+                        transferredOwnership2 = true;
+                    }
                 }
                     
             }
             if (!transferredOwnership2){
                 if (this.gameObject.name[gameObject.name.Length-1] == '2' && playerID == 2){
                     OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
+                    
+                    if (this.gameObject.name[gameObject.name.Length-1] == '1'){
+                        transferredOwnership1 = true;
+                    }  
+                    else if (this.gameObject.name[gameObject.name.Length-1] == '2'){
+                        transferredOwnership2 = true;
+                    }
                 }
                     
             }
-            
+
+
+
+
             if (this.gameObject.name == "HealWave1" || this.gameObject.name == "HealWave2"){
 
                 if (this.gameObject.name == "HealWave1" && playerID == 1){
@@ -191,8 +205,9 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                 
                 if (this.gameObject.name == "PlayerLiquidCollider1" && playerID == 1){
                     if (player1ColliderAttached){
-                        this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
-                        this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f);
+                        //bad idea
+/*                         this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
+                        this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f); */
                         this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
                             PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f, PlayerManager.LocalPlayerInstance.transform.position.z);
                     } 
@@ -200,8 +215,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                 }
                 if (this.gameObject.name == "PlayerLiquidCollider2" && playerID == 2){
                     if (player2ColliderAttached){
-                        this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
-                        this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f);
+/*                         this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
+                        this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f); */
                         this.transform.position = new Vector3 (PlayerManager.LocalPlayerInstance.transform.position.x,
                             PlayerManager.LocalPlayerInstance.transform.position.y + 0.25f, PlayerManager.LocalPlayerInstance.transform.position.z);
                     }
@@ -225,7 +240,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
             } 
             if (this.gameObject.name == "WaterBall1" || this.gameObject.name == "WaterBallForceField1" ||
-                       this.gameObject.name == "WaterBall2" || this.gameObject.name == "WaterBallForceField2") {
+                    this.gameObject.name == "WaterBall2" || this.gameObject.name == "WaterBallForceField2") {
+
                 if ((this.gameObject.name == "WaterBall1" || this.gameObject.name == "WaterBallForceField1") && playerID == 1){
                     this.transform.position = new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, PlayerManager.LocalPlayerInstance.transform.position.y + 1.5f,
                     PlayerManager.LocalPlayerInstance.transform.position.z) + PlayerManager.LocalPlayerInstance.transform.forward * 6f;
@@ -239,26 +255,43 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                 
             }
 
-
             if (this.gameObject.name == "PlayerLiquidDetector1" || this.gameObject.name == "PlayerLiquidDetector2"){
+
+
+
+
+                debugText.text = player1ColliderAttached.ToString();
+
+                //LEFT OF HERE
+                //Problem is PlayerManager.LocalPlayerInstance... is over the network
+                //player1/2ColliderAttached are not
+                //onSerializeView does not work
+                //maybe try an RPC?
+
+
+
                 if (this.gameObject.name == "PlayerLiquidDetector1" && playerID == 1){
                     
                     if (this.gameObject.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0){
 
+
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
+                            
                             player1ColliderAttached = false;
-                            PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((new Vector3(playerLiquidCollider1.transform.position.x, 0f, playerLiquidCollider1.transform.position.z)
-                                - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 0f, PlayerManager.LocalPlayerInstance.transform.position.z)) * 500);
+                            PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce(new Vector3(playerLiquidCollider1.transform.position.x, 2f, playerLiquidCollider1.transform.position.z)
+                                - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 2f, PlayerManager.LocalPlayerInstance.transform.position.z) * 5);
                         }   
                         
-
                     }
                     else {
+
                         player1ColliderAttached = true;
                     }
                 }
+
                 if (this.gameObject.name == "PlayerLiquidDetector2" && playerID == 2){
                     if (this.gameObject.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0){
+
 
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
                             player2ColliderAttached = false;

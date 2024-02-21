@@ -133,6 +133,7 @@ public class ManageCanvas : MonoBehaviour
     }
 	public void SwitchCam(bool inTheGame) { 
 		if (inTheGame == false){
+			//only activates from the Launcher script
 			canvasGameObject.SetActive(true);
 			canvasInGameGameObject.SetActive(false);
 			
@@ -143,7 +144,9 @@ public class ManageCanvas : MonoBehaviour
  /*            } else {
                 audio.clip = music6;
             } */
-            GameObject.Find("Canvas/Virtual Cursor").GetComponent<AudioSource> ().Play();
+			
+			//turning off the music so I don't get annoyed while testing
+            //GameObject.Find("Canvas/Virtual Cursor").GetComponent<AudioSource> ().Play();
 		}
 		else {
 			canvasGameObject.SetActive(false);
