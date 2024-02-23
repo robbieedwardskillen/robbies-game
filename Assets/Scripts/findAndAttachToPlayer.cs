@@ -124,7 +124,13 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
         doneSearching = true;
     }
 
-
+	[PunRPC]
+	void player1Attached (bool attached){
+        player1ColliderAttached = attached;
+    }
+    void player2Attached (bool attached){
+        player2ColliderAttached = attached;
+    }
 
     void Update() 
     {
@@ -276,16 +282,16 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
-                            
-                            player1ColliderAttached = false;
+                            photonView.RPC("player1Attached", RpcTarget.All, false);
+                            //player1ColliderAttached = false;
                             PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce(new Vector3(playerLiquidCollider1.transform.position.x, 2f, playerLiquidCollider1.transform.position.z)
                                 - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 2f, PlayerManager.LocalPlayerInstance.transform.position.z) * 5);
                         }   
                         
                     }
                     else {
-
-                        player1ColliderAttached = true;
+                        photonView.RPC("player1Attached", RpcTarget.All, true);
+                        //player1ColliderAttached = true;
                     }
                 }
 
@@ -294,14 +300,16 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
-                            player2ColliderAttached = false;
+                            photonView.RPC("player2Attached", RpcTarget.All, false);
+                            //player2ColliderAttached = false;
                             PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((new Vector3(playerLiquidCollider2.transform.position.x, 0f, playerLiquidCollider2.transform.position.z)
                                 - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 0f, PlayerManager.LocalPlayerInstance.transform.position.z)) * 500);
                         }
                                             
                     }
                     else {
-                        player2ColliderAttached = true;
+                        photonView.RPC("player2Attached", RpcTarget.All, true);
+                        //player2ColliderAttached = true;
                     }
                 }
 

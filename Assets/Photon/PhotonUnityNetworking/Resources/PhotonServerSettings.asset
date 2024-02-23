@@ -67,6 +67,7 @@ MonoBehaviour:
   - LoseMediumHealth
   - LoseSmallHealth
   - PushPlayer
+  - player1Attached
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

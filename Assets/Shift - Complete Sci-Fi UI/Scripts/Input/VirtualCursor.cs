@@ -4,12 +4,16 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TMPro;
 
 namespace Michsky.UI.Shift
 {
     public class VirtualCursor : PointerInputModule
     {
+        private Camera m_cam;
+        private Canvas canvas;
+        private Vector3 screenPosition;
         private GameObject keyboard;
         private GameObject keyboardEnglishBig;
         private List<RaycastResult> rr;
@@ -41,6 +45,8 @@ namespace Michsky.UI.Shift
 
         public new void Start()
         {
+            m_cam = GameObject.Find("Main Camera").GetComponent<Camera>();
+            canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
             audio = gameObject.GetComponent<AudioSource> ();
             audio.volume = 0.35f;
 
@@ -68,11 +74,25 @@ namespace Michsky.UI.Shift
         
         void Update()
         {
-            cursorPos.x += Input.GetAxis(horizontalAxis) * speed * 1000 * Time.deltaTime;
-            cursorPos.x = Mathf.Clamp(cursorPos.x, -+border.rect.width / 2, border.rect.width / 2);
+            if (Gamepad.all.Count > 0)//controller
+            {
+                cursorPos.x += Input.GetAxis(horizontalAxis) * speed * 1000 * Time.deltaTime;
+                cursorPos.x = Mathf.Clamp(cursorPos.x, -+border.rect.width / 2, border.rect.width / 2);
 
-            cursorPos.y += Input.GetAxis(verticalAxis) * speed * 1000 * Time.deltaTime;
-            cursorPos.y = Mathf.Clamp(cursorPos.y, -+border.rect.height / 2, border.rect.height / 2);
+                cursorPos.y += Input.GetAxis(verticalAxis) * speed * 1000 * Time.deltaTime;
+                cursorPos.y = Mathf.Clamp(cursorPos.y, -+border.rect.height / 2, border.rect.height / 2);
+            } else {
+                screenPosition = Input.mousePosition;
+                screenPosition.z = m_cam.nearClipPlane + 1;
+
+
+
+
+                cursorPos = m_cam.ScreenToWorldPoint(new Vector3(screenPosition.x / canvas.scaleFactor, screenPosition.y / canvas.scaleFactor, 200f));
+            }
+            
+
+
 
             cursorObj.anchoredPosition = cursorPos;
             if (manageCanvas.myPlayerInstantiated)
