@@ -32,6 +32,7 @@ public class ManageCanvas : MonoBehaviour
 	public bool myPlayerInstantiated = false;
 	private bool canChange = true;
 	private bool setInactive = false;
+	public bool attached = false;
     void Start()
     {	
 		//print(uiManager.backgroundColorTint);
@@ -99,9 +100,21 @@ public class ManageCanvas : MonoBehaviour
 
 
     void Update()
-    {//myPlayerInstantiated
+    {
+
+		if (controls != null){
+			if (attached == false){
+				controls.Gameplay.Disable();
+			} else {
+				controls.Gameplay.Enable();
+			}
+		}
+
+
+
 		if (myPlayerInstantiated && !setInactive && GameObject.Find("Canvas") != null){
-			
+				
+
 			if (GameObject.Find("Canvas/Main Panels/Top Panel/Button List/Home") != null)
 				GameObject.Find("Canvas/Main Panels/Top Panel/Button List/Home").SetActive(false);
 			if (GameObject.Find("Canvas/Main Panels/Home/Content/Play Story") != null)
@@ -150,13 +163,8 @@ public class ManageCanvas : MonoBehaviour
 		}
 		else {
 
+		//***Fix this
 
-
-			//*********FIX THIS
-
-			//error when starting too soon need to fix
-			//1. make game take longer to load
-			//2. disable all input while loading
 
 
 

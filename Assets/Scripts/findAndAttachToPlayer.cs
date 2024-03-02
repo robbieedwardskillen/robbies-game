@@ -14,6 +14,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 {
     GameObject[] players;
     GameObject player;
+    public bool attached = false;
     private int instantiationId;
     private int playerID;
     private bool doneSearching = false;
@@ -33,6 +34,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     private PhotonView pv;
     private Player photonPlayer;
     private GameObject canvasInGame;
+    private ManageCanvas canvasManager;
     private Text debugText;
     private Text debugText2;
     private bool transferredOwnership1 = false;
@@ -93,10 +95,6 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     } 
 
 
-
-
-
-
     void Start()
     {
         PhotonNetwork.AddCallbackTarget(this);
@@ -110,11 +108,13 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     }
 
     IEnumerator WaitThenFindPlayer(){
-
+        canvasManager = GameObject.Find("Canvas Manager").GetComponent<ManageCanvas>();
+        canvasManager.attached = false;
         yield return new WaitForSeconds(1.75f);
-
+        canvasManager.attached = true;
         players = GameObject.FindGameObjectsWithTag("Player");
         canvasInGame = GameObject.Find("Canvas In Game");
+
         debugText = canvasInGame.transform.Find("Debugging").GetComponent<Text>();
         debugText2 = canvasInGame.transform.Find("Debugging2").GetComponent<Text>();
         playerLiquidCollider1 = GameObject.Find("PlayerLiquidCollider1");
