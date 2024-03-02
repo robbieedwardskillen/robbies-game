@@ -114,6 +114,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnConnectedToMaster()
     {
+        
         Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
         if (isConnecting){
             PhotonNetwork.JoinRandomRoom();
@@ -134,6 +135,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
+        
         debugText.text = "Joined room. Region: " + PhotonNetwork.CloudRegion;
 
         /* manageCanvas.SwitchCam(true);

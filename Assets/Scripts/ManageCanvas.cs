@@ -149,6 +149,22 @@ public class ManageCanvas : MonoBehaviour
             //GameObject.Find("Canvas/Virtual Cursor").GetComponent<AudioSource> ().Play();
 		}
 		else {
+
+
+
+			//*********FIX THIS
+
+			//error when starting too soon need to fix
+			//1. make game take longer to load
+			//2. disable all input while loading
+
+
+
+
+
+
+
+
 			canvasGameObject.SetActive(false);
 			canvasInGameGameObject.SetActive(true);
 		}

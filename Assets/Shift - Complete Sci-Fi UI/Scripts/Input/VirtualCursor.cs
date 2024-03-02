@@ -77,20 +77,28 @@ namespace Michsky.UI.Shift
             if (Gamepad.all.Count > 0)//controller
             {
                 cursorPos.x += Input.GetAxis(horizontalAxis) * speed * 1000 * Time.deltaTime;
-                cursorPos.x = Mathf.Clamp(cursorPos.x, -+border.rect.width / 2, border.rect.width / 2);
-
+                cursorPos.x = Mathf.Clamp(cursorPos.x, 0f, border.rect.width);
+                //cursorPos.y = Mathf.Clamp(cursorPos.x, -+border.rect.width, border.rect.width);
                 cursorPos.y += Input.GetAxis(verticalAxis) * speed * 1000 * Time.deltaTime;
-                cursorPos.y = Mathf.Clamp(cursorPos.y, -+border.rect.height / 2, border.rect.height / 2);
+                cursorPos.y = Mathf.Clamp(cursorPos.y, 0f, border.rect.height);
+                //cursorPos.y = Mathf.Clamp(cursorPos.y, -+border.rect.height, border.rect.height);
             } else {
                 
-                screenPosition = Input.mousePosition;
+                screenPosition = Input.mousePosition / canvas.scaleFactor;
                 screenPosition.z = Camera.main.nearClipPlane + 1;
 
 
+                cursorPos.x = Mathf.Clamp(screenPosition.x, border.rect.width, border.rect.width);
+                cursorPos.y = Mathf.Clamp(screenPosition.y, border.rect.height, border.rect.height);
+                cursorPos.x = Mathf.Clamp(screenPosition.x, 0f, border.rect.width);
+                cursorPos.y = Mathf.Clamp(screenPosition.y, 0f, border.rect.height);
 
 
-                cursorPos.x = Mathf.Clamp(screenPosition.x, -+border.rect.width / 2, border.rect.width / 2);
-                cursorPos.y = Mathf.Clamp(screenPosition.y, -+border.rect.height / 2, border.rect.height / 2);
+
+
+                //how the guy I got the asset from had it:
+  /*               cursorPos.x = Mathf.Clamp(screenPosition.x, -+border.rect.width / 2, border.rect.width / 2);
+                cursorPos.y = Mathf.Clamp(screenPosition.y, -+border.rect.height / 2, border.rect.height / 2); */
             }
             
 
