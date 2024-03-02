@@ -79,6 +79,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 		if (stream.IsWriting)
 		{
 			if (zle != null){
+                stream.SendNext((bool)player1ColliderAttached);
+                stream.SendNext((bool)player2ColliderAttached);
                 stream.SendNext((bool)zle.enabled);
             }
 				
@@ -86,6 +88,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 		else
 		{
 			if (this.zle != null){
+                this.player1ColliderAttached = (bool) stream.ReceiveNext();
+                this.player2ColliderAttached = (bool) stream.ReceiveNext();
                 this.zle.enabled = (bool) stream.ReceiveNext();
             }
 
@@ -128,6 +132,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 	void player1Attached (bool attached){
         player1ColliderAttached = attached;
     }
+    [PunRPC]
     void player2Attached (bool attached){
         player2ColliderAttached = attached;
     }
@@ -267,13 +272,14 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
                 debugText.text = player1ColliderAttached.ToString();
+                debugText2.text = player2ColliderAttached.ToString();
 
-                //LEFT OF HERE
-                //Problem is PlayerManager.LocalPlayerInstance... is over the network
-                //player1/2ColliderAttached are not
-                //onSerializeView does not work
-                //maybe try an RPC?
 
+                ///***************************
+                //LEFT OFF HERE
+
+                //player1Collider does not move
+                //even when not attached it is still at player position
 
 
                 if (this.gameObject.name == "PlayerLiquidDetector1" && playerID == 1){
@@ -283,6 +289,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
                             photonView.RPC("player1Attached", RpcTarget.All, false);
+                            player1ColliderAttached = false;
+                            
                             //player1ColliderAttached = false;
                             PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce(new Vector3(playerLiquidCollider1.transform.position.x, 2f, playerLiquidCollider1.transform.position.z)
                                 - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 2f, PlayerManager.LocalPlayerInstance.transform.position.z) * 5);
@@ -291,7 +299,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                     }
                     else {
                         photonView.RPC("player1Attached", RpcTarget.All, true);
-                        //player1ColliderAttached = true;
+                        player1ColliderAttached = true;
                     }
                 }
 
@@ -301,6 +309,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
                         if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
                             photonView.RPC("player2Attached", RpcTarget.All, false);
+                            player2ColliderAttached = false;
                             //player2ColliderAttached = false;
                             PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((new Vector3(playerLiquidCollider2.transform.position.x, 0f, playerLiquidCollider2.transform.position.z)
                                 - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 0f, PlayerManager.LocalPlayerInstance.transform.position.z)) * 500);
@@ -309,7 +318,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                     }
                     else {
                         photonView.RPC("player2Attached", RpcTarget.All, true);
-                        //player2ColliderAttached = true;
+                        player2ColliderAttached = true;
                     }
                 }
 
