@@ -69,6 +69,8 @@ MonoBehaviour:
   - PushPlayer
   - player1Attached
   - player2Attached
+  - transferred1
+  - transferred2
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
