@@ -39,8 +39,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     private ManageCanvas canvasManager;
     private Text debugText;
     private Text debugText2;
-    private bool transferredOwnership1 = false;
-    private bool transferredOwnership2 = false;
+    private bool transferredOwnership = false;
 
 
 
@@ -71,7 +70,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
 //***********Newest plan 
-//find out how to instantiate these after everything has loaded
+//idk
 
 
 
@@ -144,32 +143,13 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
             //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
             playerID = PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().playerID;
 
-            if (!transferredOwnership1){
-                if (this.gameObject.name[gameObject.name.Length-1] == '1' && playerID == 1){
-                    OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
+            if (!transferredOwnership){
 
-                    if (this.gameObject.name[gameObject.name.Length-1] == '1'){
-                        transferredOwnership1 = true;
-                    }   
-                    else if (this.gameObject.name[gameObject.name.Length-1] == '2'){
-                        transferredOwnership2 = true;
-                    }
-                }
+                OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
+                transferredOwnership = true;
                     
             }
-            if (!transferredOwnership2){
-                if (this.gameObject.name[gameObject.name.Length-1] == '2' && playerID == 2){
-                    OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
-                    
-                    if (this.gameObject.name[gameObject.name.Length-1] == '1'){
-                        transferredOwnership1 = true;
-                    }  
-                    else if (this.gameObject.name[gameObject.name.Length-1] == '2'){
-                        transferredOwnership2 = true;
-                    }
-                }
-                    
-            } 
+
 
 
 
