@@ -39,7 +39,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
     private ManageCanvas canvasManager;
     private Text debugText;
     private Text debugText2;
-    private bool transferredOwnership = false;
+    private bool transferredOwnership1 = false;
+    private bool transferredOwnership2 = false;
 
 
 
@@ -144,13 +145,21 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
             //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
             playerID = PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().playerID;
-            if (!transferredOwnership){
 
-                OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
-                transferredOwnership = true;
-                    
+            if (!transferredOwnership1){
+                if (playerID == 1 && this.gameObject.name[this.gameObject.name.Length - 1] == '1'){
+
+                    OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
+                    transferredOwnership1 = true;
+                } 
             }
+            if (!transferredOwnership2){
+                if (playerID == 2 && this.gameObject.name[this.gameObject.name.Length - 1] == '2'){
 
+                    OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
+                    transferredOwnership2 = true;
+                }
+            }
 
 
 
@@ -243,13 +252,12 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
             }
 
 
-            //Current issue: Ro is controller and owner of both collider 1 and collider 2
+            //Current issue: many issues still but fixed the ownership at least
 
 
 
 
-            debugText.text = PhotonView.Find(103).gameObject.transform.position.ToString();
-            debugText2.text = PhotonView.Find(104).gameObject.transform.position.ToString();
+
 
             if (Input.GetKeyDown("z")){
                 //testing attached 1
