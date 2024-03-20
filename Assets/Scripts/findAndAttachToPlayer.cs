@@ -243,14 +243,13 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
             }
 
 
-            //Current issue: Rob's collider doesn't no matter which player he is move but Ro's does
-            //Rob viewID 2001 isMine False(master), Controller, Owner, Creator: 2 doesn't move
-            //Rob viewID 1001 isMine False, Controller, Owner, Creator: 1 doesn't move
+            //Current issue: Ro is controller and owner of both collider 1 and collider 2
 
-            //maybe see if you can get the other liquid collider from the local liquid collider and see if its position changes from the local
 
-        
 
+
+            debugText.text = PhotonView.Find(103).gameObject.transform.position.ToString();
+            debugText2.text = PhotonView.Find(104).gameObject.transform.position.ToString();
 
             if (Input.GetKeyDown("z")){
                 //testing attached 1
