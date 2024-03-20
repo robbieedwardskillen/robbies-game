@@ -247,7 +247,7 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
             //Rob viewID 2001 isMine False(master), Controller, Owner, Creator: 2 doesn't move
             //Rob viewID 1001 isMine False, Controller, Owner, Creator: 1 doesn't move
 
-            //maybe see if you can get the other player then test if their position changes
+            //maybe see if you can get the other liquid collider from the local liquid collider and see if its position changes from the local
 
         
 
