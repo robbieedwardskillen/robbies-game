@@ -81,7 +81,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 		if (stream.IsWriting)
 		{
 			if (zle != null){
-
+                stream.SendNext((bool)player1ColliderAttached);
+                stream.SendNext((bool)player2ColliderAttached);
                 stream.SendNext((bool)zle.enabled);
             }
 				
@@ -89,7 +90,8 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 		else
 		{
 			if (this.zle != null){
-
+                this.player1ColliderAttached = (bool) stream.ReceiveNext();
+                this.player2ColliderAttached = (bool) stream.ReceiveNext();
                 this.zle.enabled = (bool) stream.ReceiveNext();
             }
 
@@ -142,7 +144,6 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
             //var output2 = JsonUtility.ToJson(PhotonView.Get(players[i]), true);
             playerID = PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().playerID;
-
             if (!transferredOwnership){
 
                 OnOwnershipRequest(photonView, PhotonNetwork.LocalPlayer);
@@ -187,8 +188,15 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
 
             if (this.gameObject.name == "PlayerLiquidCollider1" || this.gameObject.name == "PlayerLiquidCollider2"){
-                
+
+
+
+
                 if (this.gameObject.name == "PlayerLiquidCollider1" && playerID == 1){
+
+
+
+
                     if (player1ColliderAttached){
                         //bad idea
 /*                         this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
@@ -201,6 +209,11 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
 
                 }
                 if (this.gameObject.name == "PlayerLiquidCollider2" && playerID == 2){
+
+
+
+
+
                     if (player2ColliderAttached){
 /*                         this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
                         this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f); */
@@ -230,19 +243,37 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
             }
 
 
+            //Current issue: Rob's collider doesn't no matter which player he is move but Ro's does
+            //Rob viewID 2001 isMine False(master), Controller, Owner, Creator: 2 doesn't move
+            //Rob viewID 1001 isMine False, Controller, Owner, Creator: 1 doesn't move
+
+            //maybe see if you can get the other player then test if their position changes
+
+        
+
+
             if (Input.GetKeyDown("z")){
                 //testing attached 1
                 player1ColliderAttached = !player1ColliderAttached;
+/*                 if (this.gameObject.name == "PlayerLiquidCollider1" && playerID == 1){
+                    this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
+                    this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f);
+                } */
+
             }
             if (Input.GetKeyDown("v")){
                 //testing attached 2
                 player2ColliderAttached = !player2ColliderAttached;
+/*                 if (this.gameObject.name == "PlayerLiquidCollider2" && playerID == 2){
+                    this.gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0f,0f,0f);
+                    this.gameObject.GetComponent<Rigidbody>().angularVelocity = new Vector3(0f,0f,0f);
+                } */
             }
 
             if (this.gameObject.name == "PlayerLiquidDetector1" || this.gameObject.name == "PlayerLiquidDetector2"){
 
-                debugText.text = player1ColliderAttached.ToString();
-                debugText2.text = player2ColliderAttached.ToString();
+/*                 debugText.text = player1ColliderAttached.ToString();
+                debugText2.text = player2ColliderAttached.ToString(); */
 
 
 
@@ -257,31 +288,30 @@ public class findAndAttachToPlayer : MonoBehaviourPunCallbacks, IPunObservable, 
                
 
 
-                //************************
 
-                //current workings: player 1 cannot detach player 2s and vice versa
-            
 
 
                 if (this.gameObject.GetComponent<ZibraLiquidDetector>().ParticlesInside > 0){
 
+                    //var playerHit = new GameObject();
 
                     if (!PlayerManager.LocalPlayerInstance.GetComponent<PlayerManager>().castingHealingWater){ // healing spells prevent pushback because too much work otherwise
 
                         if (this.gameObject.name == "PlayerLiquidDetector1" && playerID == 1){
+                            
 
                             player1ColliderAttached = false;
-                            
-                            PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce(new Vector3(playerLiquidCollider1.transform.position.x, 2f, playerLiquidCollider1.transform.position.z)
-                                - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 2f, PlayerManager.LocalPlayerInstance.transform.position.z) * 5);
+
+
+                            PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce(new Vector3(playerLiquidCollider1.transform.position.x, 0f, playerLiquidCollider1.transform.position.z)
+                                - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 0f, PlayerManager.LocalPlayerInstance.transform.position.z) * 5);
                         }
 
                         if (this.gameObject.name == "PlayerLiquidDetector2" && playerID == 2){
-
                             player2ColliderAttached = false;
 
                             PlayerManager.LocalPlayerInstance.GetComponent<Rigidbody>().AddForce((new Vector3(playerLiquidCollider2.transform.position.x, 0f, playerLiquidCollider2.transform.position.z)
-                                - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 0f, PlayerManager.LocalPlayerInstance.transform.position.z)) * 500);
+                                - new Vector3(PlayerManager.LocalPlayerInstance.transform.position.x, 0f, PlayerManager.LocalPlayerInstance.transform.position.z)) * 5);
                         }
 
                     }   
